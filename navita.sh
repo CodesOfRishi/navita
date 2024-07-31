@@ -49,7 +49,7 @@ __navita::CleanHistory() {
 	elif [[ ${user_choice} -eq 2 ]]; then
 		__navita::CleanHistory::EmptyHistoryFile
 	else
-		printf "Invalid input!"
+		printf "Invalid input!\n"
 		return 1
 	fi
 }
