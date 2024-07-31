@@ -26,14 +26,35 @@ __navita::PrintHistory() {
 }
 
 __navita::CleanHistory() { 
-	# Possible options:
-	# 	complete clean the history file
-	# 	remove only invalid paths
-	
+
 	__navita::CleanHistory::EmptyHistoryFile() {
 		> "${navita_historyfile}"
 		[[ $? -eq 0 ]] && printf '%s\n' "${navita_historyfile} cleaned."
 		return $?
+	}
+
+	__navita::CleanHistory::RemoveInvalidPaths() {
+		# the line numbers that needs to be deleted from the history file, will be stored in an array
+		# using sed, delete those lines in-place
+
+		declare -a line_no_todel
+		local line_no=1
+		local line
+		
+		while read -r line; do
+			local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+			if [[ -n "${error}" ]]; then 
+				# printf "To Delete: ${line_no}: ${line} (${colr91}${error}${colr_rst})\n"
+				line_no_todel+=(${line_no})
+			fi
+			line_no=$(( ${line_no} + 1 ))
+		done < ${navita_historyfile}
+
+		local index_reduced=0
+		for i in "${line_no_todel[@]}"; do
+			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${navita_historyfile}
+			index_reduced=$(( ${index_reduced} + 1 ))
+		done
 	}
 
 	printf '%s\n' "Choose any one: "
@@ -44,8 +65,7 @@ __navita::CleanHistory() {
 	read -p "Choice? (1 or 2): " user_choice
 
 	if [[ ${user_choice} -eq 1 ]]; then
-		# will write code later
-		return 0
+		__navita::CleanHistory::RemoveInvalidPaths
 	elif [[ ${user_choice} -eq 2 ]]; then
 		__navita::CleanHistory::EmptyHistoryFile
 	else
@@ -77,6 +97,7 @@ __navita__() {
 
 	local colr91 && colr91='\e[01;91m'
 	local colr_rst && colr_rst='\e[0m'
+
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
 		if [[ -z "${fzf_query}" ]]; then
