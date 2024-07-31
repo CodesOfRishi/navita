@@ -21,7 +21,7 @@ __navita::PrintHistory() {
 		if [[ -n "${error}" ]]; then 
 			printf " (${colr91}${error}${colr_rst})"
 		fi
-		echo
+		printf "\n"
 	done < ${navita_historyfile}
 }
 
@@ -60,7 +60,7 @@ __navita::CleanHistory() {
 	printf '%s\n' "Choose any one: "
 	printf '%s\n' "1. Remove only invalid paths."
 	printf '%s\n' "2. Empty the history."
-	echo
+	printf "\n"
 	local user_choice
 	read -p "Choice? (1 or 2): " user_choice
 
@@ -87,7 +87,7 @@ __navita::UpdatePathHistory() {
 		return 0
 	}
 
-	echo ${PWD} >> "${navita_historyfile}"
+	printf "${PWD}\n" >> "${navita_historyfile}"
 	awk -i inplace '!seen[$0]++' "${navita_historyfile}" # remove duplicates
 	__navita::KeepHistoryWithinLimit
 	return $?
