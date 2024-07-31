@@ -106,9 +106,9 @@ __navita__() {
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
 		if [[ -z "${fzf_query}" ]]; then
-			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 )
+			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 )
 		else 
-			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
+			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
 		fi
 		builtin cd "${path_returned}"
 		return $?
