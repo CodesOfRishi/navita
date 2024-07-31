@@ -36,9 +36,13 @@ __navita::CleanHistory() {
 	# printf '%s\n' "1. Remove only invalid paths."
 	# printf '%s\n' "2. Empty the history."
 	
-	> "${navita_historyfile}"
-	[[ $? -eq 0 ]] && printf '%s\n' "${navita_historyfile} cleaned."
-	return 0
+	__navita::CleanHistory::EmptyHistoryFile() {
+		> "${navita_historyfile}"
+		[[ $? -eq 0 ]] && printf '%s\n' "${navita_historyfile} cleaned."
+		return $?
+	}
+
+	__navita::CleanHistory::EmptyHistoryFile
 }
 
 # update the path-history file
