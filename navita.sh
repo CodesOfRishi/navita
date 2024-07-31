@@ -115,13 +115,9 @@ __navita__() {
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
 		__navita::CleanHistory
 	else
-		if [[ -z "$1" ]]; then
-			builtin cd
-		else
-			builtin cd "$1"
-			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
-			return 1
-		fi
+		builtin cd "${@}"
+		[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
+		return 1
 	fi
 }
 
