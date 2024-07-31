@@ -87,7 +87,12 @@ __navita::UpdatePathHistory() {
 		return 0
 	}
 
-	printf "${PWD}\n" >> "${NAVITA_HISTORYFILE}"
+	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
+		printf "${PWD}\n" > "${NAVITA_HISTORYFILE}"
+	else
+		sed -i "1i ${PWD}" "${NAVITA_HISTORYFILE}" 
+	fi
+
 	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
 	__navita::KeepHistoryWithinLimit
 	return $?
