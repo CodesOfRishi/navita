@@ -13,8 +13,6 @@ elif [[ ! -f "${XDG_CONFIG_HOME}/navita/path-history" ]]; then
 fi
 
 __navita::PrintHistory() { 
-	local colr91 && colr91='\e[01;91m'
-	local colr_rst && colr_rst='\e[0m'
 
 	local line=""
 	while read -r line; do
@@ -77,6 +75,8 @@ __navita::UpdatePathHistory() {
 
 __navita__() {
 
+	local colr91 && colr91='\e[01;91m'
+	local colr_rst && colr_rst='\e[0m'
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
 		if [[ -z "${fzf_query}" ]]; then
