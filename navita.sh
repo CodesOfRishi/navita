@@ -110,7 +110,7 @@ __navita__() {
 	elif [[ $1 == "-" ]]; then
 		builtin cd -
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
-	elif [[ $1 == "--history" ]] || [[ $1 == "-h" ]]; then
+	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		__navita::PrintHistory | bat
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
 		__navita::CleanHistory
