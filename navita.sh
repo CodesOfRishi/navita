@@ -1,6 +1,6 @@
 # navita variables
 export NAVITA_HISTORYFILE="${XDG_CONFIG_HOME}/navita/path-history"
-export NAVITA_HISTORYFILESIZE=50
+export NAVITA_HISTORYFILE_SIZE=50
 
 # create configuration file(s) for Navita
 if [[ ! -d "${XDG_CONFIG_HOME}/navita" ]]; then 
@@ -77,10 +77,10 @@ __navita::CleanHistory() {
 # update the path-history file
 __navita::UpdatePathHistory() { 
 
-	# keep the path-history file within the $NAVITA_HISTORYFILESIZE
+	# keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
 	__navita::KeepHistoryWithinLimit() { 
-		if [[ $( wc -l < "${NAVITA_HISTORYFILE}" ) -gt "${NAVITA_HISTORYFILESIZE}" ]]; then
-			local extra_linecount=$(( $( wc -l < "${NAVITA_HISTORYFILE}" ) - ${NAVITA_HISTORYFILESIZE} ))
+		if [[ $( wc -l < "${NAVITA_HISTORYFILE}" ) -gt "${NAVITA_HISTORYFILE_SIZE}" ]]; then
+			local extra_linecount=$(( $( wc -l < "${NAVITA_HISTORYFILE}" ) - ${NAVITA_HISTORYFILE_SIZE} ))
 			sed -i 1,${extra_linecount}d ${NAVITA_HISTORYFILE}
 			return $?
 		fi
