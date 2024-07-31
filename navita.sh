@@ -1,5 +1,5 @@
 # navita variables
-export navita_historyfile="${XDG_CONFIG_HOME}/navita/path-history"
+export NAVITA_HISTORYFILE="${XDG_CONFIG_HOME}/navita/path-history"
 export navita_historyfilesize=50
 
 # create configuration file(s) for Navita
@@ -22,14 +22,14 @@ __navita::PrintHistory() {
 			printf " (${colr91}${error}${colr_rst})"
 		fi
 		printf "\n"
-	done < ${navita_historyfile}
+	done < ${NAVITA_HISTORYFILE}
 }
 
 __navita::CleanHistory() { 
 
 	__navita::CleanHistory::EmptyHistoryFile() {
-		> "${navita_historyfile}"
-		[[ $? -eq 0 ]] && printf '%s\n' "${navita_historyfile} cleaned."
+		> "${NAVITA_HISTORYFILE}"
+		[[ $? -eq 0 ]] && printf '%s\n' "${NAVITA_HISTORYFILE} cleaned."
 		return $?
 	}
 
@@ -48,11 +48,11 @@ __navita::CleanHistory() {
 				line_no_todel+=(${line_no})
 			fi
 			line_no=$(( ${line_no} + 1 ))
-		done < ${navita_historyfile}
+		done < ${NAVITA_HISTORYFILE}
 
 		local index_reduced=0
 		for i in "${line_no_todel[@]}"; do
-			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${navita_historyfile}
+			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${NAVITA_HISTORYFILE}
 			index_reduced=$(( ${index_reduced} + 1 ))
 		done
 	}
@@ -79,16 +79,16 @@ __navita::UpdatePathHistory() {
 
 	# keep the path-history file within the $navita_historyfilesize
 	__navita::KeepHistoryWithinLimit() { 
-		if [[ $( wc -l < "${navita_historyfile}" ) -gt "${navita_historyfilesize}" ]]; then
-			local extra_linecount=$(( $( wc -l < "${navita_historyfile}" ) - ${navita_historyfilesize} ))
-			sed -i 1,${extra_linecount}d ${navita_historyfile}
+		if [[ $( wc -l < "${NAVITA_HISTORYFILE}" ) -gt "${navita_historyfilesize}" ]]; then
+			local extra_linecount=$(( $( wc -l < "${NAVITA_HISTORYFILE}" ) - ${navita_historyfilesize} ))
+			sed -i 1,${extra_linecount}d ${NAVITA_HISTORYFILE}
 			return $?
 		fi
 		return 0
 	}
 
-	printf "${PWD}\n" >> "${navita_historyfile}"
-	awk -i inplace '!seen[$0]++' "${navita_historyfile}" # remove duplicates
+	printf "${PWD}\n" >> "${NAVITA_HISTORYFILE}"
+	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
 	__navita::KeepHistoryWithinLimit
 	return $?
 }
@@ -101,9 +101,9 @@ __navita__() {
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
 		if [[ -z "${fzf_query}" ]]; then
-			local path_returned=$( cat "${navita_historyfile}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 )
+			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 )
 		else 
-			local path_returned=$( cat "${navita_historyfile}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
+			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --tac --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
 		fi
 		builtin cd "${path_returned}"
 		return $?
