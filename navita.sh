@@ -32,17 +32,28 @@ __navita::CleanHistory() {
 	# 	complete clean the history file
 	# 	remove only invalid paths
 	
-	# printf '%s\n' "Choose any one: "
-	# printf '%s\n' "1. Remove only invalid paths."
-	# printf '%s\n' "2. Empty the history."
-	
 	__navita::CleanHistory::EmptyHistoryFile() {
 		> "${navita_historyfile}"
 		[[ $? -eq 0 ]] && printf '%s\n' "${navita_historyfile} cleaned."
 		return $?
 	}
 
-	__navita::CleanHistory::EmptyHistoryFile
+	printf '%s\n' "Choose any one: "
+	printf '%s\n' "1. Remove only invalid paths."
+	printf '%s\n' "2. Empty the history."
+	echo
+	local user_choice
+	read -p "Choice? (1 or 2): " user_choice
+
+	if [[ ${user_choice} -eq 1 ]]; then
+		# will write code later
+		return 0
+	elif [[ ${user_choice} -eq 2 ]]; then
+		__navita::CleanHistory::EmptyHistoryFile
+	else
+		printf "Invalid input!"
+		return 1
+	fi
 }
 
 # update the path-history file
