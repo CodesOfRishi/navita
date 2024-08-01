@@ -76,17 +76,6 @@ __navita::CleanHistory() {
 
 # update the path-history file
 __navita::UpdatePathHistory() { 
-
-	# keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
-	__navita::KeepHistoryWithinLimit() { 
-		if [[ $( wc -l < "${NAVITA_HISTORYFILE}" ) -gt "${NAVITA_HISTORYFILE_SIZE}" ]]; then
-			local extra_linecount=$(( $( wc -l < "${NAVITA_HISTORYFILE}" ) - ${NAVITA_HISTORYFILE_SIZE} ))
-			sed -i 1,${extra_linecount}d ${NAVITA_HISTORYFILE}
-			return $?
-		fi
-		return 0
-	}
-
 	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
 		printf "${PWD}\n" > "${NAVITA_HISTORYFILE}"
 	else
@@ -94,7 +83,7 @@ __navita::UpdatePathHistory() {
 	fi
 
 	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
-	__navita::KeepHistoryWithinLimit
+	sed -i "$(( $NAVITA_HISTORYFILE_SIZE + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
 	return $?
 }
 
