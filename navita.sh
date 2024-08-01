@@ -29,9 +29,22 @@ __navita::PrintHistory() {
 __navita::CleanHistory() { 
 
 	__navita::CleanHistory::EmptyHistoryFile() {
+		# cp historyfile to tempfile
+		# empty the historyfile
+		# if success, cp tempfile to historyfile.bak & remove the tempfile
+		# if failed, remove the tempfile
+
+		local tempfile=$( mktemp )
+		$( whereis -b cp | cut -d" " -f2 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		> "${NAVITA_HISTORYFILE}"
-		[[ $? -eq 0 ]] && printf '%s\n' "${NAVITA_HISTORYFILE} cleaned."
-		return $?
+		local exitcode="$?"
+		if [[ ${exitcode} -eq 0 ]]; then 
+			printf '%s\n' "${NAVITA_HISTORYFILE} cleaned."
+			$( whereis -b cp | cut -d" " -f2 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
+			printf '%s\n' "Backup created at ${tput241}${NAVITA_HISTORYFILE}.bak${tput_rst}"
+		fi
+		rm --interactive=never "$tempfile"
+		return "$exitcode"
 	}
 
 	__navita::CleanHistory::RemoveInvalidPaths() {
@@ -63,6 +76,7 @@ __navita::CleanHistory() {
 	printf "\n"
 	local user_choice
 	read -p "Choice? (1 or 2): " user_choice
+	printf "\n"
 
 	if [[ ${user_choice} -eq 1 ]]; then
 		__navita::CleanHistory::RemoveInvalidPaths
