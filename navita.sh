@@ -93,6 +93,9 @@ __navita__() {
 	local colr91 && colr91='\e[01;91m'
 	local colr_rst && colr_rst='\e[0m'
 
+	local tput241 && tput241=$( tput setaf 241 )
+	local tput_rst && tput_rst=$( tput sgr0 )
+
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
 		if [[ -z "${fzf_query}" ]]; then
