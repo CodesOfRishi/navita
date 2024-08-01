@@ -72,6 +72,7 @@ __navita::CleanHistory() {
 		printf "Invalid input!\n" 1>&2
 		return 1
 	fi
+	return $?
 }
 
 # update the path-history file
