@@ -1,15 +1,16 @@
 # navita variables
-export NAVITA_HISTORYFILE="${XDG_CONFIG_HOME}/navita/path-history"
+export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/Navita}"
+export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
 export NAVITA_HISTORYFILE_SIZE=50
 
 # create configuration file(s) for Navita
-if [[ ! -d "${XDG_CONFIG_HOME}/navita" ]]; then 
-	mkdir -p "${XDG_CONFIG_HOME}/navita"
-	touch "${XDG_CONFIG_HOME}/navita/path-history"
-	printf '%s\n' "Navita: Created ${XDG_CONFIG_HOME}/navita/path-history"
-elif [[ ! -f "${XDG_CONFIG_HOME}/navita/path-history" ]]; then 
-	touch "${XDG_CONFIG_HOME}/navita/path-history"
-	printf '%s\n' "Navita: Created ${XDG_CONFIG_HOME}/navita/path-history"
+if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then 
+	mkdir -p "${NAVITA_CONFIG_DIR}"
+	touch "${NAVITA_HISTORYFILE}"
+	printf '%s\n' "Navita: Created ${NAVITA_HISTORYFILE}"
+elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
+	touch "${NAVITA_HISTORYFILE}"
+	printf '%s\n' "Navita: Created ${NAVITA_HISTORYFILE}"
 fi
 
 __navita::PrintHistory() { 
