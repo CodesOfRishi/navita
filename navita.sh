@@ -45,7 +45,6 @@ __navita::CleanHistory() {
 		while read -r line; do
 			local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 			if [[ -n "${error}" ]]; then 
-				# printf "To Delete: ${line_no}: ${line} (${colr91}${error}${colr_rst})\n"
 				line_no_todel+=(${line_no})
 			fi
 			line_no=$(( ${line_no} + 1 ))
