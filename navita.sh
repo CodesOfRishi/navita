@@ -1,5 +1,5 @@
 # navita variables
-export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-${HOME}/.config}/Navita}"
+export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:=${XDG_CONFIG_HOME:-${HOME}/.config}/Navita}"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
 export NAVITA_HISTORYFILE_SIZE=50
 
