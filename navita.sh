@@ -102,7 +102,7 @@ __navita__() {
 		builtin cd "${path_returned}"
 		return $?
 	elif [[ $1 == "-" ]]; then
-		builtin cd -
+		builtin cd "${OLDPWD}"
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		__navita::PrintHistory | bat
