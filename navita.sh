@@ -117,7 +117,12 @@ __navita__() {
 		else 
 			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
 		fi
-		builtin cd "${path_returned}"
+
+		if [[ "${path_returned}" == "" ]]; then 
+			printf '%s\n' "Navita(info): none matched!"
+		else
+			builtin cd "${path_returned}"
+		fi
 		return $?
 	elif [[ $1 == "-" ]]; then
 		builtin cd "${OLDPWD}"
