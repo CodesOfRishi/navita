@@ -133,6 +133,16 @@ __navita__() {
 		__navita::PrintHistory | bat
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
 		__navita::CleanHistory
+	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
+		local fzf_query="${@:2}"
+		local path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
+
+		if [[ "${path_returned}" == "" ]]; then 
+			printf '%s\n' "Navita(info): none matched!"
+		else
+			builtin cd "${path_returned}"
+		fi
+		return $?
 	else
 		builtin cd "${@}"
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
