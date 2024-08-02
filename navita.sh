@@ -65,6 +65,8 @@ __navita::CleanHistory() {
 
 		local index_reduced=0
 		for i in "${line_no_todel[@]}"; do
+			local line_deleted=$( sed -n "$(( ${i} - ${index_reduced} ))p" ${NAVITA_HISTORYFILE} )
+			printf '%s\n' "${line_deleted} deleted!"
 			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${NAVITA_HISTORYFILE}
 			index_reduced=$(( ${index_reduced} + 1 ))
 		done
