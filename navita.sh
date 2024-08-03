@@ -1,3 +1,13 @@
+# TODO
+# Colorize informational outputs
+# Add an `--help`/`-h` option that display a brief helpful information
+# 	- can make use of `builtin cd -h`
+# Allow users to customize options for Navita.
+# Make use of programs based on availability, i.e., check which program is available and then use that program
+# 	- cat or bat
+# 	- find or fd-find
+# 	- grep or rg
+
 # navita variables
 
 if [[ -z $NAVITA_CONFIG_DIR ]] || [[ ! -v $NAVITA_CONFIG_DIR ]]; then
