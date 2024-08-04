@@ -16,6 +16,8 @@ fi
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
 export NAVITA_HISTORYFILE_SIZE=${NAVITA_HISTORYFILE_SIZE:=50}
 
+alias "${NAVITA_COMMAND:=nav}"="__navita__"
+
 # create configuration file(s) for Navita
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then 
 	mkdir -p "${NAVITA_CONFIG_DIR}"
