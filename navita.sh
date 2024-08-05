@@ -133,6 +133,7 @@ __navita__() {
 	local tput_rst && tput_rst=$( tput sgr0 )
 
 	if [[ $1 == "--" ]]; then
+		# NOTE: "Navigate-History"
 		local fzf_query="${@:2}"
 		local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
@@ -143,13 +144,17 @@ __navita__() {
 		fi
 		return $?
 	elif [[ $1 == "-" ]]; then
+		# NOTE: "Toggle-Last-Visits"
 		builtin cd "${OLDPWD}"
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
+		# NOTE: "View-History"
 		__navita::PrintHistory | bat
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
+		# NOTE: "Clean-History"
 		__navita::CleanHistory
 	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
+		# NOTE: "Navigate-Child-Dirs"
 		local fzf_query="${@:2}"
 		local path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
@@ -160,6 +165,7 @@ __navita__() {
 		fi
 		return $?
 	else
+		# NOTE: "CD-GENERAL"
 		# NOTE: if argument is either empty or already a legit directory path, then provide the argument to the builtin cd
 		# or else if the argument is already a valid existing option of the builtin cd, then provide the argument to the builtin cd
 		# otherwise provide the argument as a string to FZF to search the current directory
