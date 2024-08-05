@@ -140,12 +140,12 @@ __navita__() {
 		if [[ "${path_returned}" == "" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd "${path_returned}"
+			builtin cd ${path_returned}
 		fi
 		return $?
 	elif [[ $1 == "-" ]]; then
 		# NOTE: "Toggle-Last-Visits"
-		builtin cd "${OLDPWD}"
+		builtin cd ${OLDPWD}
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		# NOTE: "View-History"
@@ -161,7 +161,7 @@ __navita__() {
 		if [[ -z ${path_returned} ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd "${path_returned}"
+			builtin cd ${path_returned}
 		fi
 		return $?
 	else
