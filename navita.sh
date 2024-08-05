@@ -8,6 +8,12 @@
 # 	- find or fd-find
 # 	- grep or rg
 
+# NOTE: Why Navita?
+# Fast
+# Efficient
+# Easy cutomization
+# Written in !! only lines of code.
+
 # Navita variables
 export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
@@ -41,6 +47,7 @@ __navita::PrintHistory() {
 __navita::CleanHistory() { 
 
 	__navita::CleanHistory::EmptyHistoryFile() {
+		# NOTE:
 		# cp historyfile to tempfile
 		# empty the historyfile
 		# if success, cp tempfile to historyfile.bak & remove the tempfile
@@ -60,6 +67,7 @@ __navita::CleanHistory() {
 	}
 
 	__navita::CleanHistory::RemoveInvalidPaths() {
+		# NOTE:
 		# the line numbers that needs to be deleted from the history file, will be stored in an array
 		# using sed, delete those lines in-place
 
