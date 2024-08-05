@@ -10,16 +10,19 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
-**Streamline Your Workflow with Lightning-Fast Directory Switching!**
+**Tired of typing out long, complex directory paths?** Navita is here to simplify your command-line experience! The powerful Bash tool uses fuzzy search to get you to your destination in seconds.
 
-Tired of tedious navigation? Navita is here to revolutionize your command-line experience! The powerful Bash tool uses fuzzy search to get you to your destination in seconds.
+**Forget about tedious typing.** You can instantly find and jump to any directory, no matter how deeply nested. Navita is a great tool for boosting your productivity and saving you valuable time.
 
-**Work Faster, Not Longer**
-
-Effortlessly jump between directories, subdirectories, and recent visits. Simplify your workflow and maximize productivity with Navita.
+<div align="center">
 
 ## Features
+
+</div>
+
 ### Recursive Directory Search & Traversal
+
+_Feature name: Navigate-Child-Dirs_
 
 **Synopsis:** `cd (-s | --sub-search) <string>...`
 
@@ -27,15 +30,23 @@ Fuzzy search directories, all its subdirectories, and their subdirectories (so o
 
 ### History Search & Traversal
 
+_Feature name: Navigate-History_
+
 **Synopsis:** `cd -- [<string>...]`
 
 Fuzzy search last 50 (default) visited directory paths and traverse to the selected one.
  
 ### Toggle Current & Previous Directories
 
- **Synopsis:** `cd -`
+_Feature name: Toggle-Last-Visits_
+
+**Synopsis:** `cd -`
+
+Switch between the current directory and the previous directory. 
 
 ### View History
+
+_Feature name: View-History_
 
 **Synopsis:** `cd (-H | --history)`
 
@@ -43,11 +54,15 @@ View last 50 (default) visited directory paths.
 
 ### Change to Directory
 
+_Feature name: CD-General_
+
 **Synopsis:** `cd [<string>...]`
 
 Note: `cd` with no argument(s) will change PWD to $HOME.
 
 ### Cleanup History
+
+_Feature name: Clean-History_
 
 **Synopsis:** `cd (-c | --cleanup)`
 
