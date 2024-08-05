@@ -159,9 +159,11 @@ __navita__() {
 		fi
 		return $?
 	else
+		# NOTE: if argument is either empty or already a legit directory path, then provide the argument to the builtin cd
+		# otherwise provide the argument as a string to FZF to search the current directory
 		local fzf_query="${@}"
-		if [[ -z ${fzf_query} ]]; then 
-			builtin cd
+		if [[ -z ${fzf_query} ]] || [[ -d "${fzf_query}" ]]; then 
+			builtin cd ${fzf_query}
 		else
 			local path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query}" )
 			builtin cd ${path_returned}
