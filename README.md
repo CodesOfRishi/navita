@@ -28,7 +28,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 _Feature name: Navigate-Child-Dirs_
 
-**Synopsis:** `cd (-s | --sub-search) <string>...`
+**Synopsis:** `cd (-s | --sub-search) [<string>...]`
 
 Fuzzy search directories, all its subdirectories, and their subdirectories (so on..), and traverse to the selected one.
 
