@@ -46,18 +46,6 @@ Fuzzy search last 50 (default) visited directory paths and traverse to the selec
 
 <div align="center">
 
-### Toggle Current & Previous Directories
-
-</div>
-
-_Feature name: Toggle-Last-Visits_
-
-**Synopsis:** `cd -`
-
-Switch between the current directory and the previous directory. 
-
-<div align="center">
-
 ### View History
 
 </div>
@@ -79,6 +67,18 @@ _Feature name: CD-General_
 **Synopsis:** `cd [<string>...]`
 
 Navigate to the path provided as string, otherwise fuzzy search and select a directory in $PWD.
+
+<div align="center">
+
+### Toggle Current & Previous Directories
+
+</div>
+
+_Feature name: Toggle-Last-Visits_
+
+**Synopsis:** `cd -`
+
+Switch between the current directory and the previous directory. 
 
 <div align="center">
 
