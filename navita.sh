@@ -1,4 +1,4 @@
-# TODO
+# TODO:
 # Colorize informational outputs
 # Add an `--help`/`-h` option that display a brief helpful information
 # 	- can make use of `builtin cd -h`
