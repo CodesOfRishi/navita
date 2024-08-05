@@ -145,7 +145,7 @@ __navita__() {
 		local fzf_query="${@:2}"
 		local path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-		if [[ "${path_returned}" == "" ]]; then 
+		if [[ -z ${path_returned} ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
 			builtin cd "${path_returned}"
