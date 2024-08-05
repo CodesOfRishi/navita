@@ -37,7 +37,7 @@ __navita::PrintHistory() {
 	while read -r line; do
 		printf '%s' "${line/#${HOME}/\~}"
 		local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-		if [[ -n "${error}" ]]; then 
+		if [[ -n ${error} ]]; then 
 			printf " (${colr91}${error}${colr_rst})"
 		fi
 		printf "\n"
@@ -77,7 +77,7 @@ __navita::CleanHistory() {
 		
 		while read -r line; do
 			local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-			if [[ -n "${error}" ]]; then 
+			if [[ -n ${error} ]]; then 
 				line_no_todel+=(${line_no})
 			fi
 			line_no=$(( ${line_no} + 1 ))
