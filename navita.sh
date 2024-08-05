@@ -8,11 +8,8 @@
 # 	- find or fd-find
 # 	- grep or rg
 
-# navita variables
-
-if [[ -z $NAVITA_CONFIG_DIR ]] || [[ ! -v $NAVITA_CONFIG_DIR ]]; then
-	export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/navita"
-fi
+# Navita variables
+export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
 export NAVITA_HISTORYFILE_SIZE=${NAVITA_HISTORYFILE_SIZE:=50}
 
