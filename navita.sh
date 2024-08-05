@@ -129,11 +129,7 @@ __navita__() {
 
 	if [[ $1 == "--" ]]; then
 		local fzf_query="${@:2}"
-		if [[ -z "${fzf_query}" ]]; then
-			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 )
-		else 
-			local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" )
-		fi
+		local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -laFAC --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ "${path_returned}" == "" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
