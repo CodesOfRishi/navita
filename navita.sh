@@ -158,7 +158,7 @@ __navita__() {
 		if [[ -z ${fzf_query} ]] || [[ -d "${fzf_query}" ]]; then 
 			builtin cd ${fzf_query}
 		else
-			local path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query}" )
+			local path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 			builtin cd ${path_returned}
 		fi
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
