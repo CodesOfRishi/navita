@@ -32,7 +32,7 @@ __navita::PrintHistory() {
 
 	local line=""
 	while read -r line; do
-		printf '%s' "${line}" | sed "s|^${HOME}|~|g"
+		printf '%s' "${line/#${HOME}/\~}"
 		local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 		if [[ -n "${error}" ]]; then 
 			printf " (${colr91}${error}${colr_rst})"
