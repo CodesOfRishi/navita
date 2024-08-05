@@ -149,7 +149,7 @@ __navita__() {
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		# NOTE: "View-History"
-		__navita::PrintHistory | bat
+		__navita::PrintHistory | cat -n
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
 		# NOTE: "Clean-History"
 		__navita::CleanHistory
