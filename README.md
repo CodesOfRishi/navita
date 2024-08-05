@@ -20,7 +20,11 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
+<div align="center">
+
 ### Recursive Directory Search & Traversal
+
+</div>
 
 _Feature name: Navigate-Child-Dirs_
 
@@ -28,15 +32,23 @@ _Feature name: Navigate-Child-Dirs_
 
 Fuzzy search directories, all its subdirectories, and their subdirectories (so on..), and traverse to the selected one.
 
+<div align="center">
+
 ### History Search & Traversal
+
+</div>
 
 _Feature name: Navigate-History_
 
 **Synopsis:** `cd -- [<string>...]`
 
 Fuzzy search last 50 (default) visited directory paths and traverse to the selected one.
- 
+
+<div align="center">
+
 ### Toggle Current & Previous Directories
+
+</div>
 
 _Feature name: Toggle-Last-Visits_
 
@@ -44,7 +56,11 @@ _Feature name: Toggle-Last-Visits_
 
 Switch between the current directory and the previous directory. 
 
+<div align="center">
+
 ### View History
+
+</div>
 
 _Feature name: View-History_
 
@@ -52,15 +68,23 @@ _Feature name: View-History_
 
 View last 50 (default) visited directory paths.
 
+<div align="center">
+
 ### Change to Directory
+
+</div>
 
 _Feature name: CD-General_
 
 **Synopsis:** `cd [<string>...]`
 
-Note: `cd` with no argument(s) will change PWD to $HOME.
+Navigate to the path provided as string, otherwise fuzzy search and select a directory in $PWD.
+
+<div align="center">
 
 ### Cleanup History
+
+</div>
 
 _Feature name: Clean-History_
 
@@ -68,12 +92,21 @@ _Feature name: Clean-History_
 
 This is will give an option to either remove invalid paths from the history or completely empty the history.
 
+<div align="center">
+
 ## Dependencies
 
+</div>
+
 - [FZF](https://junegunn.github.io/fzf/)
+- [GNU Sed](https://sed.sourceforge.io/)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
 
+<div align="center">
+
 ## Installation
+
+</div>
 
 1. Download the `navita.sh` file.
 
