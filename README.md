@@ -26,7 +26,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
-_Feature name: Navigate-Child-Dirs_
+<u>Feature name: Navigate-Child-Dirs</u>
 
 **Synopsis:** `cd (-s | --sub-search) [<string>...]`
 
@@ -38,7 +38,7 @@ Fuzzy search directories, all its subdirectories, and their subdirectories (so o
 
 </div>
 
-_Feature name: Navigate-History_
+<u>Feature name: Navigate-History</u>
 
 **Synopsis:** `cd -- [<string>...]`
 
@@ -50,7 +50,7 @@ Fuzzy search last 50 (default) visited directory paths and traverse to the selec
 
 </div>
 
-_Feature name: View-History_
+<u>Feature name: View-History</u>
 
 **Synopsis:** `cd (-H | --history)`
 
@@ -62,11 +62,11 @@ View last 50 (default) visited directory paths.
 
 </div>
 
-_Feature name: CD-General_
+<u>Feature name: CD-General</u>
 
 **Synopsis:** `cd [<string>...]`
 
-Navigate to the path provided as string, otherwise fuzzy search and select a directory in $PWD.
+Fuzzy search directories *in current working directory* and traverse to the selected one.
 
 <div align="center">
 
@@ -74,7 +74,7 @@ Navigate to the path provided as string, otherwise fuzzy search and select a dir
 
 </div>
 
-_Feature name: Toggle-Last-Visits_
+<u>Feature name: Toggle-Last-Visits</u>
 
 **Synopsis:** `cd -`
 
@@ -86,7 +86,7 @@ Switch between the current directory and the previous directory.
 
 </div>
 
-_Feature name: Clean-History_
+<u>Feature name: Clean-History</u>
 
 **Synopsis:** `cd (-c | --cleanup)`
 
