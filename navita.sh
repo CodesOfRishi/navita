@@ -192,7 +192,7 @@ __navita__() {
 		fi
 
 		# NOTE: argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
-		local path_returned && path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+		local path_returned && path_returned="$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
 
 		if [[ -z "${path_returned}" ]]; then
 			printf "None matched!\n"
