@@ -172,8 +172,13 @@ __navita__() {
 
 		local fzf_query=( "${@}" )
 
-		if [[ -z "${fzf_query[*]}" ]] || [[ -d "${fzf_query[*]}" ]]; then 
-			# NOTE: argument provided by the user is either empty or is a valid directory path
+		if [[ -z "${fzf_query[*]}" ]]; then 
+			# NOTE: argument provided by the user is empty
+			builtin cd "${HOME}"
+			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
+			return 1
+		elif [[ -d "${fzf_query[*]}" ]]; then
+			# NOTE: argument provided by the user is a valid directory path
 			builtin cd "${fzf_query[*]}"
 			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
 			return 1
