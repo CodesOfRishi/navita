@@ -140,13 +140,12 @@ __navita__() {
 		if [[ -z "${path_returned}" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd "${path_returned}"
+			builtin cd "${path_returned}" || return $?
 		fi
-		return $?
 	elif [[ $1 == "-" ]]; then
 		# NOTE: "Toggle-Last-Visits"
-		builtin cd "${OLDPWD}"
-		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
+		( builtin cd "${OLDPWD}" && __navita::UpdatePathHistory ) || return $?
+		return $?
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		# NOTE: "View-History"
 		__navita::PrintHistory | cat -n
@@ -161,9 +160,8 @@ __navita__() {
 		if [[ -z "${path_returned}" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd "${path_returned}"
+			builtin cd "${path_returned}" || return $?
 		fi
-		return $?
 	else
 		# NOTE: "CD-GENERAL"
 		# NOTE: if argument is either empty or already a legit directory path, then provide the argument to the builtin cd
@@ -174,14 +172,10 @@ __navita__() {
 
 		if [[ -z "${fzf_query[*]}" ]]; then 
 			# NOTE: argument provided by the user is empty
-			builtin cd "${HOME}"
-			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
-			return 1
+			( builtin cd "${HOME}" && __navita::UpdatePathHistory ) || return $?
 		elif [[ -d "${fzf_query[*]}" ]]; then
 			# NOTE: argument provided by the user is a valid directory path
-			builtin cd "${fzf_query[*]}"
-			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
-			return 1
+			( builtin cd "${fzf_query[*]}" && __navita::UpdatePathHistory ) || return $?
 		fi
 
 		if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
@@ -190,9 +184,7 @@ __navita__() {
 
 			if [[ -z "${cderror[*]}" ]]; then 
 				# NOTE: likely argument contains valid existing option(s) of builtin cd
-				builtin cd "${fzf_query[*]}"
-				[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
-				return 1
+				( builtin cd "${fzf_query[*]}" && __navita::UpdatePathHistory ) || return $?
 			fi
 		fi
 
@@ -202,9 +194,7 @@ __navita__() {
 		if [[ -z "${path_returned}" ]]; then
 			printf "None matched!\n"
 		else
-			builtin cd "${path_returned}"
-			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
-			return 1
+			( builtin cd "${path_returned}" && __navita::UpdatePathHistory ) || return $?
 		fi
 	fi
 }
