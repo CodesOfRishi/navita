@@ -36,7 +36,7 @@ __navita::PrintHistory() {
 	local line=""
 	while read -r line; do
 		printf '%s' "${line/#${HOME}/\~}"
-		local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+		local error && error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 		if [[ -n ${error} ]]; then 
 			printf " (${colr91}${error}${colr_rst})"
 		fi
@@ -53,7 +53,7 @@ __navita::CleanHistory() {
 		# if success, cp tempfile to historyfile.bak & remove the tempfile
 		# if failed, remove the tempfile
 
-		local tempfile=$( mktemp )
+		local tempfile && tempfile=$( mktemp )
 		$( whereis -b cp | cut -d" " -f2 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		> "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
@@ -76,7 +76,7 @@ __navita::CleanHistory() {
 		local line
 		
 		while read -r line; do
-			local error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+			local error && error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 			if [[ -n ${error} ]]; then 
 				line_no_todel+=(${line_no})
 			fi
@@ -85,7 +85,7 @@ __navita::CleanHistory() {
 
 		local index_reduced=0
 		for i in "${line_no_todel[@]}"; do
-			local line_deleted=$( sed -n "$(( ${i} - ${index_reduced} ))p" ${NAVITA_HISTORYFILE} )
+			local line_deleted && line_deleted=$( sed -n "$(( ${i} - ${index_reduced} ))p" ${NAVITA_HISTORYFILE} )
 			printf '%s\n' "${line_deleted} deleted!"
 			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${NAVITA_HISTORYFILE}
 			index_reduced=$(( ${index_reduced} + 1 ))
@@ -135,7 +135,7 @@ __navita__() {
 	if [[ $1 == "--" ]]; then
 		# NOTE: "Navigate-History"
 		local fzf_query="${@:2}"
-		local path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+		local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ -z ${path_returned} ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
@@ -156,7 +156,7 @@ __navita__() {
 	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
 		# NOTE: "Navigate-Child-Dirs"
 		local fzf_query="${@:2}"
-		local path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+		local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ -z ${path_returned} ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
@@ -192,7 +192,7 @@ __navita__() {
 		fi
 
 		# NOTE: argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
-		local path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+		local path_returned && path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ -z ${path_returned} ]]; then
 			printf "None matched!\n"
