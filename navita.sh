@@ -134,7 +134,7 @@ __navita__() {
 
 	if [[ $1 == "--" ]]; then
 		# NOTE: "Navigate-History"
-		local fzf_query="${@:2}"
+		local fzf_query && fzf_query="${*:2}"
 		local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ -z ${path_returned} ]]; then 
@@ -155,7 +155,7 @@ __navita__() {
 		__navita::CleanHistory
 	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
 		# NOTE: "Navigate-Child-Dirs"
-		local fzf_query="${@:2}"
+		local fzf_query && fzf_query="${*:2}"
 		local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 		if [[ -z ${path_returned} ]]; then 
