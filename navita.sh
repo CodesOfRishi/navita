@@ -182,11 +182,11 @@ __navita__() {
 
 		if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
 			# NOTE: argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
-			local cderror=( $( find -maxdepth 1 -exec cd "${fzf_query[*]}" \; 2>&1 > /dev/null ) )
+			local cderror && cderror="$( find -L -maxdepth 1 -exec cd "${fzf_query[@]}" \; 2>&1 > /dev/null )"
 
 			if [[ -z "${cderror[*]}" ]]; then 
 				# NOTE: likely argument contains valid existing option(s) of builtin cd
-				builtin cd "${fzf_query[*]}" && __navita::UpdatePathHistory 
+				builtin cd "${fzf_query[@]}" && __navita::UpdatePathHistory 
 				return $?
 			fi
 		fi
