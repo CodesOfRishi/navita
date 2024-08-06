@@ -78,7 +78,7 @@ __navita::CleanHistory() {
 		while read -r line; do
 			local error && error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 			if [[ -n ${error} ]]; then 
-				line_no_todel+=(${line_no})
+				line_no_todel+=( "${line_no}" )
 			fi
 			line_no=$(( ${line_no} + 1 ))
 		done < ${NAVITA_HISTORYFILE}
@@ -170,7 +170,7 @@ __navita__() {
 		# or else if the argument is already a valid existing option of the builtin cd, then provide the argument to the builtin cd
 		# otherwise provide the argument as a string to FZF to search the current directory
 
-		local fzf_query=(${@})
+		local fzf_query=( "${@}" )
 
 		if [[ -z ${fzf_query[*]} ]] || [[ -d ${fzf_query[*]} ]] then 
 			# NOTE: argument provided by the user is either empty or is a valid directory path
