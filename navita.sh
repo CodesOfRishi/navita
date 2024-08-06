@@ -17,7 +17,7 @@
 # Navita variables
 export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
-export NAVITA_HISTORYFILE_SIZE=${NAVITA_HISTORYFILE_SIZE:=50}
+export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:=50}"
 
 alias "${NAVITA_COMMAND:="cd"}"="__navita__"
 
@@ -35,13 +35,13 @@ __navita::PrintHistory() {
 
 	local line=""
 	while read -r line; do
-		printf '%s' "${line/#${HOME}/\~}"
-		local error && error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-		if [[ -n ${error} ]]; then 
+		printf '%s' "${line/#"${HOME}"/\~}"
+		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+		if [[ -n "${error}" ]]; then 
 			printf " (${colr91}${error}${colr_rst})"
 		fi
 		printf "\n"
-	done < ${NAVITA_HISTORYFILE}
+	done < "${NAVITA_HISTORYFILE}"
 }
 
 __navita::CleanHistory() { 
@@ -57,7 +57,7 @@ __navita::CleanHistory() {
 		$( whereis -b cp | cut -d" " -f2 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		> "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
-		if [[ ${exitcode} -eq 0 ]]; then 
+		if [[ "${exitcode}" -eq 0 ]]; then 
 			printf '%s\n' "${NAVITA_HISTORYFILE} cleaned."
 			$( whereis -b cp | cut -d" " -f2 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
 			printf '%s\n' "Backup created at ${tput241}${NAVITA_HISTORYFILE}.bak${tput_rst}"
@@ -76,19 +76,19 @@ __navita::CleanHistory() {
 		local line
 		
 		while read -r line; do
-			local error && error="$( find ${line} -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-			if [[ -n ${error} ]]; then 
+			local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+			if [[ -n "${error}" ]]; then 
 				line_no_todel+=( "${line_no}" )
 			fi
-			line_no=$(( ${line_no} + 1 ))
-		done < ${NAVITA_HISTORYFILE}
+			line_no=$(( "${line_no}" + 1 ))
+		done < "${NAVITA_HISTORYFILE}"
 
 		local index_reduced=0
 		for i in "${line_no_todel[@]}"; do
-			local line_deleted && line_deleted=$( sed -n "$(( ${i} - ${index_reduced} ))p" ${NAVITA_HISTORYFILE} )
+			local line_deleted && line_deleted=$( sed -n "$(( "${i}" - "${index_reduced}" ))p" "${NAVITA_HISTORYFILE}" )
 			printf '%s\n' "${line_deleted} deleted!"
-			sed -i -e "$(( ${i} - ${index_reduced} ))d" ${NAVITA_HISTORYFILE}
-			index_reduced=$(( ${index_reduced} + 1 ))
+			sed -i -e "$(( "${i}" - "${index_reduced}" ))d" "${NAVITA_HISTORYFILE}"
+			index_reduced=$(( "${index_reduced}" + 1 ))
 		done
 	}
 
@@ -100,9 +100,9 @@ __navita::CleanHistory() {
 	read -p "Choice? (1 or 2): " user_choice
 	printf "\n"
 
-	if [[ ${user_choice} -eq 1 ]]; then
+	if [[ "${user_choice}" -eq 1 ]]; then
 		__navita::CleanHistory::RemoveInvalidPaths
-	elif [[ ${user_choice} -eq 2 ]]; then
+	elif [[ "${user_choice}" -eq 2 ]]; then
 		__navita::CleanHistory::EmptyHistoryFile
 	else
 		printf "Invalid input!\n" 1>&2
@@ -120,7 +120,7 @@ __navita::UpdatePathHistory() {
 	fi
 
 	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
-	sed -i "$(( $NAVITA_HISTORYFILE_SIZE + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
+	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
 	return $?
 }
 
@@ -137,15 +137,15 @@ __navita__() {
 		local fzf_query && fzf_query="${*:2}"
 		local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-		if [[ -z ${path_returned} ]]; then 
+		if [[ -z "${path_returned}" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd ${path_returned}
+			builtin cd "${path_returned}"
 		fi
 		return $?
 	elif [[ $1 == "-" ]]; then
 		# NOTE: "Toggle-Last-Visits"
-		builtin cd ${OLDPWD}
+		builtin cd "${OLDPWD}"
 		[[ $? -eq 0 ]] && __navita::UpdatePathHistory
 	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
 		# NOTE: "View-History"
@@ -158,10 +158,10 @@ __navita__() {
 		local fzf_query && fzf_query="${*:2}"
 		local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-		if [[ -z ${path_returned} ]]; then 
+		if [[ -z "${path_returned}" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd ${path_returned}
+			builtin cd "${path_returned}"
 		fi
 		return $?
 	else
@@ -172,20 +172,20 @@ __navita__() {
 
 		local fzf_query=( "${@}" )
 
-		if [[ -z ${fzf_query[*]} ]] || [[ -d ${fzf_query[*]} ]] then 
+		if [[ -z "${fzf_query[*]}" ]] || [[ -d "${fzf_query[*]}" ]]; then 
 			# NOTE: argument provided by the user is either empty or is a valid directory path
-			builtin cd ${fzf_query[*]}
+			builtin cd "${fzf_query[*]}"
 			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
 			return 1
 		fi
 
-		if [[ ${fzf_query[0]:0:2} == "-L" ]] || [[ ${fzf_query[0]:0:2} == "-P" ]] || [[ ${fzf_query[0]:0:2} == "-e" ]] || [[ ${fzf_query[0]:0:2} == "-@" ]] || [[ ${fzf_query[0]:0:6} == "--help" ]]; then
+		if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
 			# NOTE: argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
-			local cderror=( $( find -maxdepth 1 -exec cd ${fzf_query[*]} \; 2>&1 > /dev/null ) )
+			local cderror=( $( find -maxdepth 1 -exec cd "${fzf_query[*]}" \; 2>&1 > /dev/null ) )
 
-			if [[ -z ${cderror[*]} ]]; then 
+			if [[ -z "${cderror[*]}" ]]; then 
 				# NOTE: likely argument contains valid existing option(s) of builtin cd
-				builtin cd ${fzf_query[*]}
+				builtin cd "${fzf_query[*]}"
 				[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
 				return 1
 			fi
@@ -194,10 +194,10 @@ __navita__() {
 		# NOTE: argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
 		local path_returned && path_returned=$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-		if [[ -z ${path_returned} ]]; then
+		if [[ -z "${path_returned}" ]]; then
 			printf "None matched!\n"
 		else
-			builtin cd ${path_returned}
+			builtin cd "${path_returned}"
 			[[ $? -eq 0 ]] && __navita::UpdatePathHistory && return 0
 			return 1
 		fi
