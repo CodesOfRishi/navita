@@ -100,6 +100,7 @@ This is will give an option to either remove invalid paths from the history or c
 
 - [FZF](https://junegunn.github.io/fzf/)
 - [GNU Sed](https://sed.sourceforge.io/)
+- [GNU Gawk](https://www.gnu.org/software/gawk/)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
 
 <div align="center">
