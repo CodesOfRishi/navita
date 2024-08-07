@@ -38,7 +38,7 @@ __navita::PrintHistory() {
 		printf '%s' "${line/#"${HOME}"/\~}"
 		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 		if [[ -n "${error}" ]]; then 
-			printf " (${colr91}%s${colr_rst})\n" "${error}"
+			printf " (${colr91}%s${colr_rst})" "${error}"
 		fi
 		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
