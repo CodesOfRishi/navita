@@ -1,19 +1,3 @@
-# TODO:
-# Colorize informational outputs
-# Add an `--help`/`-h` option that display a brief helpful information
-# 	- can make use of `builtin cd -h`
-# Allow users to customize options for Navita.
-# Make use of programs based on availability, i.e., check which program is available and then use that program
-# 	- cat or bat
-# 	- find or fd-find
-# 	- grep or rg
-
-# NOTE: Why Navita?
-# Fast
-# Efficient
-# Easy cutomization
-# Written in !! only lines of code.
-
 # Navita variables
 export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
