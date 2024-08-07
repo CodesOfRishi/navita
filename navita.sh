@@ -182,7 +182,7 @@ __navita__() {
 
 		if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
 			# NOTE: argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
-			local cderror && cderror="$( find -L -maxdepth 1 -exec cd "${fzf_query[@]}" \; 2>&1 > /dev/null )"
+			local cderror && cderror="$( find -L . -maxdepth 1 -exec cd "${fzf_query[@]}" \; 2>&1 > /dev/null )"
 
 			if [[ -z "${cderror[*]}" ]]; then 
 				# NOTE: likely argument contains valid existing option(s) of builtin cd
@@ -192,7 +192,7 @@ __navita__() {
 		fi
 
 		# NOTE: argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
-		local path_returned && path_returned="$( find -L -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
+		local path_returned && path_returned="$( find -L . -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
 
 		if [[ -z "${path_returned}" ]]; then
 			printf "None matched!\n"
