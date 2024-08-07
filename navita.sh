@@ -97,7 +97,7 @@ __navita::CleanHistory() {
 	printf '%s\n' "2. Empty the history."
 	printf "\n"
 	local user_choice
-	read -p "Choice? (1 or 2): " user_choice
+	read -rp "Choice? (1 or 2): " user_choice
 	printf "\n"
 
 	if [[ "${user_choice}" -eq 1 ]]; then
