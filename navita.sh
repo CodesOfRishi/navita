@@ -1,7 +1,6 @@
 # INFO: Navita variables
-# export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
-export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
+export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/navita-history"
 export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:=50}"
 
 alias "${NAVITA_COMMAND:="cd"}"="__navita__"
@@ -96,7 +95,7 @@ __navita::CleanHistory() {
 	return $?
 }
 
-# update the path-history file
+# update the navita-history file
 __navita::UpdatePathHistory() { 
 	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
 		printf "%s\n" "${PWD}" > "${NAVITA_HISTORYFILE}"
@@ -105,7 +104,7 @@ __navita::UpdatePathHistory() {
 	fi
 
 	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
-	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the path-history file within the $NAVITA_HISTORYFILE_SIZE
+	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the navita-history file within the $NAVITA_HISTORYFILE_SIZE
 	return $?
 }
 
