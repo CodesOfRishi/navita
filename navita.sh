@@ -1,5 +1,6 @@
-# Navita variables
-export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
+# INFO: Navita variables
+# export NAVITA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/navita"
+export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/path-history"
 export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:=50}"
 
@@ -144,7 +145,8 @@ __navita__() {
 		if [[ -z "${path_returned}" ]]; then 
 			printf '%s\n' "Navita(info): none matched!"
 		else
-			builtin cd -- "${path_returned}" || return $?
+			builtin cd -- "${path_returned}" && __navita::UpdatePathHistory
+			return $?
 		fi
 	else
 		# NOTE: "CD-GENERAL"
