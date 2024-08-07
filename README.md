@@ -24,9 +24,9 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 ### Recursive Directory Search & Traversal
 
-</div>
+*Feature name: Navigate-Child-Dirs*
 
-<u>Feature name: Navigate-Child-Dirs</u>
+</div>
 
 **Synopsis:** `cd (-s | --sub-search) [<string>...]`
 
@@ -36,9 +36,9 @@ Fuzzy search directories, all its subdirectories, and their subdirectories (so o
 
 ### History Search & Traversal
 
-</div>
+*Feature name: Navigate-History*
 
-<u>Feature name: Navigate-History</u>
+</div>
 
 **Synopsis:** `cd -- [<string>...]`
 
@@ -48,9 +48,9 @@ Fuzzy search last 50 (default) visited directory paths and traverse to the selec
 
 ### View History
 
-</div>
+*Feature name: View-History*
 
-<u>Feature name: View-History</u>
+</div>
 
 **Synopsis:** `cd (-H | --history)`
 
@@ -60,9 +60,9 @@ View last 50 (default) visited directory paths.
 
 ### Change to Directory
 
-</div>
+*Feature name: CD-General*
 
-<u>Feature name: CD-General</u>
+</div>
 
 **Synopsis:** `cd [<string>...]`
 
@@ -72,9 +72,9 @@ Fuzzy search directories *in current working directory* and traverse to the sele
 
 ### Toggle Current & Previous Directories
 
-</div>
+*Feature name: Toggle-Last-Visits*
 
-<u>Feature name: Toggle-Last-Visits</u>
+</div>
 
 **Synopsis:** `cd -`
 
@@ -84,9 +84,9 @@ Switch between the current directory and the previous directory.
 
 ### Cleanup History
 
-</div>
+*Feature name: Clean-History*
 
-<u>Feature name: Clean-History</u>
+</div>
 
 **Synopsis:** `cd (-c | --cleanup)`
 
