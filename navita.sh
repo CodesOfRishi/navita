@@ -38,7 +38,7 @@ __navita::PrintHistory() {
 		printf '%s' "${line/#"${HOME}"/\~}"
 		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
 		if [[ -n "${error}" ]]; then 
-			printf " (${colr91}${error}${colr_rst})"
+			printf " (${colr91}%s${colr_rst})\n" "${error}"
 		fi
 		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
@@ -114,7 +114,7 @@ __navita::CleanHistory() {
 # update the path-history file
 __navita::UpdatePathHistory() { 
 	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
-		printf "${PWD}\n" > "${NAVITA_HISTORYFILE}"
+		printf "%s\n" "${PWD}" > "${NAVITA_HISTORYFILE}"
 	else
 		sed -i "1i ${PWD}" "${NAVITA_HISTORYFILE}" 
 	fi
