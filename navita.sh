@@ -30,6 +30,13 @@ __navita::UpdatePathHistory() {
 }
 # }}}
 
+# Utility: Validate Directory{{{
+__navita::ValidateDirectory() {
+	printf "%s" "$( find "${*}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+}
+# }}}
+
+
 # ── Feature: "Clean-History ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
 
@@ -70,7 +77,7 @@ __navita::CleanHistory() {
 		local line
 		
 		while read -r line; do
-			local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+			local error && error="$( __navita::ValidateDirectory "${line}" )"
 			if [[ -n "${error}" ]]; then 
 				line_no_todel+=( "${line_no}" )
 			fi
@@ -132,7 +139,7 @@ __navita::ViewHistory() {
 	local line=""
 	while read -r line; do
 		printf '%s' "${line/#"${HOME}"/\~}"
-		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+		local error && error="$( __navita::ValidateDirectory "${line}" )"
 		if [[ -n "${error}" ]]; then 
 			printf " (${colr91}%s${colr_rst})" "${error}"
 		fi
