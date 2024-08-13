@@ -161,6 +161,52 @@ __navita::NavigateChildDirs() {
 	fi
 }
 
+__navita::CDGeneral() {
+	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+	# │ Feature: "CD-General"                                                                            │
+	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+	# +--------------------------------------------------------------------------------------------------+
+	# | NOTE: if argument is either empty or already a legit directory path, then provide the argument   |
+	# | to the builtin cd                                                                                |
+	# | or else if the argument is already a valid existing option of the builtin cd, then provide the   |
+	# | argument to the builtin cd                                                                       |
+	# | otherwise provide the argument as a string to FZF to search the current directory                |
+	# +--------------------------------------------------------------------------------------------------+
+
+	local fzf_query=( "${@}" )
+
+	if [[ -z "${fzf_query[*]}" ]]; then 
+		# argument provided by the user is empty
+		builtin cd "${HOME}" && __navita::UpdatePathHistory 
+		return $?
+	elif [[ -d "${fzf_query[*]}" ]]; then
+		# argument provided by the user is a valid directory path
+		builtin cd -- "${fzf_query[*]}" && __navita::UpdatePathHistory 
+		return $?
+	fi
+
+	if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
+		# argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
+		local cderror && cderror="$( find -L . -maxdepth 1 -exec cd "${fzf_query[@]}" \; 2>&1 > /dev/null )"
+
+		if [[ -z "${cderror[*]}" ]]; then 
+			#  likely argument contains valid existing option(s) of builtin cd
+			builtin cd "${fzf_query[@]}" && __navita::UpdatePathHistory 
+			return $?
+		fi
+	fi
+
+	# argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
+	local path_returned && path_returned="$( find -L . -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
+
+	if [[ -z "${path_returned}" ]]; then
+		printf "None matched!\n"
+	else
+		builtin cd -- "${path_returned}" && __navita::UpdatePathHistory 
+		return $?
+	fi
+}
+
 __navita__() {
 
 	local colr91 && colr91='\e[01;91m'
@@ -180,49 +226,7 @@ __navita__() {
 	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
 		__navita::NavigateChildDirs "${@}"
 	else
-		# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-		# │ Feature: "CD-GENERAL"                                                                            │
-		# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
-		# +--------------------------------------------------------------------------------------------------+
-		# | NOTE: if argument is either empty or already a legit directory path, then provide the argument   |
-		# | to the builtin cd                                                                                |
-		# | or else if the argument is already a valid existing option of the builtin cd, then provide the   |
-		# | argument to the builtin cd                                                                       |
-		# | otherwise provide the argument as a string to FZF to search the current directory                |
-		# +--------------------------------------------------------------------------------------------------+
-
-		local fzf_query=( "${@}" )
-
-		if [[ -z "${fzf_query[*]}" ]]; then 
-			# argument provided by the user is empty
-			builtin cd "${HOME}" && __navita::UpdatePathHistory 
-			return $?
-		elif [[ -d "${fzf_query[*]}" ]]; then
-			# argument provided by the user is a valid directory path
-			builtin cd -- "${fzf_query[*]}" && __navita::UpdatePathHistory 
-			return $?
-		fi
-
-		if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
-			# argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
-			local cderror && cderror="$( find -L . -maxdepth 1 -exec cd "${fzf_query[@]}" \; 2>&1 > /dev/null )"
-
-			if [[ -z "${cderror[*]}" ]]; then 
-				#  likely argument contains valid existing option(s) of builtin cd
-				builtin cd "${fzf_query[@]}" && __navita::UpdatePathHistory 
-				return $?
-			fi
-		fi
-
-		# argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
-		local path_returned && path_returned="$( find -L . -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
-
-		if [[ -z "${path_returned}" ]]; then
-			printf "None matched!\n"
-		else
-			builtin cd -- "${path_returned}" && __navita::UpdatePathHistory 
-			return $?
-		fi
+		__navita::CDGeneral "${@}"
 	fi
 }
 
