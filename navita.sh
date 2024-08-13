@@ -114,6 +114,20 @@ __navita::UpdatePathHistory() {
 	return $?
 }
 
+__navita::NavigateHistory() {
+	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+	# │ Feature: "Navigate-History"                                                                      │
+	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+	local fzf_query && fzf_query="${*:2}"
+	local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+
+	if [[ -z "${path_returned}" ]]; then 
+		printf '%s\n' "Navita(info): none matched!"
+	else
+		builtin cd "${path_returned}" || return $?
+	fi
+}
+
 __navita__() {
 
 	local colr91 && colr91='\e[01;91m'
@@ -123,17 +137,7 @@ __navita__() {
 	local tput_rst && tput_rst=$( tput sgr0 )
 
 	if [[ $1 == "--" ]]; then
-		# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-		# │ Feature: "Navigate-History"                                                                      │
-		# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
-		local fzf_query && fzf_query="${*:2}"
-		local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
-
-		if [[ -z "${path_returned}" ]]; then 
-			printf '%s\n' "Navita(info): none matched!"
-		else
-			builtin cd "${path_returned}" || return $?
-		fi
+		__navita::NavigateHistory "${@}"
 	elif [[ $1 == "-" ]]; then
 		# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 		# │ Feature: "Toggle-Last-Visits"                                                                    │
