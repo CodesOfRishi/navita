@@ -1,6 +1,10 @@
 # Todos
 
+- Don't search PWD and invalid path in FZF.
+- Make listing of directories in FZF preview in column format and configure the FZF display with its preview at the bottom.
+- Make CD-General search the history if no match was found from the $PWD/.
 - Check out `command` command and see if it can be used to check a command's availablitiy for Navita.
+- Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
 - Keep support for only POSIX builtin cd options.
     - Implement fuzzy search with the builtin cd options.
 - Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.
