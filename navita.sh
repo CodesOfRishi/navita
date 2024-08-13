@@ -139,12 +139,19 @@ __navita::ToggleLastVisits() {
 	return $?
 }
 
+# ── Feature: "View-History ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "View-History"                                                                          │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
-	__navita::PrintHistory | cat -n
+	local line=""
+	while read -r line; do
+		printf '%s' "${line/#"${HOME}"/\~}"
+		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
+		if [[ -n "${error}" ]]; then 
+			printf " (${colr91}%s${colr_rst})" "${error}"
+		fi
+		printf "\n"
+	done < "${NAVITA_HISTORYFILE}" | cat -n
 }
+# }}}
 
 __navita::NavigateChildDirs() {
 	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
