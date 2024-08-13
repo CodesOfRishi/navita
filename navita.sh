@@ -36,6 +36,29 @@ __navita::ValidateDirectory() {
 }
 # }}}
 
+# Utility: GetHistory{{{
+__navita::GetHistory() {
+	local get_pwd && get_pwd="${1:?The function needs to be told, if it\'s required to print PWD or not!}"
+	local get_invalid_paths && get_invalid_paths="${2:?The function needs to be told, if it\'s required to print invalid paths or not!}"
+
+	local line=""
+	local pwd_removed="n"
+	while read -r line; do
+		if [[ "${get_pwd}" != "y" ]] && [[ "${pwd_removed}" == "n" ]]; then
+			if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P ${PWD} )" ]]; then
+				pwd_removed="y"
+				continue
+			fi
+		fi
+
+		if [[ -n "$( __navita::ValidateDirectory "${line}" )" ]]; then
+			[[ "${get_invalid_paths}" == "y" ]] && printf "%s\n" "${line}"
+		else
+			printf "%s\n" "${line}"
+		fi
+	done < "${NAVITA_HISTORYFILE}"
+}
+# }}}
 
 # ── Feature: "Clean-History ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
@@ -117,7 +140,7 @@ __navita::CleanHistory() {
 # ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
 	local fzf_query && fzf_query="${*:2}"
-	local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 	if [[ -z "${path_returned}" ]]; then 
 		printf '%s\n' "Navita(info): none matched!"
@@ -138,13 +161,8 @@ __navita::ToggleLastVisits() {
 __navita::ViewHistory() {
 	local line=""
 	while read -r line; do
-		printf '%s' "${line/#"${HOME}"/\~}"
-		local error && error="$( __navita::ValidateDirectory "${line}" )"
-		if [[ -n "${error}" ]]; then 
-			printf " (${colr91}%s${colr_rst})" "${error}"
-		fi
-		printf "\n"
-	done < "${NAVITA_HISTORYFILE}" | cat -n
+		printf "%s ${colr91}%s${colr_rst}\n" "${line/#"${HOME}"/\~}" "$( __navita::ValidateDirectory "${line}" )"
+	done < <( __navita::GetHistory "y" "y" ) | cat -n
 }
 # }}}
 
