@@ -15,26 +15,24 @@ elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	printf '%s\n' "Navita: Created ${NAVITA_HISTORYFILE}"
 fi
 
-# ── display history of directory visits ───────────────────────────────
-__navita::PrintHistory() { 
+# Utility: Update History{{{
+__navita::UpdatePathHistory() { 
+	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
+		printf "%s\n" "${PWD}" > "${NAVITA_HISTORYFILE}"
+	else
+		sed -i "1i ${PWD}" "${NAVITA_HISTORYFILE}" 
+	fi
 
-	local line=""
-	while read -r line; do
-		printf '%s' "${line/#"${HOME}"/\~}"
-		local error && error="$( find "${line}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-		if [[ -n "${error}" ]]; then 
-			printf " (${colr91}%s${colr_rst})" "${error}"
-		fi
-		printf "\n"
-	done < "${NAVITA_HISTORYFILE}"
+	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
+	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the navita-history file within the $NAVITA_HISTORYFILE_SIZE
+	return $?
 }
+# }}}
 
-# ── cleanup history logs ──────────────────────────────────────────────
+# ── Feature: "Clean-History ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "Clean-History"                                                                         │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
+	# ── Feature: EmptyHistoryFile ─────────────────────────────────────────{{{
 	__navita::CleanHistory::EmptyHistoryFile() {
 		# +--------------------------------------------------------------------------------------------------+
 		# | NOTE:                                                                                            |
@@ -56,7 +54,9 @@ __navita::CleanHistory() {
 		rm --interactive=never "$tempfile"
 		return "$exitcode"
 	}
+	# }}}
 
+	# ── Feature: RemoveInavlidPaths ───────────────────────────────────────{{{
 	__navita::CleanHistory::RemoveInvalidPaths() {
 		# +--------------------------------------------------------------------------------------------------+
 		# | NOTE:                                                                                            |
@@ -84,6 +84,7 @@ __navita::CleanHistory() {
 			index_reduced=$(( "${index_reduced}" + 1 ))
 		done
 	}
+	# }}}
 
 	printf '%s\n' "Choose any one: "
 	printf '%s\n' "1. Remove only invalid paths."
@@ -103,24 +104,10 @@ __navita::CleanHistory() {
 	fi
 	return $?
 }
+# }}}
 
-# ── update history ────────────────────────────────────────────────────
-__navita::UpdatePathHistory() { 
-	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
-		printf "%s\n" "${PWD}" > "${NAVITA_HISTORYFILE}"
-	else
-		sed -i "1i ${PWD}" "${NAVITA_HISTORYFILE}" 
-	fi
-
-	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
-	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the navita-history file within the $NAVITA_HISTORYFILE_SIZE
-	return $?
-}
-
+# ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "Navigate-History"                                                                      │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 	local fzf_query && fzf_query="${*:2}"
 	local path_returned && path_returned=$( cat "${NAVITA_HISTORYFILE}"  | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
@@ -130,14 +117,14 @@ __navita::NavigateHistory() {
 		builtin cd "${path_returned}" || return $?
 	fi
 }
+# }}}
 
+# ── Feature: "Toggle-Last-Visits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "Toggle-Last-Visits"                                                                    │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 	builtin cd "${OLDPWD}" && __navita::UpdatePathHistory 
 	return $?
 }
+# }}}
 
 # ── Feature: "View-History ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
@@ -153,10 +140,8 @@ __navita::ViewHistory() {
 }
 # }}}
 
+# ── Feature: "Navigate-Child-Dirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "Navigate-Child-Dirs"                                                                   │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 	local fzf_query && fzf_query="${*:2}"
 	local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
@@ -167,11 +152,10 @@ __navita::NavigateChildDirs() {
 		return $?
 	fi
 }
+# }}}
 
+# ── Feature: "CD-General ──────────────────────────────────────────────{{{
 __navita::CDGeneral() {
-	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-	# │ Feature: "CD-General"                                                                            │
-	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 	# +--------------------------------------------------------------------------------------------------+
 	# | NOTE: if argument is either empty or already a legit directory path, then provide the argument   |
 	# | to the builtin cd                                                                                |
@@ -213,6 +197,7 @@ __navita::CDGeneral() {
 		return $?
 	fi
 }
+# }}}
 
 __navita__() {
 
