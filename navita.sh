@@ -2,6 +2,7 @@
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/navita-history"
 export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:-50}"
+export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 
 alias "${NAVITA_COMMAND:="cd"}"="__navita__"
 
@@ -114,14 +115,14 @@ __navita::NavigateHistory() {
 	if [[ -z "${path_returned}" ]]; then 
 		printf '%s\n' "Navita(info): none matched!"
 	else
-		builtin cd -L "${path_returned}" || return $?
+		builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" || return $?
 	fi
 }
 # }}}
 
 # ── Feature: "Toggle-Last-Visits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
-	builtin cd -L "${OLDPWD}" && __navita::UpdatePathHistory 
+	builtin cd -L "${__the_builtin_P_option[@]}" "${OLDPWD}" && __navita::UpdatePathHistory 
 	return $?
 }
 # }}}
@@ -148,7 +149,7 @@ __navita::NavigateChildDirs() {
 	if [[ -z "${path_returned}" ]]; then 
 		printf '%s\n' "Navita(info): none matched!"
 	else
-		builtin cd -L -- "${path_returned}" && __navita::UpdatePathHistory
+		builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory
 		return $?
 	fi
 }
@@ -168,38 +169,28 @@ __navita::CDGeneral() {
 
 	if [[ -z "${fzf_query[*]}" ]]; then 
 		# argument provided by the user is empty
-		builtin cd -L "${HOME}" && __navita::UpdatePathHistory 
+		builtin cd -L "${__the_builtin_P_option[@]}" "${HOME}" && __navita::UpdatePathHistory 
 		return $?
 	elif [[ -d "${fzf_query[*]}" ]]; then
 		# argument provided by the user is a valid directory path
-		builtin cd -L -- "${fzf_query[*]}" && __navita::UpdatePathHistory 
+		builtin cd -L "${__the_builtin_P_option[@]}" -- "${fzf_query[*]}" && __navita::UpdatePathHistory 
 		return $?
 	fi
 
-	if [[ "${fzf_query[0]:0:2}" == "-L" ]] || [[ "${fzf_query[0]:0:2}" == "-P" ]] || [[ "${fzf_query[0]:0:2}" == "-e" ]] || [[ "${fzf_query[0]:0:2}" == "-@" ]] || [[ "${fzf_query[0]:0:6}" == "--help" ]]; then
-		# argument provided by the user likely contains (valid/invalid) builtin cd options (check builtin cd --help)
-		local cderror && cderror="$( find -L . -maxdepth 1 -exec cd -L "${fzf_query[@]}" \; 2>&1 > /dev/null )"
-
-		if [[ -z "${cderror[*]}" ]]; then 
-			#  likely argument contains valid existing option(s) of builtin cd
-			builtin cd -L "${fzf_query[@]}" && __navita::UpdatePathHistory 
-			return $?
-		fi
-	fi
-
-	# argument is not empty, is not valid directory path and also does not contains a valid builtin cd option
 	local path_returned && path_returned="$( find -L . -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
 
 	if [[ -z "${path_returned}" ]]; then
 		printf "None matched!\n"
 	else
-		builtin cd -L -- "${path_returned}" && __navita::UpdatePathHistory 
+		builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory 
 		return $?
 	fi
 }
 # }}}
 
 __navita__() {
+
+	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" == "y" ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
 
 	local colr91 && colr91='\e[01;91m'
 	local colr_rst && colr_rst='\e[0m'
