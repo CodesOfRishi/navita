@@ -207,18 +207,16 @@ __navita__() {
 	local tput241 && tput241=$( tput setaf 241 )
 	local tput_rst && tput_rst=$( tput sgr0 )
 
-	if [[ $1 == "--" ]]; then
-		__navita::NavigateHistory "${@}"
-	elif [[ $1 == "-" ]]; then
-		__navita::ToggleLastVisits
-	elif [[ $1 == "--history" ]] || [[ $1 == "-H" ]]; then
-		__navita::ViewHistory
-	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
-		__navita::CleanHistory
-	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
-		__navita::NavigateChildDirs "${@}"
-	else
-		__navita::CDGeneral "${@}"
-	fi
+	case "$1" in
+		"--") __navita::NavigateHistory "${@}";;
+		"-") __navita::ToggleLastVisits;;
+		"--history" | "-H") __navita::ViewHistory;;
+		"--clean" | "-c") __navita::CleanHistory;;
+		"--sub-search" | "-s") __navita::NavigateChildDirs "${@}";;
+		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
+		"--version" | "-v") printf "Print version information (to be implemented!)\n";;
+		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
+		*) __navita::CDGeneral "${@}";;
+	esac
 }
 
