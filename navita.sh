@@ -146,6 +146,21 @@ __navita::ViewHistory() {
 	__navita::PrintHistory | cat -n
 }
 
+__navita::NavigateChildDirs() {
+	# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+	# │ Feature: "Navigate-Child-Dirs"                                                                   │
+	# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+	local fzf_query && fzf_query="${*:2}"
+	local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+
+	if [[ -z "${path_returned}" ]]; then 
+		printf '%s\n' "Navita(info): none matched!"
+	else
+		builtin cd -- "${path_returned}" && __navita::UpdatePathHistory
+		return $?
+	fi
+}
+
 __navita__() {
 
 	local colr91 && colr91='\e[01;91m'
@@ -163,18 +178,7 @@ __navita__() {
 	elif [[ $1 == "--clean" ]] || [[ $1 == "-c" ]]; then
 		__navita::CleanHistory
 	elif [[ $1 == "--sub-search" ]] || [[ $1 == "-s" ]]; then
-		# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-		# │ Feature: "Navigate-Child-Dirs"                                                                   │
-		# ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
-		local fzf_query && fzf_query="${*:2}"
-		local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
-
-		if [[ -z "${path_returned}" ]]; then 
-			printf '%s\n' "Navita(info): none matched!"
-		else
-			builtin cd -- "${path_returned}" && __navita::UpdatePathHistory
-			return $?
-		fi
+		__navita::NavigateChildDirs "${@}"
 	else
 		# ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 		# │ Feature: "CD-GENERAL"                                                                            │
