@@ -1,7 +1,7 @@
 # ── Navita variables ──────────────────────────────────────────────────
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/navita-history"
-export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:=50}"
+export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:-50}"
 
 alias "${NAVITA_COMMAND:="cd"}"="__navita__"
 
