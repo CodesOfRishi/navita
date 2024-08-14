@@ -1,10 +1,11 @@
 # Todos
 
+- Probably implement FZF <u>exact</u> search/match for Navigate-History.
 - Use exec to execute commands, where you require customizibility of those commands by the end-user.
 - Show relevant error (if any) along side each path as well in FZF which search/matching for paths.
 - Don't search PWD and invalid path in FZF for the `--root` option.
 - Make listing of directories in FZF preview in column format and configure the FZF display with its preview at the bottom.
-- Make CD-General search the history if no match was found from the $PWD/.
+- ~~Make CD-General search the history if no match was found from the $PWD/.~~
 - Check out `command` command and see if it can be used to check a command's availablitiy for Navita.
 - ~~Keep support for only POSIX builtin cd options.~~
 - ~~Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.~~
