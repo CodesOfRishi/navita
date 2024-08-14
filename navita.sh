@@ -205,11 +205,8 @@ __navita::CDGeneral() {
 	local path_returned && path_returned="$( find -L . -maxdepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
 
 	case "$?" in
-		0) 
-			builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
 		1) printf "None matched!\n"; return 1;;
-		2) return 2;;
-		130) return 130;;
 		*) return $?;;
 	esac
 }
