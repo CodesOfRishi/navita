@@ -171,12 +171,11 @@ __navita::NavigateChildDirs() {
 	local fzf_query && fzf_query="${*:2}"
 	local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-	if [[ -z "${path_returned}" ]]; then 
-		printf '%s\n' "Navita(info): none matched!"
-	else
-		builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory
-		return $?
-	fi
+	case "$?" in
+		0) builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		1) printf "Navita(info): None matched!\n"; return 1;;
+		*) return $?;;
+	esac
 }
 # }}}
 
