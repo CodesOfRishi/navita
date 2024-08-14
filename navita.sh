@@ -44,7 +44,7 @@ __navita::GetHistory() {
 	local line=""
 	local pwd_removed="n"
 	while read -r line; do
-		if [[ "${get_pwd}" != "y" ]] && [[ "${pwd_removed}" == "n" ]]; then
+		if [[ ! "${get_pwd}" =~ ^(y|Y) ]] && [[ "${pwd_removed}" == "n" ]]; then
 			if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P ${PWD} )" ]]; then
 				pwd_removed="y"
 				continue
