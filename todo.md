@@ -1,5 +1,8 @@
 # Todos
 
+- Keep consistency in coloring codes.
+- Introduce a feature to add directories to a list, so that they are not added to the history
+- Introduce a feature to remove multiple paths from history using FZF multi-select
 - Probably implement FZF <u>exact</u> search/match for Navigate-History.
 - Use exec to execute commands, where you require customizibility of those commands by the end-user.
 - Show relevant error (if any) along side each path as well in FZF which search/matching for paths.
