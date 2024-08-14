@@ -1,19 +1,18 @@
 # Todos
 
-- Don't search PWD and invalid path in FZF.
+- Use exec to execute commands, where you require customizibility of those commands by the end-user.
+- Show relevant error (if any) along side each path as well in FZF which search/matching for paths.
+- Don't search PWD and invalid path in FZF for the `--root` option.
 - Make listing of directories in FZF preview in column format and configure the FZF display with its preview at the bottom.
 - Make CD-General search the history if no match was found from the $PWD/.
 - Check out `command` command and see if it can be used to check a command's availablitiy for Navita.
-- Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
-- Keep support for only POSIX builtin cd options.
-    - Implement fuzzy search with the builtin cd options.
-- Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.
-- Utilize FZF exit statuses.
+- ~~Keep support for only POSIX builtin cd options.~~
+- ~~Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.~~
+- ~~Utilize FZF exit statuses.~~
 - Colorize informational outputs.
 - Add an `--help`/`-h` option that display a brief helpful information
     - can make use of `builtin cd -h`
 - Introduce `--root` / `-r` option, which will fuzzy search in the directory path provided to the --root option.
-- Make following symoblic links optional for the user. (check the `-L` option of the `find` command)
 - Allow users to customize options for Navita.
 - Make use of programs based on availability, i.e., check which program is available and then use that program
     - `cat` or `bat`
@@ -43,7 +42,8 @@
 - Add Apache 2.0 License
 - Add an environment containing version name
 - Introduce `-v`/`--version` options to show version information
-- Add a section that tells the differences with SmartCD.
+- Add a section that tells the differences with SmartCD in README
+- Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
 - Implement Aging feature for Navita.
 
 # When to do nothing?
