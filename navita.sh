@@ -142,11 +142,11 @@ __navita::CleanHistory() {
 __navita::NavigateHistory() {
 	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
-	if [[ -z "${path_returned}" ]]; then 
-		printf '%s\n' "Navita(info): none matched!"
-	else
-		builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" || return $?
-	fi
+	case "$?" in
+		0) builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
+		1) printf "Navita(info): None matched!\n"; return 1;;
+		*) return $?;;
+	esac
 }
 # }}}
 
