@@ -3,8 +3,9 @@ export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}
 export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/navita-history"
 export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:-50}"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
+export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 
-alias "${NAVITA_COMMAND:="cd"}"="__navita__"
+alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then 
