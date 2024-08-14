@@ -51,10 +51,10 @@ __navita::GetHistory() {
 			fi
 		fi
 
-		if [[ -n "$( __navita::ValidateDirectory "${line}" )" ]]; then
-			[[ "${get_invalid_paths}" == "y" ]] && printf "%s\n" "${line}"
-		else
+		if [[ "${get_invalid_paths}" =~ ^(y|Y) ]]; then
 			printf "%s\n" "${line}"
+		else
+			[[ -z "$( __navita::ValidateDirectory "${line}" )" ]] && printf "%s\n" "${line}"
 		fi
 	done < "${NAVITA_HISTORYFILE}"
 }
