@@ -204,7 +204,7 @@ __navita::CDGeneral() {
 
 	case "$?" in
 		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
-		1) printf "None matched!\n"; return 1;;
+		1) __navita::NavigateHistory "${fzf_query[@]}";;
 		*) return $?;;
 	esac
 }
