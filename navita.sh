@@ -140,8 +140,7 @@ __navita::CleanHistory() {
 
 # ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local fzf_query && fzf_query="${*:2}"
-	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 	if [[ -z "${path_returned}" ]]; then 
 		printf '%s\n' "Navita(info): none matched!"
@@ -227,7 +226,7 @@ __navita__() {
 	local tput_rst && tput_rst=$( tput sgr0 )
 
 	case "$1" in
-		"--") __navita::NavigateHistory "${@}";;
+		"--") __navita::NavigateHistory "${@:2}";;
 		"-") __navita::ToggleLastVisits;;
 		"--history" | "-H") __navita::ViewHistory;;
 		"--clean" | "-c") __navita::CleanHistory;;
