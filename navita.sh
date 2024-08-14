@@ -152,8 +152,7 @@ __navita::NavigateHistory() {
 
 # ── Feature: "Toggle-Last-Visits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
-	builtin cd -L "${__the_builtin_P_option[@]}" "${OLDPWD}" && __navita::UpdatePathHistory 
-	return $?
+	builtin cd -L "${__the_builtin_P_option[@]}" - && __navita::UpdatePathHistory 
 }
 # }}}
 
