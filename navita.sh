@@ -11,10 +11,10 @@ alias "${NAVITA_COMMAND}"="__navita__"
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then 
 	mkdir -p "${NAVITA_CONFIG_DIR}"
 	touch "${NAVITA_HISTORYFILE}"
-	printf '%s\n' "Navita: Created ${NAVITA_HISTORYFILE}"
+	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
 	touch "${NAVITA_HISTORYFILE}"
-	printf '%s\n' "Navita: Created ${NAVITA_HISTORYFILE}"
+	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
 
 # Utility: Update History{{{
@@ -79,9 +79,9 @@ __navita::CleanHistory() {
 		> "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if [[ "${exitcode}" -eq 0 ]]; then 
-			printf '%s\n' "${NAVITA_HISTORYFILE} cleaned."
+			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			$( whereis -b cp | cut -d" " -f2 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
-			printf '%s\n' "Backup created at ${tput241}${NAVITA_HISTORYFILE}.bak${tput_rst}"
+			printf "Backup created at ${tput241}%s.bak${tput_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		rm --interactive=never "$tempfile"
 		return "$exitcode"
@@ -111,16 +111,16 @@ __navita::CleanHistory() {
 		local index_reduced=0
 		for i in "${line_no_todel[@]}"; do
 			local line_deleted && line_deleted=$( sed -n "$(( "${i}" - "${index_reduced}" ))p" "${NAVITA_HISTORYFILE}" )
-			printf '%s\n' "${line_deleted} deleted!"
+			printf '%s deleted!\n' "${line_deleted}"
 			sed -i -e "$(( "${i}" - "${index_reduced}" ))d" "${NAVITA_HISTORYFILE}"
 			index_reduced=$(( "${index_reduced}" + 1 ))
 		done
 	}
 	# }}}
 
-	printf '%s\n' "Choose any one: "
-	printf '%s\n' "1. Remove only invalid paths."
-	printf '%s\n' "2. Empty the history."
+	printf "Choose any one:\n"
+	printf "1. Remove only invalid paths.\n"
+	printf "2. Empty the history.\n"
 	printf "\n"
 	local user_choice
 	read -rp "Choice? (1 or 2): " user_choice
