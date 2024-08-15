@@ -66,7 +66,7 @@ View last 50 (default) visited directory paths.
 
 **Synopsis:** `cd [<string>...]`
 
-Fuzzy search directories *in current working directory* and traverse to the selected one.
+Fuzzy search directories in the *current working directory* and traverse to the selected one. If no match is found, Navita would search the history i.e., the same as the *Navigate-History* feature.
 
 <div align="center">
 
