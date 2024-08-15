@@ -140,7 +140,7 @@ __navita::CleanHistory() {
 
 # ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 	case "$?" in
 		0) builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
