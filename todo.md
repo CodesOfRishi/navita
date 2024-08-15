@@ -3,7 +3,7 @@
 - Keep consistency in coloring codes.
 - Introduce a feature to add directories to a list, so that they are not added to the history
 - Introduce a feature to remove multiple paths from history using FZF multi-select
-- Implement FZF <u>exact</u> search/match for Navigate-History.
+- ~~Implement FZF <u>exact</u> search/match for Navigate-History.~~
 - Use exec to execute commands, where you require customizibility of those commands by the end-user.
 - Show relevant error (if any) along side each path as well in FZF which search/matching for paths.
 - Don't search PWD and invalid path in FZF for the `--root` option.
