@@ -211,6 +211,10 @@ __navita::CDGeneral() {
 }
 # }}}
 
+__navita::Version() {
+	printf "Navita - %s\n" "${NAVITA_VERSION}"
+}
+
 __navita__() {
 
 	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" == "y" ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
@@ -228,7 +232,7 @@ __navita__() {
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@}";;
 		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
-		"--version" | "-v") printf "Print version information (to be implemented!)\n";;
+		"--version" | "-v") __navita::Version;;
 		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
 		*) __navita::CDGeneral "${@}";;
 	esac
