@@ -38,26 +38,11 @@ __navita::ValidateDirectory() {
 }
 # }}}
 
-# Utility: GetHistory{{{
-__navita::GetHistory() {
-	local get_pwd && get_pwd="${1:?The function needs to be told, if it\'s required to print PWD or not!}"
-	local get_invalid_paths && get_invalid_paths="${2:?The function needs to be told, if it\'s required to print invalid paths or not!}"
-
-	local line=""
-	local pwd_removed="n"
+# ── Feature: "View-History ────────────────────────────────────────────{{{
+__navita::ViewHistory() {
+	local line
 	while read -r line; do
-		if [[ ! "${get_pwd}" =~ ^(y|Y) ]] && [[ "${pwd_removed}" == "n" ]]; then
-			if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
-				pwd_removed="y"
-				continue
-			fi
-		fi
-
-		if [[ "${get_invalid_paths}" =~ ^(y|Y) ]]; then
-			printf "%s\n" "${line}"
-		else
-			[[ -z "$( __navita::ValidateDirectory "${line}" )" ]] && printf "%s\n" "${line}"
-		fi
+		printf "%s\n" "${line}"
 	done < "${NAVITA_HISTORYFILE}"
 }
 # }}}
@@ -141,7 +126,7 @@ __navita::CleanHistory() {
 
 # ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::GetHistory "n" "n" | fzf --prompt="navita> " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 	case "$?" in
 		0) builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
@@ -154,15 +139,6 @@ __navita::NavigateHistory() {
 # ── Feature: "Toggle-Last-Visits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
 	builtin cd -L "${__the_builtin_P_option[@]}" - && __navita::UpdatePathHistory 
-}
-# }}}
-
-# ── Feature: "View-History ────────────────────────────────────────────{{{
-__navita::ViewHistory() {
-	local line=""
-	while read -r line; do
-		printf "%s ${colr91}%s${colr_rst}\n" "${line/#"${HOME}"/\~}" "$( __navita::ValidateDirectory "${line}" )"
-	done < <( __navita::GetHistory "y" "y" ) | cat -n
 }
 # }}}
 
