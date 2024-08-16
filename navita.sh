@@ -42,7 +42,14 @@ __navita::ValidateDirectory() {
 __navita::ViewHistory() {
 	local line
 	while read -r line; do
-		printf "%s\n" "${line}"
+		printf "%s" "${line}"
+		if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
+			printf " ❯ ${colr_cyan}%s${colr_rst}" "Present Working Directory"
+		else
+			local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
+			[[ -n "${path_error}" ]] && printf " ❯ ${colr91}%s${colr_rst}" "${path_error}"
+		fi
+		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
 }
 # }}}
@@ -126,10 +133,10 @@ __navita::CleanHistory() {
 
 # ── Feature: "Navigate-History ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --ansi --nth=1 --with-nth=1,2 --delimiter=" ❯ " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {1}" )
 
 	case "$?" in
-		0) builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
+		0) path_returned="${path_returned%% ❯ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
 		1) printf "Navita(info): None matched!\n"; return 1;;
 		*) return $?;;
 	esac
@@ -196,6 +203,7 @@ __navita__() {
 	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" == "y" ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
 
 	local colr91 && colr91='\e[01;91m'
+	local colr_cyan && colr_cyan="\033[1;38;2;0;170;170m"
 	local colr_rst && colr_rst='\e[0m'
 
 	local tput241 && tput241=$( tput setaf 241 )
