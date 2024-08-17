@@ -1,5 +1,6 @@
 # Todos
 
+- For Navigate-Child-Dirs, search from only 2nd level directories.
 - Keep consistency in coloring codes.
 - Introduce a feature to add directories to a list, so that they are not added to the history
 - Introduce a feature to remove multiple paths from history using FZF multi-select
@@ -49,6 +50,7 @@
 - Add a section that tells the differences with SmartCD in README
 - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
 - Implement Aging feature for Navita.
+- Show how long ago a path was accessed in history.
 
 # When to do nothing?
 
