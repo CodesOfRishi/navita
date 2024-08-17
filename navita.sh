@@ -38,7 +38,7 @@ __navita::ValidateDirectory() {
 }
 # }}}
 
-# ── Feature: "View-History ────────────────────────────────────────────{{{
+# ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
 	local line
 	while read -r line; do
@@ -54,7 +54,7 @@ __navita::ViewHistory() {
 }
 # }}}
 
-# ── Feature: "Clean-History ───────────────────────────────────────────{{{
+# ── Feature: CleanHistory ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
 
 	# ── Feature: EmptyHistoryFile ─────────────────────────────────────────{{{
@@ -81,7 +81,7 @@ __navita::CleanHistory() {
 	}
 	# }}}
 
-	# ── Feature: RemoveInavlidPaths ───────────────────────────────────────{{{
+	# ── Feature: RemoveInvalidPaths ───────────────────────────────────────{{{
 	__navita::CleanHistory::RemoveInvalidPaths() {
 		# +--------------------------------------------------------------------------------------------------+
 		# | NOTE:                                                                                            |
@@ -131,7 +131,7 @@ __navita::CleanHistory() {
 }
 # }}}
 
-# ── Feature: "Navigate-History ────────────────────────────────────────{{{
+# ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
 	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {1}" )
 
@@ -143,13 +143,13 @@ __navita::NavigateHistory() {
 }
 # }}}
 
-# ── Feature: "Toggle-Last-Visits ──────────────────────────────────────{{{
+# ── Feature: ToggleLastVisits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
 	builtin cd -L "${__the_builtin_P_option[@]}" - && __navita::UpdatePathHistory 
 }
 # }}}
 
-# ── Feature: "Navigate-Child-Dirs ─────────────────────────────────────{{{
+# ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
 	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' | fzf --select-1 --exit-0 --exact --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )"
 
@@ -161,7 +161,7 @@ __navita::NavigateChildDirs() {
 }
 # }}}
 
-# ── Feature: "CD-General ──────────────────────────────────────────────{{{
+# ── Feature: CDGeneral ──────────────────────────────────────────────{{{
 __navita::CDGeneral() {
 	# +--------------------------------------------------------------------------------------------------+
 	# | NOTE: if argument is either empty or already a legit directory path, then provide the argument   |
@@ -193,7 +193,7 @@ __navita::CDGeneral() {
 }
 # }}}
 
-# Feature: Navigate-Parent-Dirs{{{
+# ── Feature: NavigateParentDirs ───────────────────────────────────────{{{
 __navita::NavigateParentDirs() {
 	__navita::NavigateParentDirs::GetParentDirs() {
 		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
@@ -222,7 +222,7 @@ __navita::NavigateParentDirs() {
 }
 # }}}
 
-# ── Feature: Version-Info ─────────────────────────────────────────────{{{
+# ── Feature: VersionInfo ─────────────────────────────────────────────{{{
 __navita::Version() {
 	printf "Navita - %s\n" "${NAVITA_VERSION}"
 }

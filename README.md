@@ -24,7 +24,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 ### Recursive Directory Search & Traversal
 
-*Feature name: Navigate-Child-Dirs*
+*Feature name: NavigateChildDirs*
 
 </div>
 
@@ -36,7 +36,7 @@ Fuzzy search directories, all its subdirectories, and their subdirectories (so o
 
 ### History Search & Traversal
 
-*Feature name: Navigate-History*
+*Feature name: NavigateHistory*
 
 </div>
 
@@ -48,7 +48,7 @@ Fuzzy search last 50 (default) visited directory paths and traverse to the selec
 
 ### View History
 
-*Feature name: View-History*
+*Feature name: ViewHistory*
 
 </div>
 
@@ -60,19 +60,19 @@ View last 50 (default) visited directory paths.
 
 ### Change to Directory
 
-*Feature name: CD-General*
+*Feature name: CDGeneral*
 
 </div>
 
 **Synopsis:** `cd [<string>...]`
 
-Fuzzy search directories in the *current working directory* and traverse to the selected one. If no match is found, Navita would search the history i.e., the same as the *Navigate-History* feature.
+Fuzzy search directories in the *current working directory* and traverse to the selected one. If no match is found, Navita would search the history i.e., the same as the *NavigateHistory* feature.
 
 <div align="center">
 
 ### Toggle Current & Previous Directories
 
-*Feature name: Toggle-Last-Visits*
+*Feature name: ToggleLastVisits*
 
 </div>
 
@@ -84,7 +84,7 @@ Switch between the current directory and the previous directory.
 
 ### Cleanup History
 
-*Feature name: Clean-History*
+*Feature name: CleanHistory*
 
 </div>
 
