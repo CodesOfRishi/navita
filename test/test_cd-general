@@ -1,7 +1,19 @@
-When not in $HOME
+When not in $HOME:
 	`cd`
-		EXPECTED: $PWD = $HOME
+		INFO: run cd with no arugments and options.
+		Expected Behaviour: 
+			- When no argument is provided, it's expected to behave as POSIX cd. 
+			- That's if $HOME is set to a non-empty value, $HOME is assumed as the argument to cd and will change the pwd to $HOME.
+		Expected $PWD: $HOME
+		Expected Standard Output: [none]
+		Expected Standard Error: [none]
+		Expected Exit Code: 0
+		Expected Change in History: $HOME should be at the top in the history file
 
+When in any directory location:
 	`cd aslkdfasdf`
-		INFO: provided random that's not supposed to match
-		EXPECTED: no change
+		INFO: provide random string that's not supposed to match
+		Expected Behaviour: no change in PWD
+		Expected Standard Output: [none]
+		Expected Standard Error: Navita(info): None matched!
+		Expected Exit Code: 1

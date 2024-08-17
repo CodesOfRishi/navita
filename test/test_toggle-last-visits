@@ -1,3 +1,8 @@
 The very first command in a new shell:
-	cd -
-		EXPECTED: Should throw an error, "-bash: cd: OLDPWD not set"
+	`cd -`
+		Expected Behaviour: Should throw an error, "-bash: cd: OLDPWD not set"
+		Expected $PWD: [no change]
+		Expected Standard Output: [none]
+		Expected Standard Error: -bash: cd: OLDPWD not set
+		Expected Exit Code: 1
+		Expected Change in History: [none]
