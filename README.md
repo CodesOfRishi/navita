@@ -6,7 +6,10 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 [Features](#features) •
 [Dependencies](#dependencies) •
-[Installation](#installation)
+[Installation](#installation) •
+[Environment Variables](#environment-variables) •
+[Concept/Motivation](#conceptmotivation) •
+[Contributing to Navita](#contributing-to-navita)
 
 </div>
 
@@ -24,7 +27,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 ### Recursive Directory Search & Traversal
 
-*Feature name: NavigateChildDirs*
+*Feature Name: NavigateChildDirs*
 
 </div>
 
@@ -34,9 +37,21 @@ Fuzzy search directories, all its subdirectories, and their subdirectories (so o
 
 <div align="center">
 
+### Parent Directory Search & Traversal
+
+*Feature Name: NavigateParentDirs*
+
+</div>
+
+**Synopsis:** `cd (-S | --super-search) [<string>...]` 
+
+Fuzzy search directories (1-level down) in parent directories and traverse to the selected one.
+
+<div align="center">
+
 ### History Search & Traversal
 
-*Feature name: NavigateHistory*
+*Feature Name: NavigateHistory*
 
 </div>
 
@@ -48,7 +63,7 @@ Fuzzy search last 50 (default) visited directory paths and traverse to the selec
 
 ### View History
 
-*Feature name: ViewHistory*
+*Feature Name: ViewHistory*
 
 </div>
 
@@ -60,7 +75,7 @@ View last 50 (default) visited directory paths.
 
 ### Change to Directory
 
-*Feature name: CDGeneral*
+*Feature Name: CDGeneral*
 
 </div>
 
@@ -72,7 +87,7 @@ Fuzzy search directories in the *current working directory* and traverse to the 
 
 ### Toggle Current & Previous Directories
 
-*Feature name: ToggleLastVisits*
+*Feature Name: ToggleLastVisits*
 
 </div>
 
@@ -91,6 +106,18 @@ Switch between the current directory and the previous directory.
 **Synopsis:** `cd (-c | --cleanup)`
 
 This is will give an option to either remove invalid paths from the history or completely empty the history.
+
+<div align="center">
+
+### Version Information
+
+*Feature Name: VersionInfo*
+
+</div>
+
+**Synopsis:** `cd (-v | --version)`
+
+View Navita's version information.
 
 <div align="center">
 
@@ -124,4 +151,71 @@ curl <raw.githubusercontent.com url to navita.sh...> --output navita.sh
 ```bash
 source "path/to/the/navita.sh"
 ```
+
+<div align="center">
+
+## Environment Variables
+
+</div>
+
+> [!NOTE]
+> If you want to keep your desired values rather than the default ones, make sure to export these environment variables before sourcing the `navita.sh` file in your `.bashrc`."
+
+- **NAVITA_CONFIG_DIR**
+    - Directory location for Navita's configuration files.
+    - Defaults to `$XDG_CONFIG_HOME/navita`
+    - If `XDG_CONFIG_HOME` is not set, it defaults to `~/.config/navita`.
+
+- **NAVITA_HISTORYFILE**
+    - Absolute path of the history file, which contains last 50 (default) visited paths.
+    - Defaults to `$NAVITA_CONFIG_DIR/navita-history`.
+
+- **NAVITA_HISTORYFILE_SIZE**
+    - Number of last visited directory paths Navita should track.
+    - Defaults to `50`.
+
+- **NAVITA_COMMAND**
+    - Name of the command to use Navita.
+    - Defaults to `cd`.
+
+- **NAVITA_FOLLOW_ACTUAL_PATH**
+    - Follow symbolic links and resolve them to their actual physical locations before making the directory change.
+    - Defaults to `n`, i.e., not to follow symbolic links.
+    - Change it to `y` or `Y` to follow symbolic links.
+
+<div align="center">
+
+## Concept/Motivation
+
+</div>
+
+- To address the tedium of the builtin `cd` command.
+- KISS&E - Keep It Simple, Straightforward & Efficient.
+- No feature bloating.
+
+<div align="center">
+
+## Contributing to Navita
+
+### Reporting Issues
+
+</div>
+
+If you encounter any bugs or issues while using Navita, please open an issue on the Navita GitHub repository. Provide as much detail as possible, including steps to reproduce the issue and any relevant error messages.
+
+<div align="center">
+
+### Contributing Code
+
+</div>
+
+I welcome contributions from the community! If you'd like to contribute, please:
+
+- Fork the repository.
+- Make your changes and submit a pull request to the **dev** branch. 
+
+> [!NOTE]
+> Please do not submit pull requests to the main branch.
+
+I will review your pull request and provide feedback. Once your contribution is approved, it will be merged into the main repository.
 
