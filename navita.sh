@@ -230,7 +230,7 @@ __navita::Version() {
 
 __navita__() {
 
-	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" == "y" ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
+	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
 
 	local colr91 && colr91='\e[01;91m'
 	local colr_cyan && colr_cyan="\033[1;38;2;0;170;170m"
