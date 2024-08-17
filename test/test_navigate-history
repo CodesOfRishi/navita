@@ -1,0 +1,2 @@
+Traverse to PWD (again)
+	EXPECTED: No change in PWD, no output, no error

@@ -1,0 +1,7 @@
+When not in $HOME
+	`cd`
+		EXPECTED: $PWD = $HOME
+
+	`cd aslkdfasdf`
+		INFO: provided random that's not supposed to match
+		EXPECTED: no change

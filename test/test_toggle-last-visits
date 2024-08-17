@@ -1,0 +1,3 @@
+The very first command in a new shell:
+	cd -
+		EXPECTED: Should throw an error, "-bash: cd: OLDPWD not set"
