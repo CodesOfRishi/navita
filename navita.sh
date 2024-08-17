@@ -193,6 +193,35 @@ __navita::CDGeneral() {
 }
 # }}}
 
+# Feature: Navigate-Parent-Dirs{{{
+__navita::NavigateParentDirs() {
+	__navita::NavigateParentDirs::GetParentDirs() {
+		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
+			local _dir && _dir="${PWD}"
+			[[ "${_dir}" == "/" ]] && return 0
+
+			until [[ -z "${_dir}" ]]; do
+				_dir="${_dir%/*}"
+				[[ -n "${_dir}" ]] && printf "%s\n" "${_dir}"
+			done
+			printf "/\n"
+		}
+
+		while read -r line; do
+			find -L "${line}" -maxdepth 1 -mindepth 1 -type d
+		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --exact --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}"
+	}
+
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
+
+	case "$?" in
+		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		1) printf "Navita(info): None matched!\n"; return 1;;
+		*) return $?;;
+	esac
+}
+# }}}
+
 __navita::Version() {
 	printf "Navita - %s\n" "${NAVITA_VERSION}"
 }
@@ -214,6 +243,7 @@ __navita__() {
 		"--history" | "-H") __navita::ViewHistory;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
+		"--super-search" | "-S" ) __navita::NavigateParentDirs "${@:2}";;
 		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
 		"--version" | "-v") __navita::Version;;
 		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
