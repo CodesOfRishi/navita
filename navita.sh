@@ -222,9 +222,11 @@ __navita::NavigateParentDirs() {
 }
 # }}}
 
+# ── Feature: Version-Info ─────────────────────────────────────────────{{{
 __navita::Version() {
 	printf "Navita - %s\n" "${NAVITA_VERSION}"
 }
+# }}}
 
 __navita__() {
 
