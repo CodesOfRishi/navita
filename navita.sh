@@ -89,7 +89,7 @@ __navita::CleanHistory() {
 		# | using sed, delete those lines in-place                                                           |
 		# +--------------------------------------------------------------------------------------------------+
 
-		declare -a line_no_todel
+		local -a line_no_todel
 		local line_no=1
 		local line
 		
