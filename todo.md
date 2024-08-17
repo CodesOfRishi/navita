@@ -1,12 +1,15 @@
 # Todos
 
+- Check if an Associative array can be used for tracking history instead of a history file, where keys will be the paths visited and values their age (no. of days ago last visited).
 - Use associative array (key-value data structure) to contain list of paths (as keys) and annotation (as values) to show up in history.
     - Move existing annotation to this array.
     - Show last visited directory ($OLDPWD) as annotation in history.
     - If associative arrays are used, then mention Bash version 4 or later as requirement in README.
 - ~~For Navigate-Child-Dirs, search from only 2nd level directories.~~
 - Keep consistency in coloring codes - use ASCII color codes instead of `tput`.
-- Introduce a feature to add directories to a list, so that they are not added to the history
+- Introduce features related to exclusions.
+    - List of directories to exclude from being searched (E.g. - .git).
+    - Exclude directories from being added to the history file, but allow being searched.
 - Introduce a feature to remove multiple paths from history using FZF multi-select
 - ~~Implement FZF <u>exact</u> search/match for Navigate-History.~~
 - ~~Show relevant error (if any) along side each path as well in FZF which search/matching for paths.~~
