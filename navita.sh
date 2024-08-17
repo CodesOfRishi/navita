@@ -151,8 +151,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: "Navigate-Child-Dirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local fzf_query && fzf_query="${*:2}"
-	local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${fzf_query}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
+	local path_returned && path_returned=$( fzf --walker=dir,hidden,follow --prompt="navita> " --select-1 --exit-0 --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -aFA --format=single-column --dereference-command-line-symlink-to-dir --color=always {}" )
 
 	case "$?" in
 		0) builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
@@ -214,7 +213,7 @@ __navita__() {
 		"-") __navita::ToggleLastVisits;;
 		"--history" | "-H") __navita::ViewHistory;;
 		"--clean" | "-c") __navita::CleanHistory;;
-		"--sub-search" | "-s") __navita::NavigateChildDirs "${@}";;
+		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
 		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
 		"--version" | "-v") __navita::Version;;
 		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
