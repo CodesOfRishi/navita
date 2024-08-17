@@ -1,56 +1,40 @@
 # Todos
 
-- For Navigate-Child-Dirs, search from only 2nd level directories.
-- Keep consistency in coloring codes.
+- Use associative array (key-value data structure) to contain list of paths (as keys) and annotation (as values) to show up in history.
+    - Move existing annotation to this array.
+    - Show last visited directory ($OLDPWD) as annotation in history.
+    - If associative arrays are used, then mention Bash version 4 or later as requirement in README.
+- ~~For Navigate-Child-Dirs, search from only 2nd level directories.~~
+- Keep consistency in coloring codes - use ASCII color codes instead of `tput`.
 - Introduce a feature to add directories to a list, so that they are not added to the history
 - Introduce a feature to remove multiple paths from history using FZF multi-select
 - ~~Implement FZF <u>exact</u> search/match for Navigate-History.~~
-- Use exec to execute commands, where you require customizibility of those commands by the end-user.
 - ~~Show relevant error (if any) along side each path as well in FZF which search/matching for paths.~~
 - Don't search PWD and invalid path in FZF for the `--root` option.
 - Make listing of directories in FZF preview in column format and configure the FZF display with its preview at the bottom.
 - ~~Make CD-General search the history if no match was found from the $PWD/.~~
-- Check out `command` command and see if it can be used to check a command's availablitiy for Navita.
 - ~~Keep support for only POSIX builtin cd options.~~
 - ~~Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.~~
 - ~~Utilize FZF exit statuses.~~
 - Colorize informational outputs.
-- Add an `--help`/`-h` option that display a brief helpful information
-    - can make use of `builtin cd -h`
 - Introduce `--root` / `-r` option, which will fuzzy search in the directory path provided to the --root option.
 - Allow users to customize options for Navita.
 - Make use of programs based on availability, i.e., check which program is available and then use that program
     - `cat` or `bat`
     - `find` or `fd-find`
     - `grep` or `rg`
-- Add parent directory search & traversal feature.
+- ~~Add parent directory search & traversal feature.~~
     - Parent search should not be beyond $HOME until explicitly specified.
-    ```bash
-    parentDirs() {
-        local parentdir="$PWD/.config/nvim/.lua"
-        # local parentdir="/"
-        [[ "${parentdir}" == "/" ]] && return 0
-        # printf "OrigPWD: %s\n" "${parentdir}"
-        # printf "ModiPWD: %s\n" "${parentdir%/*}"
-
-        until [[ -z "${parentdir}" ]]; do
-            parentdir="${parentdir%/*}"
-            [[ ! -z "${parentdir}" ]] && printf "Parent Dir: %s\n" "${parentdir}"
-        done
-
-        printf "Parent Dir: /\n"
-
-    }
-
-    parentDirs
-    ```
 - ~~Add Apache 2.0 License~~
 - ~~Add an environment containing version name~~
 - ~~Introduce `-v`/`--version` options to show version information~~
 - Add a section that tells the differences with SmartCD in README
+- Add an `--help`/`-h` option that display a brief helpful information
+    - can make use of `builtin cd -h`
+- Use exec to execute commands, where you require customizibility of those commands by the end-user.
+- Show how long ago a path was accessed in history.
 - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
 - Implement Aging feature for Navita.
-- Show how long ago a path was accessed in history.
 
 # When to do nothing?
 
