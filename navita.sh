@@ -38,24 +38,6 @@ __navita::ValidateDirectory() {
 }
 # }}}
 
-# ── Feature: ViewHistory ────────────────────────────────────────────{{{
-__navita::ViewHistory() {
-	local line
-	while read -r line; do
-		printf "%s" "${line}"
-		if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
-			printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
-		elif [[ "${line}" == "${OLDPWD}" ]]; then
-			printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
-		else
-			local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
-			[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
-		fi
-		printf "\n"
-	done < "${NAVITA_HISTORYFILE}"
-}
-# }}}
-
 # ── Feature: CleanHistory ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
 
@@ -135,7 +117,25 @@ __navita::CleanHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	# ── Feature: ViewHistory ────────────────────────────────────────────{{{
+	__navita::NavigateHistory::ViewHistory() {
+		local line
+		while read -r line; do
+			printf "%s" "${line}"
+			if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
+				printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
+			elif [[ "${line}" == "${OLDPWD}" ]]; then
+				printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
+			else
+				local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
+				[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
+			fi
+			printf "\n"
+		done < "${NAVITA_HISTORYFILE}"
+	}
+	# }}}
+
+	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
@@ -239,9 +239,8 @@ __navita__() {
 	local colr_rst && colr_rst='\e[0m'
 
 	case "$1" in
-		"--") __navita::NavigateHistory "${@:2}";;
+		"--" | "--history" | "-H") __navita::NavigateHistory "${@:2}";;
 		"-") __navita::ToggleLastVisits;;
-		"--history" | "-H") __navita::ViewHistory;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
 		"--super-search" | "-S" ) __navita::NavigateParentDirs "${@:2}";;
