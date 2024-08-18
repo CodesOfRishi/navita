@@ -1,5 +1,17 @@
 # Todos
 
+## README
+
+- Add info about Navita's search matching preference in README.
+    - match substring closer to the end of the path 
+    - match most recent paths.
+- Add information about FZF search syntax in README.
+- If associative arrays are used, then mention Bash version 4 or later as requirement in README.
+- Add a section that tells the differences with SmartCD in README.
+- Add information about individual feature functions in README.
+
+## navita.sh
+
 - Check the following FZF options/features - 
     - `--filepath-word`
     - `--jump-labels=CHARS`
@@ -9,11 +21,8 @@
     - Key/event bindings
     - Available Actions
     - Command Execution
-- Add information about FZF search syntax in README.
-- Check if an Associative array can be used for tracking history instead of a history file, where keys will be the paths visited and values their age (no. of days ago last visited).
 - Use associative array (key-value data structure) to contain list of paths (as keys) and annotation (as values) to show up in history.
     - Move existing annotation to this array.
-    - If associative arrays are used, then mention Bash version 4 or later as requirement in README.
 - Introduce features related to exclusions.
     - List of directories to exclude from being searched (E.g. - .git).
     - Exclude directories from being added to the history file, but allow being searched.
@@ -32,15 +41,15 @@
     - `grep` or `rg`
 - ~~Add parent directory search & traversal feature.~~
     - Parent search should not be beyond $HOME until explicitly specified.
-- Add a section that tells the differences with SmartCD in README
 - Add an `--help`/`-h` option that display a brief helpful information
     - can make use of `builtin cd -h`
-- Add information about individual feature functions in README.
 - Try implementing frecency algorithm.
-    - Checkout the following options of FZF - `--scheme=history`
+    - ~~Checkout the following options of FZF - `--scheme=history`~~
     - Show how long ago a path was accessed in history.
     - Implement Aging feature for Navita.
         - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
+            - Check if an Associative array can be used for tracking history instead of a history file, where keys will be the paths visited and values their age (no. of days ago last visited).
+            - Allow the end-users to make use of the invidual function responsible for aging. This can allow users to put the function in `~/.bash_logout`, so that the older paths (>= 90 days) will be removed just before logging off.
 
 # When to do nothing?
 
