@@ -135,7 +135,7 @@ __navita::NavigateHistory() {
 	}
 	# }}}
 
-	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}";;
@@ -153,7 +153,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' | fzf --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' | fzf --tiebreak=end,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
@@ -183,7 +183,7 @@ __navita::CDGeneral() {
 		return $?
 	fi
 
-	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
@@ -209,7 +209,7 @@ __navita::NavigateParentDirs() {
 
 		while read -r line; do
 			find -L "${line}" -maxdepth 1 -mindepth 1 -type d
-		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
+		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
 	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
