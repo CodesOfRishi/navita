@@ -25,7 +25,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 <div align="center">
 
-### Recursive Directory Search & Traversal
+### Child Directory Search & Traversal
 
 *Feature Name: NavigateChildDirs*
 
@@ -49,27 +49,15 @@ Fuzzy search directories (1-level down) in parent directories and traverse to th
 
 <div align="center">
 
-### History Search & Traversal
+### View, Search & Traverse History
 
 *Feature Name: NavigateHistory*
 
 </div>
 
-**Synopsis:** `cd -- [<string>...]`
+**Synopsis:** `cd (-H | --history | --) [<string>...]`
 
-Fuzzy search last 50 (default) visited directory paths and traverse to the selected one.
-
-<div align="center">
-
-### View History
-
-*Feature Name: ViewHistory*
-
-</div>
-
-**Synopsis:** `cd (-H | --history)`
-
-View last 50 (default) visited directory paths.
+View or Fuzzy search last 50 (default) visited directory paths and traverse to the selected one.
 
 <div align="center">
 
