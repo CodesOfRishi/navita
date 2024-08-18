@@ -45,6 +45,8 @@ __navita::ViewHistory() {
 		printf "%s" "${line}"
 		if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
 			printf "${colr_cyan}%s${colr_rst}" " ❰ Present Working Directory"
+		elif [[ "${line}" == "${OLDPWD}" ]]; then
+			printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
 		else
 			local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
 			[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
@@ -235,6 +237,7 @@ __navita__() {
 	local colr_red && colr_red='\e[01;91m'
 	local colr_cyan && colr_cyan="\033[1;38;2;0;170;170m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 	local colr_rst && colr_rst='\e[0m'
 
 	case "$1" in
