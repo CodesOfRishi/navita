@@ -74,7 +74,7 @@ __navita::CleanHistory() {
 		if [[ "${exitcode}" -eq 0 ]]; then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			$( whereis -b cp | cut -d" " -f2 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
-			printf "Backup created at ${tput241}%s.bak${tput_rst}\n" "${NAVITA_HISTORYFILE}"
+			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		rm --interactive=never "$tempfile"
 		return "$exitcode"
@@ -234,10 +234,8 @@ __navita__() {
 
 	local colr91 && colr91='\e[01;91m'
 	local colr_cyan && colr_cyan="\033[1;38;2;0;170;170m"
+	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_rst && colr_rst='\e[0m'
-
-	local tput241 && tput241=$( tput setaf 241 )
-	local tput_rst && tput_rst=$( tput sgr0 )
 
 	case "$1" in
 		"--") __navita::NavigateHistory "${@:2}";;
