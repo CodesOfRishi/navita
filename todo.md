@@ -1,43 +1,46 @@
 # Todos
 
+- Check the following FZF options/features - 
+    - `--filepath-word`
+    - `--jump-labels=CHARS`
+    - `--info=STYLE`
+    - `--info-command=COMMAND`
+    - `--header=STR`
+    - Key/event bindings
+    - Available Actions
+    - Command Execution
+- Add information about FZF search syntax in README.
 - Check if an Associative array can be used for tracking history instead of a history file, where keys will be the paths visited and values their age (no. of days ago last visited).
 - Use associative array (key-value data structure) to contain list of paths (as keys) and annotation (as values) to show up in history.
     - Move existing annotation to this array.
-    - Show last visited directory ($OLDPWD) as annotation in history.
     - If associative arrays are used, then mention Bash version 4 or later as requirement in README.
-- ~~For Navigate-Child-Dirs, search from only 2nd level directories.~~
-- Keep consistency in coloring codes - use ASCII color codes instead of `tput`.
 - Introduce features related to exclusions.
     - List of directories to exclude from being searched (E.g. - .git).
     - Exclude directories from being added to the history file, but allow being searched.
 - Introduce a feature to remove multiple paths from history using FZF multi-select
+- ~~For Navigate-Child-Dirs, search from only 2nd level directories.~~
+- ~~Keep consistency in coloring codes - use ASCII color codes instead of `tput`.~~
 - ~~Implement FZF <u>exact</u> search/match for Navigate-History.~~
-- ~~Show relevant error (if any) along side each path as well in FZF which search/matching for paths.~~
-- Don't search PWD and invalid path in FZF for the `--root` option.
-- Make listing of directories in FZF preview in column format and configure the FZF display with its preview at the bottom.
-- ~~Make CD-General search the history if no match was found from the $PWD/.~~
-- ~~Keep support for only POSIX builtin cd options.~~
-- ~~Use `-maxdepth 0` of the `find` command wherever you are only validating successful execution of the builtin cd command.~~
-- ~~Utilize FZF exit statuses.~~
 - Colorize informational outputs.
 - Introduce `--root` / `-r` option, which will fuzzy search in the directory path provided to the --root option.
+    - Don't search PWD and invalid path in FZF for the `--root` option.
 - Allow users to customize options for Navita.
+    - Use `eval` to execute commands, where you require customizibility of those commands by the end-user.
 - Make use of programs based on availability, i.e., check which program is available and then use that program
     - `cat` or `bat`
     - `find` or `fd-find`
     - `grep` or `rg`
 - ~~Add parent directory search & traversal feature.~~
     - Parent search should not be beyond $HOME until explicitly specified.
-- ~~Add Apache 2.0 License~~
-- ~~Add an environment containing version name~~
-- ~~Introduce `-v`/`--version` options to show version information~~
 - Add a section that tells the differences with SmartCD in README
 - Add an `--help`/`-h` option that display a brief helpful information
     - can make use of `builtin cd -h`
-- Use exec to execute commands, where you require customizibility of those commands by the end-user.
-- Show how long ago a path was accessed in history.
-- Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
-- Implement Aging feature for Navita.
+- Add information about individual feature functions in README.
+- Try implementing frecency algorithm.
+    - Checkout the following options of FZF - `--scheme=history`
+    - Show how long ago a path was accessed in history.
+    - Implement Aging feature for Navita.
+        - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
 
 # When to do nothing?
 
