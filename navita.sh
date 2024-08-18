@@ -47,7 +47,7 @@ __navita::ViewHistory() {
 			printf "${colr_cyan}%s${colr_rst}" " ❰ Present Working Directory"
 		else
 			local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
-			[[ -n "${path_error}" ]] && printf "${colr91}%s${colr_rst}" " ❰ ${path_error#find: }"
+			[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
 		fi
 		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
@@ -232,7 +232,7 @@ __navita__() {
 
 	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
 
-	local colr91 && colr91='\e[01;91m'
+	local colr_red && colr_red='\e[01;91m'
 	local colr_cyan && colr_cyan="\033[1;38;2;0;170;170m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_rst && colr_rst='\e[0m'
