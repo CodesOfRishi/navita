@@ -173,23 +173,21 @@ __navita::CDGeneral() {
 	# | otherwise provide the argument as a string to FZF to search the current directory                |
 	# +--------------------------------------------------------------------------------------------------+
 
-	local fzf_query=( "${@}" )
-
-	if [[ -z "${fzf_query[*]}" ]]; then 
+	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
 		builtin cd -L "${__the_builtin_P_option[@]}" "${HOME}" && __navita::UpdatePathHistory 
 		return $?
-	elif [[ -d "${fzf_query[*]}" ]]; then
+	elif [[ -d "${*}" ]]; then
 		# argument provided by the user is a valid directory path
-		builtin cd -L "${__the_builtin_P_option[@]}" -- "${fzf_query[*]}" && __navita::UpdatePathHistory 
+		builtin cd -L "${__the_builtin_P_option[@]}" -- "${*}" && __navita::UpdatePathHistory 
 		return $?
 	fi
 
-	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${fzf_query[*]}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
-		1) __navita::NavigateHistory "${fzf_query[@]}";;
+		1) __navita::NavigateHistory "${@}";;
 		*) return $?;;
 	esac
 }
