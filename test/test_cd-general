@@ -17,3 +17,4 @@ When in any directory location:
 		Expected Standard Output: [none]
 		Expected Standard Error: Navita(info): None matched!
 		Expected Exit Code: 1
+		Expected Change in History: [none]

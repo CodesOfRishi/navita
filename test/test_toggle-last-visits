@@ -1,4 +1,4 @@
-The very first command in a new shell:
+The very first cd command in a new shell:
 	`cd -`
 		Expected Behaviour: Should throw an error, "-bash: cd: OLDPWD not set"
 		Expected $PWD: [no change]
@@ -6,3 +6,12 @@ The very first command in a new shell:
 		Expected Standard Error: -bash: cd: OLDPWD not set
 		Expected Exit Code: 1
 		Expected Change in History: [none]
+
+When cd command has already been ran once:
+	`cd -`
+		Expected Behaviour: Toggle to the last working directory
+		Expected $PWD: change to previous working directory, i.e., PWD should be the older value of $OLDPWD
+		Expected Standard Output: print PWD on the terminal
+		Expected Standard Error: [none]
+		Expected Exits Code: 0
+		Expected Change in History: $PWD should be at the top in the history file.

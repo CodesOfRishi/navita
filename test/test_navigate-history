@@ -1,10 +1,10 @@
 When in any directory location:
 	`cd $PWD`
 	`cd .`
-	INFO: Traverse to PWD (again)
-	Expected Behaviour: ...
-	Expected $PWD: [no change]
-	Expected Standard Output: [none]
-	Expected Standard Error: [none]
-	Expected Exit Code: 0
-	Expected Change in History: $PWD should be at the top in the history file.
+		INFO: Traverse to PWD (again)
+		Expected Behaviour: ...
+		Expected $PWD: [no change]
+		Expected Standard Output: [none]
+		Expected Standard Error: [none]
+		Expected Exit Code: 0
+		Expected Change in History: $PWD should be at the top in the history file.
