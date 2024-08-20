@@ -268,3 +268,5 @@ __navita__() {
 	esac
 }
 
+# update the history with the current working directory when opening a new shell
+__navita::UpdatePathHistory
