@@ -116,43 +116,43 @@ __navita::CleanHistory() {
 }
 # }}}
 
+# ── Feature: ViewHistory ────────────────────────────────────────────{{{
+__navita::ViewHistory() {
+	local line
+	local now_time && now_time="$( date +%s )"
+	while read -r line; do
+		local _path && _path="${line%% : *}"
+		printf "%s" "${_path}" 
+
+		local access_time && access_time="${line##* : }"
+		local seconds_old && seconds_old="$(( ${now_time} - ${access_time} ))"
+		local days_old && days_old="$(( ${seconds_old}/86400 ))"
+		local hours_old && hours_old="$(( (${seconds_old} - (${days_old}*86400))/3600 ))"
+		local minutes_old && minutes_old="$(( (${seconds_old} - (${days_old}*86400) - (${hours_old}*3600))/60 ))"
+
+		local path_age=""
+		[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
+		[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
+		[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
+
+		[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
+
+		if [[ "${_path}" == "${PWD}" ]] || [[ "${_path}" == "$( realpath -P "${PWD}" )" ]]; then
+			printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
+		elif [[ "${_path}" == "${OLDPWD}" ]]; then
+			printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
+		else
+			local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
+			[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
+		fi
+		printf "\n"
+	done < "${NAVITA_HISTORYFILE}"
+}
+# }}}
+
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	# ── Feature: ViewHistory ────────────────────────────────────────────{{{
-	__navita::NavigateHistory::ViewHistory() {
-		local line
-		local now_time && now_time="$( date +%s )"
-		while read -r line; do
-			local _path && _path="${line%% : *}"
-			printf "%s" "${_path}" 
-
-			local access_time && access_time="${line##* : }"
-			local seconds_old && seconds_old="$(( ${now_time} - ${access_time} ))"
-			local days_old && days_old="$(( ${seconds_old}/86400 ))"
-			local hours_old && hours_old="$(( (${seconds_old} - (${days_old}*86400))/3600 ))"
-			local minutes_old && minutes_old="$(( (${seconds_old} - (${days_old}*86400) - (${hours_old}*3600))/60 ))"
-
-			local path_age=""
-			[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
-			[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
-			[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
-
-			[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
-
-			if [[ "${_path}" == "${PWD}" ]] || [[ "${_path}" == "$( realpath -P "${PWD}" )" ]]; then
-				printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
-			elif [[ "${_path}" == "${OLDPWD}" ]]; then
-				printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
-			else
-				local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
-				[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
-			fi
-			printf "\n"
-		done < "${NAVITA_HISTORYFILE}"
-	}
-	# }}}
-	
-	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
@@ -256,7 +256,8 @@ __navita__() {
 	local colr_rst && colr_rst='\e[0m'
 
 	case "$1" in
-		"--" | "--history" | "-H") __navita::NavigateHistory "${@:2}";;
+		"--") __navita::NavigateHistory "${@:2}";;
+		"--history" | "-H") __navita::ViewHistory;;
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
