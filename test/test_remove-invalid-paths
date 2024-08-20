@@ -1,0 +1,9 @@
+When in any directory location:
+	`cd -c`
+	1
+		INFO: To delete the invalid paths from the history file.
+		Expected $PWD: [no change]
+		Expected STDOUT: print the paths only (not the its associated access time) that were deleted from the history file.
+		Expected STDERR: [to be checked]
+		Expected Exit Code: [to be checked]
+		Expected Change in History: only the invalid paths should be removed
