@@ -1,6 +1,6 @@
 # ── Navita variables ──────────────────────────────────────────────────
-export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
-export NAVITA_HISTORYFILE="${NAVITA_CONFIG_DIR}/navita-history"
+export NAVITA_DATA_DIR="${NAVITA_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/navita}"
+export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_HISTORYFILE_SIZE="${NAVITA_HISTORYFILE_SIZE:-50}"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
@@ -9,8 +9,8 @@ export NAVITA_VERSION="Alpha"
 alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── create configuration file(s) for Navita ───────────────────────────
-if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then 
-	mkdir -p "${NAVITA_CONFIG_DIR}"
+if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
+	mkdir -p "${NAVITA_DATA_DIR}"
 	touch "${NAVITA_HISTORYFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
