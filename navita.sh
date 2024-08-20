@@ -21,14 +21,13 @@ fi
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
 	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
-		printf "%s\n" "${PWD}" > "${NAVITA_HISTORYFILE}"
+		printf "%s : %d\n" "${PWD}" "$( date +%s )" > "${NAVITA_HISTORYFILE}"
 	else
-		sed -i "1i ${PWD}" "${NAVITA_HISTORYFILE}" 
+		sed -i "1i ${PWD} : $( date +%s )" "${NAVITA_HISTORYFILE}" 
 	fi
 
-	awk -i inplace '!seen[$0]++' "${NAVITA_HISTORYFILE}" # remove duplicates
+	awk -i inplace -F " : " '!seen[$1]++' "${NAVITA_HISTORYFILE}" # remove duplicate paths
 	sed -i "$(( "${NAVITA_HISTORYFILE_SIZE}" + 1 )),\$"d "${NAVITA_HISTORYFILE}" # keep the navita-history file within the $NAVITA_HISTORYFILE_SIZE
-	return $?
 }
 # }}}
 
@@ -78,6 +77,7 @@ __navita::CleanHistory() {
 		local line
 		
 		while read -r line; do
+			line="${line%% : *}"
 			local error && error="$( __navita::ValidateDirectory "${line}" )"
 			if [[ -n "${error}" ]]; then 
 				line_no_todel+=( "${line_no}" )
@@ -86,11 +86,12 @@ __navita::CleanHistory() {
 		done < "${NAVITA_HISTORYFILE}"
 
 		local index_reduced=0
+		local i
 		for i in "${line_no_todel[@]}"; do
-			local line_deleted && line_deleted=$( sed -n "$(( "${i}" - "${index_reduced}" ))p" "${NAVITA_HISTORYFILE}" )
-			printf '%s deleted!\n' "${line_deleted}"
-			sed -i -e "$(( "${i}" - "${index_reduced}" ))d" "${NAVITA_HISTORYFILE}"
-			index_reduced=$(( "${index_reduced}" + 1 ))
+			local line_to_be_deleted && line_to_be_deleted=$( sed -n "$(( "${i}" - "${index_reduced}" ))p" "${NAVITA_HISTORYFILE}" )
+			sed -i -e "$(( "${i}" - "${index_reduced}" ))d" "${NAVITA_HISTORYFILE}" && \
+				printf '%s deleted!\n' "${line_to_be_deleted%% : *}" &&\
+				index_reduced=$(( "${index_reduced}" + 1 ))
 		done
 	}
 	# }}}
@@ -120,22 +121,38 @@ __navita::NavigateHistory() {
 	# ── Feature: ViewHistory ────────────────────────────────────────────{{{
 	__navita::NavigateHistory::ViewHistory() {
 		local line
+		local now_time && now_time="$( date +%s )"
 		while read -r line; do
-			printf "%s" "${line}"
-			if [[ "${line}" == "${PWD}" ]] || [[ "${line}" == "$( realpath -P "${PWD}" )" ]]; then
+			local _path && _path="${line%% : *}"
+			printf "%s" "${_path}" 
+
+			local access_time && access_time="${line##* : }"
+			local seconds_old && seconds_old="$(( ${now_time} - ${access_time} ))"
+			local days_old && days_old="$(( ${seconds_old}/86400 ))"
+			local hours_old && hours_old="$(( (${seconds_old} - (${days_old}*86400))/3600 ))"
+			local minutes_old && minutes_old="$(( (${seconds_old} - (${days_old}*86400) - (${hours_old}*3600))/60 ))"
+
+			local path_age=""
+			[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
+			[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
+			[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
+
+			[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
+
+			if [[ "${_path}" == "${PWD}" ]] || [[ "${_path}" == "$( realpath -P "${PWD}" )" ]]; then
 				printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
-			elif [[ "${line}" == "${OLDPWD}" ]]; then
+			elif [[ "${_path}" == "${OLDPWD}" ]]; then
 				printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
 			else
-				local path_error && path_error="$( __navita::ValidateDirectory "${line}" )"
+				local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
 				[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
 			fi
 			printf "\n"
 		done < "${NAVITA_HISTORYFILE}"
 	}
 	# }}}
-
-	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	
+	local path_returned && path_returned=$( __navita::NavigateHistory::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
