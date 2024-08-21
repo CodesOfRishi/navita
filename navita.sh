@@ -281,7 +281,7 @@ __navita::completions() {
 		case "$?" in
 			0) COMPREPLY=( "${navita_opts}" );;
 			*) 
-				local dir_select && dir_select="$( find -L ./ -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+				local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 				case "$?" in
 					0) COMPREPLY=( "${dir_select}" );;
