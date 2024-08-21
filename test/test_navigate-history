@@ -1,3 +1,17 @@
+When not in $HOME:
+	`cd -- ~`
+		INFO: Attempt to search $HOME in history
+		Expected Behaviour: Tilde should expand and passed as FZF search query for NavigateHistory
+		Expected $PWD: $HOME (if that's the only entry in the history file)
+		Expected STDOUT: [none]
+		Expected STDERR: 
+			Navita(info): None matched! (if no match was found in the history file)
+			Otherwise, [none]
+		Expected Exit Code: 
+			0 (if successful fzf match, fzf selection and traversal)
+			1 (if no match was found in the history file for the expanded ~)
+		Expected Change in History: $HOME should be at the top in the history file.
+
 When in any directory location:
 	`cd $PWD`
 		INFO: Traverse to PWD (again)
