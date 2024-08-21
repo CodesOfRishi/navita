@@ -291,7 +291,7 @@ __navita::completions() {
 		esac
 	else
 		COMPREPLY=( $( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-			fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" ) )
+			fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always \"\${1/#~/${HOME}}\"' -- {}" ) )
 	fi
 }
 
