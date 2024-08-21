@@ -12,7 +12,6 @@
 
 ## navita.sh
 
-- Introduce a feature for tab completion. When `-` is the first argument with the cursor just at right-side of the `-`, it should bring an FZF list of Navita options for completion. In other cases, it should perform completion for directories in PWD.
 - Introduce environment variables to toggle path age, Navita annotations and user-specific annotations.
 - Check the following FZF options/features - 
     - `--filepath-word`
@@ -29,6 +28,7 @@
     - List of directories to exclude from being searched (E.g. - .git).
     - Exclude directories from being added to the history file, but allow being searched.
 - Introduce a feature to remove multiple paths from history using FZF multi-select
+- ~~Introduce a feature for tab completion. When `-` is the first argument with the cursor just at right-side of the `-`, it should bring an FZF list of Navita options for completion. In other cases, it should perform completion for directories in PWD.~~
 - ~~For Navigate-Child-Dirs, search from only 2nd level directories.~~
 - ~~Keep consistency in coloring codes - use ASCII color codes instead of `tput`.~~
 - ~~Implement FZF <u>exact</u> search/match for Navigate-History.~~
@@ -51,7 +51,6 @@
     - Implement Aging feature for Navita.
         - ~~Show how long ago a path was accessed in history.~~
         - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
-            - Check if an Associative array can be used for tracking history instead of a history file, where keys will be the paths visited and values their age (no. of days ago last visited).
             - Allow the end-users to make use of the invidual function responsible for aging. This can allow users to put the function in `~/.bash_logout`, so that the older paths (>= 90 days) will be removed just before logging off.
 
 # When to do nothing?
