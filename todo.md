@@ -12,6 +12,8 @@
 
 ## navita.sh
 
+- Print what was the error along with the each paths, when invalid paths are removed.
+- Create a separate function to add annotations to path(s).
 - Introduce environment variables to toggle path age, Navita annotations and user-specific annotations.
 - Check the following FZF options/features - 
     - `--filepath-word`
@@ -49,9 +51,10 @@
 - Try implementing frecency algorithm.
     - ~~Checkout the following options of FZF - `--scheme=history`~~
     - Implement Aging feature for Navita.
+        - Provide an option to call `__navita::AgeOut()` from the `__navita::CleanHistory()` for manual aging out of paths from the history.
         - ~~Show how long ago a path was accessed in history.~~
-        - Remove invalid paths from the history automatically if they are older than N days (likely 90 days).
-            - Allow the end-users to make use of the invidual function responsible for aging. This can allow users to put the function in `~/.bash_logout`, so that the older paths (>= 90 days) will be removed just before logging off.
+        - ~~Remove paths from the history automatically if they are older than N days (likely 30 days).~~
+            - ~~Allow the end-users to make use of the individual function responsible for aging. This can allow users to put the function in `~/.bash_logout`, so that the older paths (>= 30 days) will be removed just before logging off.~~
 
 # When to do nothing?
 
