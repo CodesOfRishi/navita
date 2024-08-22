@@ -245,33 +245,6 @@ __navita::Version() {
 }
 # }}}
 
-__navita__() {
-
-	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
-
-	local colr_red && colr_red='\033[1;38;2;255;51;51m'
-	local colr_green && colr_green="\033[1;38;2;91;255;51m"
-	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
-	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
-	local colr_rst && colr_rst='\e[0m'
-
-	case "$1" in
-		"--") __navita::NavigateHistory "${@:2}";;
-		"--history" | "-H") __navita::ViewHistory;;
-		"-") __navita::ToggleLastVisits;;
-		"--clean" | "-c") __navita::CleanHistory;;
-		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
-		"--super-search" | "-S" ) __navita::NavigateParentDirs "${@:2}";;
-		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
-		"--version" | "-v") __navita::Version;;
-		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
-		*) __navita::CDGeneral "${@}";;
-	esac
-}
-
-# update the history with the current working directory when opening a new shell
-__navita::UpdatePathHistory
-
 # ── Feature: TabCompletion ────────────────────────────────────────────{{{
 __navita::completions() {
 	if [[ "${COMP_CWORD}" -eq 1 ]] && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
@@ -303,4 +276,31 @@ __navita::completions() {
 
 complete -F __navita::completions "${NAVITA_COMMAND}"
 # }}}
+
+__navita__() {
+
+	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
+
+	local colr_red && colr_red='\033[1;38;2;255;51;51m'
+	local colr_green && colr_green="\033[1;38;2;91;255;51m"
+	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
+	local colr_rst && colr_rst='\e[0m'
+
+	case "$1" in
+		"--") __navita::NavigateHistory "${@:2}";;
+		"--history" | "-H") __navita::ViewHistory;;
+		"-") __navita::ToggleLastVisits;;
+		"--clean" | "-c") __navita::CleanHistory;;
+		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
+		"--super-search" | "-S" ) __navita::NavigateParentDirs "${@:2}";;
+		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
+		"--version" | "-v") __navita::Version;;
+		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
+		*) __navita::CDGeneral "${@}";;
+	esac
+}
+
+# update the history with the current working directory when opening a new shell
+__navita::UpdatePathHistory
 
