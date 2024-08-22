@@ -82,16 +82,16 @@ __navita::CleanHistory() {
 			if [[ -n "${error}" ]]; then 
 				line_no_todel+=( "${line_no}" )
 			fi
-			line_no=$(( "${line_no}" + 1 ))
+			(( line_no++ ))
 		done < "${NAVITA_HISTORYFILE}"
 
 		local index_reduced=0
-		local i
-		for i in "${line_no_todel[@]}"; do
-			local line_to_be_deleted && line_to_be_deleted=$( sed -n "$(( "${i}" - "${index_reduced}" ))p" "${NAVITA_HISTORYFILE}" )
-			sed -i -e "$(( "${i}" - "${index_reduced}" ))d" "${NAVITA_HISTORYFILE}" && \
-				printf '%s deleted!\n' "${line_to_be_deleted%% : *}" &&\
-				index_reduced=$(( "${index_reduced}" + 1 ))
+		local line_no
+		for line_no in "${line_no_todel[@]}"; do
+			local line_to_be_deleted && line_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )"
+			sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
+				printf '%s deleted!\n' "${line_to_be_deleted%% : *}" && \
+				(( index_reduced++ ))
 		done
 	}
 	# }}}
