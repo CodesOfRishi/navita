@@ -194,7 +194,7 @@ __navita::ViewHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
@@ -212,7 +212,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' 2> /dev/null | fzf --tiebreak=end,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' 2> /dev/null | fzf --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) builtin cd -L "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
@@ -242,7 +242,7 @@ __navita::CDGeneral() {
 		return $?
 	fi
 
-	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d | fzf --prompt="navita> " --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) builtin cd -L  "${__the_builtin_P_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
@@ -268,7 +268,7 @@ __navita::NavigateParentDirs() {
 
 		while read -r line; do
 			find -L "${line}" -maxdepth 1 -mindepth 1 -type d
-		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --scheme=history --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
+		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
 	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
@@ -291,13 +291,13 @@ __navita::Version() {
 __navita::completions() {
 	if [[ "${COMP_CWORD}" -eq 1 ]] && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
 		local navita_opts && navita_opts="$( printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n" "-" "--" "-H" "--history" "-c" "--clean" "-s" "--sub-search" "-S" "--super-search" "-v" "--version" | \
-			fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up )"
+			fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up )"
 
 		case "$?" in
 			0) COMPREPLY=( "${navita_opts}" );;
 			*) 
 				local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-					fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+					fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 				case "$?" in
 					0) COMPREPLY=( "${dir_select}" );;
@@ -307,7 +307,7 @@ __navita::completions() {
 		esac
 	else
 		local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-			fzf --prompt="navita> " --tiebreak=begin,index --scheme=history --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+			fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 		
 		case "$?" in
 			0) COMPREPLY=( "${dir_select}" );;
