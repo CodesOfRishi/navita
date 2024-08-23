@@ -1,0 +1,3 @@
+When in /
+	`cd -s`
+		INFO: Run recursive `find` search for large number of sub-directories to check for any possible errors
