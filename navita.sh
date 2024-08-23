@@ -37,7 +37,7 @@ __navita::ValidateDirectory() {
 }
 # }}}
 
-# ── Feature: AgeOutHistory ────────────────────────────────────────────
+# ── Feature: AgeOutHistory ────────────────────────────────────────────{{{
 __navita::AgeOutHistory() {
 
 	# if the history file either doesn't exist or have no content, return 0
@@ -78,6 +78,7 @@ __navita::AgeOutHistory() {
 			(( index_reduced++ ))
 	done
 }
+# }}}
 
 # ── Feature: CleanHistory ───────────────────────────────────────────{{{
 __navita::CleanHistory() { 
@@ -346,5 +347,5 @@ __navita__() {
 # update the history with the current working directory when opening a new shell
 __navita::UpdatePathHistory
 
-# age out paths
+# check for outdated paths when opening a new shell
 [[ "${NAVITA_AUTOMATIC_EXPIRE_PATHS}" =~ ^(y|Y) ]] && __navita::AgeOutHistory
