@@ -8,6 +8,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Dependencies](#dependencies) •
 [Installation](#installation) •
 [Environment Variables](#environment-variables) •
+[Make use of indiviual Feature functions](#make-use-of-the-indiviual-feature-functions) •
 [Concept/Motivation](#conceptmotivation) •
 [Contributing to Navita](#contributing-to-navita)
 
@@ -25,39 +26,57 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 <div align="center">
 
-### Child Directory Search & Traversal
+### Search & Traverse Child Directories
 
 *Feature Name: NavigateChildDirs*
 
 </div>
 
-**Synopsis:** `cd (-s | --sub-search) [<string>...]`
+**Synopsis:** `cd (-s | --sub-search) [string...]`
 
-Fuzzy search directories, all its subdirectories, and their subdirectories (so on..), and traverse to the selected one.
+Search subdirectories, and their subdirectories (and so on), and navigate to the selected one.
+
+
 
 <div align="center">
 
-### Parent Directory Search & Traversal
+### Search & Traverse Parent Directories
 
 *Feature Name: NavigateParentDirs*
 
 </div>
 
-**Synopsis:** `cd (-S | --super-search) [<string>...]` 
+**Synopsis:** `cd (-S | --super-search) [string...]` 
 
-Fuzzy search directories (1-level down) in parent directories and traverse to the selected one.
+Search directories (1-level down) in parent directories and navigate to the selected one.
 
 <div align="center">
 
-### View, Search & Traverse History
+### Search & Traverse History
 
 *Feature Name: NavigateHistory*
 
 </div>
 
-**Synopsis:** `cd (-H | --history | --) [<string>...]`
+**Synopsis:** `cd -- [string...]`
 
-View or Fuzzy search last 50 (default) visited directory paths and traverse to the selected one.
+Search recently visited directory paths and navigate to the selected one. 
+
+> [!NOTE]
+> This feature can still be used by omitting the -- option if the provided string does not match any directory paths in your PWD.<br>
+> See the [*CDGeneral*](#change-to-directory) feature.
+
+<div align="center">
+
+### View History
+
+*Feature Name: ViewHistory*
+
+</div>
+
+**Synopsis:** `cd (-H | --history) [string...]`
+
+View recently visited directory paths.
 
 <div align="center">
 
@@ -67,9 +86,9 @@ View or Fuzzy search last 50 (default) visited directory paths and traverse to t
 
 </div>
 
-**Synopsis:** `cd [<string>...]`
+**Synopsis:** `cd [string...]`
 
-Fuzzy search directories in the *current working directory* and traverse to the selected one. If no match is found, Navita would search the history i.e., the same as the *NavigateHistory* feature.
+Search directories in the *current working directory* and navigate to the selected one. If no match is found, Navita would search the history i.e., the same as the [*NavigateHistory*](#search--traverse-history) feature.
 
 <div align="center">
 
@@ -106,6 +125,55 @@ This is will give an option to either remove invalid paths from the history or c
 **Synopsis:** `cd (-v | --version)`
 
 View Navita's version information.
+
+<div align="center">
+
+### Tab Completion
+
+*Feature Name:* TabCompletion
+
+</div>
+
+- Navita supports Tab completion for its options and directories in your PWD.
+
+<div align="center">
+
+### Aging
+
+*Feature Name:* AgeOutHistory
+
+</div>
+
+- By default, Navita will remember directories for a maximum of 30 days. Any directories that have not been accessed in over 30 days will be forgotten. This value can be changed using `NAVITA_MAX_AGE`.
+- Navita checks for outdated directory paths at every new shell startup.
+
+> [!TIP]
+> You can disable the automatic check for outdated paths using the `NAVITA_AUTOMATIC_EXPIRE_PATHS` env, and you may schedule `__navita::AgeOutHistory` to run once per day using Cron.<br>
+> For example, 
+> ```bash
+> 0 8 * * * bash -c '__navita::AgeOutHistory'
+> ```
+
+<div align="center">
+
+### Add Annotations
+
+*Feature Name:* UserAnnotations
+
+</div>
+
+- Annotate a specific directory path with a note or comment that will appear in the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature.
+
+<div align="center">
+
+### Addional Info
+
+</div>
+
+- Navita will prioritize search results based on the position of the match within the directory path, giving preference to matches near the end and then considering the recency of the path.
+- Navita has a few default annotations that are visible when using the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature. These include error, PWD, and LWD (last working directory) annotations.
+
+
 
 <div align="center">
 
@@ -147,20 +215,7 @@ source "path/to/the/navita.sh"
 </div>
 
 > [!NOTE]
-> If you want to keep your desired values rather than the default ones, make sure to export these environment variables before sourcing the `navita.sh` file in your `.bashrc`."
-
-- **NAVITA_CONFIG_DIR**
-    - Directory location for Navita's configuration files.
-    - Defaults to `$XDG_CONFIG_HOME/navita`
-    - If `XDG_CONFIG_HOME` is not set, it defaults to `~/.config/navita`.
-
-- **NAVITA_HISTORYFILE**
-    - Absolute path of the history file, which contains last 50 (default) visited paths.
-    - Defaults to `$NAVITA_CONFIG_DIR/navita-history`.
-
-- **NAVITA_HISTORYFILE_SIZE**
-    - Number of last visited directory paths Navita should track.
-    - Defaults to `50`.
+> If you want to keep your desired values rather than the default ones, make sure to export these environment variables *before* sourcing the `navita.sh` file in your `.bashrc`."
 
 - **NAVITA_COMMAND**
     - Name of the command to use Navita.
@@ -170,6 +225,47 @@ source "path/to/the/navita.sh"
     - Follow symbolic links and resolve them to their actual physical locations before making the directory change.
     - Defaults to `n`, i.e., not to follow symbolic links.
     - Change it to `y` or `Y` to follow symbolic links.
+
+- **NAVITA_MAX_AGE**
+    - Specifies maximum retention period for a directory path since last access.
+    - The default value is `30` i.e., 30 days.
+
+- **NAVITA_AUTOMATIC_EXPIRE_PATHS**
+    - It defaults to `y` i.e., check for outdated directory paths in the history at every shell startup.
+    - Change it to `n` or `N` to prevent Navita from checking for outdated directory paths.
+
+- **NAVITA_DATA_DIR**
+    - Directory location for Navita's configuration files.
+    - Defaults to `$XDG_DATA_HOME/navita`
+    - If `XDG_DATA_HOME` is not set, it defaults to `~/.local/share/navita`.
+
+- **NAVITA_HISTORYFILE**
+    - The file that stores a history of recently visited directories.
+    - Defaults to `$NAVITA_DATA_DIR/navita-history`.
+
+- **NAVITA_VERSION**
+    - Show the Navita version information.
+
+<div align="center">
+
+## Make use of indiviual Feature functions
+
+</div>
+
+If you like, you can make use of Navita's individual shell feature functions.
+
+> [!NOTE]
+> Avoid using any Navita shell functions other than those mentioned.
+
+
+- `__navita::NavigateParentDirs`: NavigateParentDirs feature.
+- `__navita::CDGeneral`: CDGeneral feature.
+- `__navita::NavigateChildDirs`: NavigateChildDirs feature.
+- `__navita::ToggleLastVisits`: ToggleLastVisits feature.
+- `__navita::NavigateHistory`: NavigateHistory feature.
+- `__navita::ViewHistory`: ViewHistory feature.
+- `__navita::CleanHistory`: CleanHistory feature.
+- `__navita::AgeOutHistory`: AgeOutHistory feature.
 
 <div align="center">
 
@@ -204,6 +300,3 @@ I welcome contributions from the community! If you'd like to contribute, please:
 
 > [!NOTE]
 > Please do not submit pull requests to the main branch.
-
-I will review your pull request and provide feedback. Once your contribution is approved, it will be merged into the main repository.
-
