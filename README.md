@@ -8,7 +8,6 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Dependencies](#dependencies) •
 [Installation](#installation) •
 [Environment Variables](#environment-variables) •
-[Make use of indiviual Feature functions](#make-use-of-the-indiviual-feature-functions) •
 [Concept/Motivation](#conceptmotivation) •
 [Contributing to Navita](#contributing-to-navita) •
 [LICENSE](#license)
@@ -64,7 +63,7 @@ Search directories (1-level down) in parent directories and navigate to the sele
 Search recently visited directory paths and navigate to the selected one. This feature can still be used by omitting the -- option if the provided string does not match any directory paths in your PWD. See the [*CDGeneral*](#change-to-directory) feature.
 
 > [!NOTE]
-> Visit a few directories to build a history.
+> Visit a few directories after a clean or initial installation to build a history.
 
 <div align="center">
 
@@ -133,7 +132,7 @@ View Navita's version information.
 
 ### Tab Completion
 
-*Feature Name:* TabCompletion
+*Feature Name: TabCompletion*
 
 </div>
 
@@ -143,21 +142,21 @@ View Navita's version information.
 
 ### Aging
 
-*Feature Name:* AgeOutHistory
+*Feature Name: AgeOutHistory*
 
 </div>
 
 - By default, Navita will remember directories for a maximum of 30 days. Any directories that have not been accessed in over 30 days will be forgotten. This value can be changed using the `NAVITA_MAX_AGE` environment variable.
 
-<div align="center">
-
-### Add Annotations
-
-*Feature Name:* UserAnnotations
-
-</div>
-
-- Annotate a specific directory path with a note or comment that will appear in the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature.
+<!--<div align="center">-->
+<!---->
+<!--### Add Annotations-->
+<!---->
+<!--*Feature Name: UserAnnotations*-->
+<!---->
+<!--</div>-->
+<!---->
+<!--- Annotate a specific directory path with a note or comment that will appear in the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature.-->
 
 <div align="center">
 
@@ -230,13 +229,14 @@ source "path/to/the/navita.sh"
     - Change it to `n` or `N` to prevent Navita from checking for outdated directory paths.
 
 - **NAVITA_DATA_DIR**
-    - Directory location for Navita's configuration files.
+    - Directory location for Navita's data files.
     - Defaults to `$XDG_DATA_HOME/navita`
     - If `XDG_DATA_HOME` is not set, it defaults to `~/.local/share/navita`.
 
-- **NAVITA_HISTORYFILE**
-    - The file that stores a history of recently visited directories.
-    - Defaults to `$NAVITA_DATA_DIR/navita-history`.
+- **NAVITA_CONFIG_DIR**
+    - Directory location for Navita's configuration files.
+    - Defaults to `$XDG_CONFIG_HOME/navita`
+    - If `XDG_CONFIG_HOME`  is not set, it defaults, `~/.config/navita`.
 
 - **NAVITA_VERSION**
     - Show the Navita version information.
@@ -272,9 +272,9 @@ I welcome contributions from the community! If you'd like to contribute, please:
 - Fork the repository.
 - Make your changes and submit a pull request to the **dev** branch. 
 
-> [!NOTE]
+> [!WARNING]
 > Please do not submit pull requests to the main branch.
 
-License
+## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) for details.
