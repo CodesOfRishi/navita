@@ -336,7 +336,13 @@ __navita__() {
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
-		"--super-search" | "-S" ) __navita::NavigateParentDirs "${@:2}";;
+		"--super-search" | "-S" | "..") 
+			if [[ "$1" == ".." ]] && [[ -z "$2" ]]; then
+				__navita::CDGeneral "${@}"
+			else
+				__navita::NavigateParentDirs "${@:2}"
+			fi
+			;;
 		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
 		"--version" | "-v") __navita::Version;;
 		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
