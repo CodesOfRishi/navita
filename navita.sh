@@ -170,10 +170,10 @@ __navita::ViewHistory() {
 		printf "%s" "${_path}" 
 
 		local access_time && access_time="${line##* : }"
-		local seconds_old && seconds_old="$(( ${now_time} - ${access_time} ))"
-		local days_old && days_old="$(( ${seconds_old}/86400 ))"
-		local hours_old && hours_old="$(( (${seconds_old} - (${days_old}*86400))/3600 ))"
-		local minutes_old && minutes_old="$(( (${seconds_old} - (${days_old}*86400) - (${hours_old}*3600))/60 ))"
+		local seconds_old && seconds_old="$(( now_time - access_time ))"
+		local days_old && days_old="$(( seconds_old/86400 ))"
+		local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
+		local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
 
 		local path_age=""
 		[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
