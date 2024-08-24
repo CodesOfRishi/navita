@@ -108,12 +108,12 @@ __navita::CleanHistory() {
 		# +--------------------------------------------------------------------------------------------------+
 
 		local tempfile && tempfile=$( mktemp )
-		$( whereis -b cp | cut -d" " -f2 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
+		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		> "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if [[ "${exitcode}" -eq 0 ]]; then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
-			$( whereis -b cp | cut -d" " -f2 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
+			$( type -apf cp | head -1 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		rm --interactive=never "$tempfile"
