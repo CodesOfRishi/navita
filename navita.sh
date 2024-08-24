@@ -173,10 +173,15 @@ __navita::CleanHistory() {
 
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
+	local check_pwd="${1:-n}"
 	local line
 	local now_time && now_time="$( date +%s )"
 	while read -r line; do
 		local _path && _path="${line%% : *}"
+		if [[ "${check_pwd}" == "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
+			check_pwd="n"
+			continue
+		fi
 		printf "%s" "${_path}" 
 
 		local access_time && access_time="${line##* : }"
@@ -201,7 +206,7 @@ __navita::ViewHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned=$( __navita::ViewHistory "y" | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd -L "${__the_builtin_P_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
