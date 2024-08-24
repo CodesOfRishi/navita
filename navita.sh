@@ -131,9 +131,11 @@ __navita::CleanHistory() {
 		local index_reduced=0
 		local line_no
 		for line_no in "${line_no_todel[@]}"; do
-			local line_to_be_deleted && line_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )"
+			local path_to_be_deleted && path_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )" && path_to_be_deleted="${path_to_be_deleted%% : *}"
+			local error && error="$( __navita::ValidateDirectory "${path_to_be_deleted}" )" && error=${error#find: }
+
 			sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
-				printf '%s deleted!\n' "${line_to_be_deleted%% : *}" && \
+				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${path_to_be_deleted}" "${error}" && \
 				(( index_reduced++ ))
 		done
 	}
