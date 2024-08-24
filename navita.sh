@@ -23,7 +23,7 @@ export NAVITA_VERSION="Alpha"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
-# ── create configuration file(s) for Navita ───────────────────────────
+# ── Create data file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
 	mkdir -p "${NAVITA_DATA_DIR}"
 	touch "${NAVITA_HISTORYFILE}"
@@ -99,13 +99,11 @@ __navita::CleanHistory() {
 
 	# ── Feature: EmptyHistoryFile ─────────────────────────────────────────{{{
 	__navita::CleanHistory::EmptyHistoryFile() {
-		# +--------------------------------------------------------------------------------------------------+
-		# | NOTE:                                                                                            |
-		# | cp historyfile to tempfile                                                                       |
-		# | empty the historyfile                                                                            |
-		# | if success, cp tempfile to historyfile.bak & remove the tempfile                                 |
-		# | if failed, remove the tempfile                                                                   |
-		# +--------------------------------------------------------------------------------------------------+
+		# NOTE:
+		# copy historyfile to tempfile
+		# empty the historyfile
+		# if success, copy tempfile to historyfile.bak & remove the tempfile
+		# if failed, remove the tempfile
 
 		local tempfile && tempfile=$( mktemp )
 		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
@@ -123,11 +121,9 @@ __navita::CleanHistory() {
 
 	# ── Feature: RemoveInvalidPaths ───────────────────────────────────────{{{
 	__navita::CleanHistory::RemoveInvalidPaths() {
-		# +--------------------------------------------------------------------------------------------------+
-		# | NOTE:                                                                                            |
-		# | the line numbers that needs to be deleted from the history file, will be stored in an array      |
-		# | using sed, delete those lines in-place                                                           |
-		# +--------------------------------------------------------------------------------------------------+
+		# NOTE:
+		# the line numbers that needs to be deleted from the history file, will be stored in an array
+		# using sed, delete those lines in-place
 
 		local -a line_no_todel
 		local line_no=1
@@ -241,13 +237,10 @@ __navita::NavigateChildDirs() {
 
 # ── Feature: CDGeneral ──────────────────────────────────────────────{{{
 __navita::CDGeneral() {
-	# +--------------------------------------------------------------------------------------------------+
-	# | NOTE: if argument is either empty or already a legit directory path, then provide the argument   |
-	# | to the builtin cd                                                                                |
-	# | or else if the argument is already a valid existing option of the builtin cd, then provide the   |
-	# | argument to the builtin cd                                                                       |
-	# | otherwise provide the argument as a string to FZF to search the current directory                |
-	# +--------------------------------------------------------------------------------------------------+
+	# NOTE: 
+	# if string argument provided is either empty or already a legit directory path, then provide the argument to the builtin cd,
+	# otherwise search the directories in PWD with the argument,
+	# if still no match was found in PWD, call the NavigateHistory feature with the arguments
 
 	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
@@ -366,8 +359,8 @@ __navita__() {
 	esac
 }
 
-# update the history with the current working directory when opening a new shell
+# Update the history with the current working directory when opening a new shell
 __navita::UpdatePathHistory
 
-# check for outdated paths when opening a new shell
+# Check for outdated paths when opening a new shell
 [[ "${NAVITA_AUTOMATIC_EXPIRE_PATHS}" =~ ^(y|Y) ]] && __navita::AgeOutHistory
