@@ -44,17 +44,14 @@ __navita::AgeOutHistory() {
 	[[ ! -s "${NAVITA_HISTORYFILE}" ]] && return 0
 
 	local now_epoch && now_epoch="$( date +%s )"
-	local oldest_history && oldest_history="$( tail -1 "${NAVITA_HISTORYFILE}" )"
-	local oldest_path_epoch && oldest_path_epoch="${oldest_history##* : }"
-	local oldest_path_age && oldest_path_age="$(( now_epoch - oldest_path_epoch ))"
+
+	if [[ -s "${NAVITA_DATA_DIR}/last-age-check" ]]; then
+		local last_check_epoch && last_check_epoch="$( head -1 "${NAVITA_DATA_DIR}/last-age-check" )"
+		(( (now_epoch - last_check_epoch)/86400 > NAVITA_MAX_AGE )) || return 0
+	fi
+	printf "%s\n" "${now_epoch}" > "${NAVITA_DATA_DIR}/last-age-check"
+
 	local max_allowed_age && max_allowed_age="$(( NAVITA_MAX_AGE * 86400 ))"
-
-	# if the oldest path in history has not reached the allowed max age, return 0
-	(( oldest_path_age < max_allowed_age )) && return 0
-
-	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
-	local colr_rst && colr_rst='\e[0m'
-	
 	local -a line_no_todel
 	local line_no=1
 
@@ -62,10 +59,13 @@ __navita::AgeOutHistory() {
 		local access_epoch && access_epoch="${line##* : }"
 		local line_age && line_age="$(( now_epoch - access_epoch ))"
 
-		(( line_age >= max_allowed_age )) && line_no_todel+=( "${line_no}" )
+		(( line_age > max_allowed_age )) && line_no_todel+=( "${line_no}" )
 		(( line_no++ ))
 	done < "${NAVITA_HISTORYFILE}"
 
+	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+	local colr_rst && colr_rst='\e[0m'
+	
 	local index_reduced=0
 	local line_no=""
 	for line_no in "${line_no_todel[@]}"; do
