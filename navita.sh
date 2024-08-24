@@ -20,6 +20,8 @@ export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-30}"
 export NAVITA_AUTOMATIC_EXPIRE_PATHS="y"
 export NAVITA_VERSION="Alpha"
+export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
+export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -33,8 +35,22 @@ elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
 
+# ── Create configuration file(s) for Navita ───────────────────────────
+if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
+	mkdir -p "${NAVITA_CONFIG_DIR}"
+	printf "Navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
+fi
+if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
+	touch "${NAVITA_IGNOREFILE}"
+	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
+fi
+
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
+	while read -r pattern; do
+		[[ "${PWD}" =~ ${pattern} ]] && return 0
+	done < "${NAVITA_IGNOREFILE}"
+
 	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
 		printf "%s : %d\n" "${PWD}" "$( date +%s )" > "${NAVITA_HISTORYFILE}"
 	else
