@@ -19,8 +19,6 @@
     - Key/event bindings
     - Available Actions
     - Command Execution
-- Use associative array (key-value data structure) to contain list of paths (as keys) and annotation (as values) to show up in history.
-    - Move existing annotation to this array.
 - Introduce features related to exclusions.
     - List of directories to exclude from being searched (E.g. - .git).
     - Exclude directories from being added to the history file, but allow being searched.
