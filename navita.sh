@@ -192,14 +192,8 @@ __navita::ViewHistory() {
 
 		[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
 
-		if [[ "${_path}" == "${PWD}" ]] || [[ "${_path}" == "$( realpath -P "${PWD}" )" ]]; then
-			printf "${colr_green}%s${colr_rst}" " ❰ Present Working Directory"
-		elif [[ "${_path}" == "${OLDPWD}" ]]; then
-			printf "${colr_blue}%s${colr_rst}" " ❰ Previous Working Directory"
-		else
-			local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
-			[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
-		fi
+		local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
+		[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
 		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
 }
