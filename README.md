@@ -10,7 +10,8 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Environment Variables](#environment-variables) •
 [Make use of indiviual Feature functions](#make-use-of-the-indiviual-feature-functions) •
 [Concept/Motivation](#conceptmotivation) •
-[Contributing to Navita](#contributing-to-navita)
+[Contributing to Navita](#contributing-to-navita) •
+[LICENSE](#license)
 
 </div>
 
@@ -46,7 +47,7 @@ Search subdirectories, and their subdirectories (and so on), and navigate to the
 
 </div>
 
-**Synopsis:** `cd (-S | --super-search) [string...]` 
+**Synopsis:** `cd (-S | --super-search | ..) [string...]` 
 
 Search directories (1-level down) in parent directories and navigate to the selected one.
 
@@ -60,11 +61,10 @@ Search directories (1-level down) in parent directories and navigate to the sele
 
 **Synopsis:** `cd -- [string...]`
 
-Search recently visited directory paths and navigate to the selected one. 
+Search recently visited directory paths and navigate to the selected one. This feature can still be used by omitting the -- option if the provided string does not match any directory paths in your PWD. See the [*CDGeneral*](#change-to-directory) feature.
 
 > [!NOTE]
-> This feature can still be used by omitting the -- option if the provided string does not match any directory paths in your PWD.<br>
-> See the [*CDGeneral*](#change-to-directory) feature.
+> Visit a few directories to build a history.
 
 <div align="center">
 
@@ -100,7 +100,10 @@ Search directories in the *current working directory* and navigate to the select
 
 **Synopsis:** `cd -`
 
-Switch between the current directory and the previous directory. 
+Switch between your current directory and the previous directory you were in.
+
+> [!NOTE]
+> `cd -` only works if you've used `cd` to change directories previously. If you haven't used `cd` before in the current shell, `cd -` won't do anything.
 
 <div align="center">
 
@@ -144,15 +147,7 @@ View Navita's version information.
 
 </div>
 
-- By default, Navita will remember directories for a maximum of 30 days. Any directories that have not been accessed in over 30 days will be forgotten. This value can be changed using `NAVITA_MAX_AGE`.
-- Navita checks for outdated directory paths at every new shell startup.
-
-> [!TIP]
-> You can disable the automatic check for outdated paths using the `NAVITA_AUTOMATIC_EXPIRE_PATHS` env, and you may schedule `__navita::AgeOutHistory` to run once per day using Cron.<br>
-> For example, 
-> ```bash
-> 0 8 * * * bash -c '__navita::AgeOutHistory'
-> ```
+- By default, Navita will remember directories for a maximum of 30 days. Any directories that have not been accessed in over 30 days will be forgotten. This value can be changed using the `NAVITA_MAX_AGE` environment variable.
 
 <div align="center">
 
@@ -215,7 +210,7 @@ source "path/to/the/navita.sh"
 </div>
 
 > [!NOTE]
-> If you want to keep your desired values rather than the default ones, make sure to export these environment variables *before* sourcing the `navita.sh` file in your `.bashrc`."
+> If you want to keep your desired values rather than the default ones, make sure to export these environment variables *before* sourcing the `navita.sh` file in your `.bashrc`.
 
 - **NAVITA_COMMAND**
     - Name of the command to use Navita.
@@ -245,27 +240,6 @@ source "path/to/the/navita.sh"
 
 - **NAVITA_VERSION**
     - Show the Navita version information.
-
-<div align="center">
-
-## Make use of indiviual Feature functions
-
-</div>
-
-If you like, you can make use of Navita's individual shell feature functions.
-
-> [!NOTE]
-> Avoid using any Navita shell functions other than those mentioned.
-
-
-- `__navita::NavigateParentDirs`: NavigateParentDirs feature.
-- `__navita::CDGeneral`: CDGeneral feature.
-- `__navita::NavigateChildDirs`: NavigateChildDirs feature.
-- `__navita::ToggleLastVisits`: ToggleLastVisits feature.
-- `__navita::NavigateHistory`: NavigateHistory feature.
-- `__navita::ViewHistory`: ViewHistory feature.
-- `__navita::CleanHistory`: CleanHistory feature.
-- `__navita::AgeOutHistory`: AgeOutHistory feature.
 
 <div align="center">
 
@@ -300,3 +274,7 @@ I welcome contributions from the community! If you'd like to contribute, please:
 
 > [!NOTE]
 > Please do not submit pull requests to the main branch.
+
+License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) for details.
