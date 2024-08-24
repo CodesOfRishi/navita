@@ -116,7 +116,7 @@ __navita::CleanHistory() {
 			$( type -apf cp | head -1 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
-		rm --interactive=never "$tempfile"
+		$( type -apf rm | head -1 ) --interactive=never "$tempfile"
 		return "$exitcode"
 	}
 	# }}}
