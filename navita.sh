@@ -25,12 +25,12 @@ export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
-# ── Create data file(s) for Navita ───────────────────────────
+# ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
 	mkdir -p "${NAVITA_DATA_DIR}"
-	touch "${NAVITA_HISTORYFILE}"
-	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
-elif [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
+	printf "Navita: Created %s\n" "${NAVITA_DATA_DIR}"
+fi
+if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
 	touch "${NAVITA_HISTORYFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
