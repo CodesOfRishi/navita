@@ -41,7 +41,7 @@ if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
 	printf "Navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
-	touch "${NAVITA_IGNOREFILE}"
+	printf "%s\n" "/\.git(/.*|)$" > "${NAVITA_IGNOREFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
