@@ -46,7 +46,8 @@ Search subdirectories, and their subdirectories (and so on), and navigate to the
 
 </div>
 
-**Synopsis:** `cd (-S | --super-search | ..) [string...]` 
+**Synopsis:** `cd (-S | --super-search) [string...]`<br>
+&nbsp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
 Search directories (1-level down) in parent directories and navigate to the selected one.
 
@@ -236,7 +237,7 @@ source "path/to/the/navita.sh"
 - **NAVITA_CONFIG_DIR**
     - Directory location for Navita's configuration files.
     - Defaults to `$XDG_CONFIG_HOME/navita`
-    - If `XDG_CONFIG_HOME`  is not set, it defaults, `~/.config/navita`.
+    - If `XDG_CONFIG_HOME`  is not set, it defaults to `~/.config/navita`.
 
 - **NAVITA_VERSION**
     - Show the Navita version information.
