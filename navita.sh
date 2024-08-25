@@ -346,7 +346,17 @@ complete -F __navita::completions "${NAVITA_COMMAND}"
 
 __navita__() {
 
-	[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
+	local navita_opt
+	local -a navita_args
+	if [[ "$1" == "-P" ]]; then
+		navita_opt="$2"
+		navita_args=( "${@:3}" )
+		local __the_builtin_P_option && __the_builtin_P_option="-P"
+	else
+		[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && local __the_builtin_P_option && __the_builtin_P_option="-P"
+		navita_opt="$1"
+		navita_args=( "${@:2}" )
+	fi
 
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_green && colr_green="\033[1;38;2;91;255;51m"
@@ -354,23 +364,23 @@ __navita__() {
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 	local colr_rst && colr_rst='\e[0m'
 
-	case "$1" in
-		"--") __navita::NavigateHistory "${@:2}";;
+	case "${navita_opt}" in
+		"--") __navita::NavigateHistory "${navita_args[@]}";;
 		"--history" | "-H") __navita::ViewHistory;;
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
-		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
+		"--sub-search" | "-s") __navita::NavigateChildDirs "${navita_args[@]}";;
 		"--super-search" | "-S" | "..") 
-			if [[ "$1" == ".." ]] && [[ -z "$2" ]]; then
-				__navita::CDGeneral "${@}"
+			if [[ "${navita_opt}" == ".." ]] && [[ -z "${navita_args[0]}" ]]; then
+				__navita::CDGeneral ".."
 			else
-				__navita::NavigateParentDirs "${@:2}"
+				__navita::NavigateParentDirs "${navita_args[@]}"
 			fi
 			;;
 		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
 		"--version" | "-v") __navita::Version;;
 		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
-		*) __navita::CDGeneral "${@}";;
+		*) __navita::CDGeneral "${navita_opt}" "${navita_args[@]}";;
 	esac
 }
 
