@@ -282,13 +282,10 @@ __navita::NavigateParentDirs() {
 	__navita::NavigateParentDirs::GetParentDirs() {
 		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
 			local _dir && _dir="${PWD}"
-			[[ "${_dir}" == "/" ]] && return 0
-
-			until [[ -z "${_dir}" ]]; do
-				_dir="${_dir%/*}"
-				[[ -n "${_dir}" ]] && printf "%s\n" "${_dir}"
+			while [[ "${_dir}" != "/" ]]; do
+				_dir="$(dirname "${_dir}")"
+				printf "%s\n" "${_dir}"
 			done
-			printf "/\n"
 		}
 
 		while read -r line; do
