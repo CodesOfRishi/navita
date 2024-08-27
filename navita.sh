@@ -22,6 +22,7 @@ export NAVITA_AUTOMATIC_EXPIRE_PATHS="y"
 export NAVITA_VERSION="Alpha"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
+export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -44,6 +45,12 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "%s\n" "/\.git(/.*|)$" > "${NAVITA_IGNOREFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
+
+# Utility: Resolve to Relative path
+__navita::GetRelativePath() {
+	local _path && _path="$1"
+	printf "%s\n" "$(realpath -s --relative-to=. "${_path}")"
+}
 
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
@@ -289,7 +296,8 @@ __navita::NavigateParentDirs() {
 		}
 
 		while read -r line; do
-			find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+			[[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]] && find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print || \
+				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
