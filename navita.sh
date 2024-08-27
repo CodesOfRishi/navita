@@ -289,7 +289,7 @@ __navita::NavigateParentDirs() {
 		}
 
 		while read -r line; do
-			find -L "${line}" -maxdepth 1 -mindepth 1 -type d
+			find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
