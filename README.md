@@ -167,6 +167,8 @@ View Navita's version information.
 
 - For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk.
     - To make Navita *always* resolve symbolic links, check the `NAVITA_FOLLOW_ACTUAL_PATH` env.
+    > [!NOTE]
+    > If this option is used, it should be the very first option given to Navita.
 - Navita will prioritize search results based on the position of the match within the directory path, giving preference to matches near the end and then considering the recency of the path.
 - Navita has a few default annotations that are visible when using the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature. These include error, PWD, and LWD (last working directory) annotations.
 
@@ -230,6 +232,10 @@ source "path/to/the/navita.sh"
 - **NAVITA_AUTOMATIC_EXPIRE_PATHS**
     - It defaults to `y` i.e., check for outdated directory paths in the history at every shell startup.
     - Change it to `n` or `N` to prevent Navita from checking for outdated directory paths.
+
+- **NAVITA_RELATIVE_PARENT_PATH**
+    - It defaults to `y` i.e., show the resolved parent paths relative to PWD in NavigateParentDirs feature.
+    - Change it to `n` or `N` to show the parent paths as absolute path. 
 
 - **NAVITA_DATA_DIR**
     - Directory location for Navita's data files.
