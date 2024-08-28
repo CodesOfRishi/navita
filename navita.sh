@@ -18,7 +18,6 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-30}"
-export NAVITA_AUTOMATIC_EXPIRE_PATHS="y"
 export NAVITA_VERSION="Alpha"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
@@ -54,6 +53,20 @@ __navita::GetRelativePath() {
 
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
+	__navita::UpdatePathHistory::AgeOutHistory() {
+		[[ ! -s "${NAVITA_HISTORYFILE}" ]] && return 0
+		local latest_epoch && latest_epoch="$(head -1 "${NAVITA_HISTORYFILE}")" && latest_epoch="${latest_epoch#* : }"
+		local earliest_epoch && earliest_epoch="$(tail -1 "${NAVITA_HISTORYFILE}")" && earliest_epoch="${earliest_epoch#* : }"
+		local D && D="$(( latest_epoch - earliest_epoch ))"
+
+		while (( D > 2592000 )); do
+			sed -i '$d' "${NAVITA_HISTORYFILE}"
+			latest_epoch="$(head -1 "${NAVITA_HISTORYFILE}")"
+			earliest_epoch="$(tail -1 "${NAVITA_HISTORYFILE}")"
+			D="$(( latest_epoch - earliest_epoch ))"
+		done
+	}
+
 	while read -r pattern; do
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
@@ -65,55 +78,13 @@ __navita::UpdatePathHistory() {
 	fi
 
 	awk -i inplace -F " : " '!seen[$1]++' "${NAVITA_HISTORYFILE}" # remove duplicate paths
+	__navita::UpdatePathHistory::AgeOutHistory
 }
 # }}}
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
 	printf "%s" "$( find "${*}" -maxdepth 0 -exec cd {} \; 2>&1 >/dev/null )"
-}
-# }}}
-
-# ── Feature: AgeOutHistory ────────────────────────────────────────────{{{
-__navita::AgeOutHistory() {
-
-	# if the history file either doesn't exist or have no content, return 0
-	[[ ! -s "${NAVITA_HISTORYFILE}" ]] && return 0
-
-	local now_epoch && now_epoch="$( date +%s )"
-
-	if [[ -s "${NAVITA_DATA_DIR}/last-age-check" ]]; then
-		local last_check_epoch && last_check_epoch="$( head -1 "${NAVITA_DATA_DIR}/last-age-check" )"
-		(( (now_epoch - last_check_epoch)/86400 > NAVITA_MAX_AGE )) || return 0
-	fi
-	printf "%s\n" "${now_epoch}" > "${NAVITA_DATA_DIR}/last-age-check"
-
-	local max_allowed_age && max_allowed_age="$(( NAVITA_MAX_AGE * 86400 ))"
-	local -a line_no_todel
-	local line_no=1
-
-	while read -r line; do
-		local access_epoch && access_epoch="${line##* : }"
-		local line_age && line_age="$(( now_epoch - access_epoch ))"
-
-		(( line_age > max_allowed_age )) && line_no_todel+=( "${line_no}" )
-		(( line_no++ ))
-	done < "${NAVITA_HISTORYFILE}"
-
-	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
-	local colr_rst && colr_rst='\e[0m'
-	
-	local index_reduced=0
-	local line_no=""
-	for line_no in "${line_no_todel[@]}"; do
-		local history_line && history_line="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )"
-		local access_epoch && access_epoch="${history_line##* : }"
-		local path_age && path_age="$(( now_epoch - access_epoch ))"
-
-		sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
-			printf "Removed %s ${colr_grey}❰ %s days old${colr_rst}\n" "${history_line%% : *}" "$(( path_age/86400 ))" && \
-			(( index_reduced++ ))
-	done
 }
 # }}}
 
@@ -391,6 +362,3 @@ __navita__() {
 
 # Update the history with the current working directory when opening a new shell
 __navita::UpdatePathHistory
-
-# Check for outdated paths when opening a new shell
-[[ "${NAVITA_AUTOMATIC_EXPIRE_PATHS}" =~ ^(y|Y) ]] && __navita::AgeOutHistory
