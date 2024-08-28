@@ -169,6 +169,7 @@ View Navita's version information.
     - To make Navita *always* resolve symbolic links, check the `NAVITA_FOLLOW_ACTUAL_PATH` env.
     > [!NOTE]
     > If this option is used, it should be the very first option given to Navita.
+
 - Navita will prioritize search results based on the position of the match within the directory path, giving preference to matches near the end and then considering the recency of the path.
 - Navita has a few default annotations that are visible when using the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature. These include error, PWD, and LWD (last working directory) annotations.
 
