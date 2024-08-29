@@ -305,8 +305,11 @@ __navita::NavigateParentDirs() {
 		}
 
 		while read -r line; do
-			[[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]] && find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print || \
+			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
+				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+			else
 				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+			fi
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
