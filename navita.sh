@@ -45,7 +45,42 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
-# Utility: Resolve to Relative path
+# Uitility: Get a Path from an entry in history
+__navita::GetPathInHistory() {
+	# should be passed only a line from the history file
+	local line && line="${1}"
+	printf "%s\n" "${line%% : *}"
+}
+
+# Utility: Get Epoch access time of a path/entry in history
+__navita::GetAccessEpochInHistory() {
+	# can be passed a line from history file
+	# or only the path
+	# however, it's recommended to pass the complete line for better time performance of this function
+	local access_epoch="${1}"
+	[[ -d "${1}" ]] && access_epoch="$(grep -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -z "${access_epoch}" ]] && return 1
+	
+	access_epoch="${access_epoch#* : }"
+	access_epoch="${access_epoch%% : *}"
+	printf "%s\n" "${access_epoch}"
+}
+
+# Utility: Get Frequency of a path/entry in history
+__navita::GetFreqInHistory() {
+	# can be passed a line from history file
+	# or only the path
+	# however, it's recommended to pass the complete line for better time performance of this function
+	local freq="${1}"
+	[[ -d "${1}" ]] && freq="$(grep -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -z "${freq}" ]] && return 1
+
+	freq="${freq#* : }"
+	freq="${freq#* : }"
+	freq="${freq%% : *}"
+	printf "%s\n" "${freq}"
+}
+
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	local _path && _path="$1"
@@ -173,14 +208,15 @@ __navita::ViewHistory() {
 	local line
 	local now_time && now_time="$( date +%s )"
 	while read -r line; do
-		local _path && _path="${line%% : *}"
+		local _path && _path="$(__navita::GetPathInHistory "${line}")"
+		# local _path && _path="${line%% : *}"
 		if [[ "${check_pwd}" == "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
 			check_pwd="n"
 			continue
 		fi
 		printf "%s" "${_path}" 
 
-		local access_time && access_time="${line##* : }"
+		local access_time && access_time="$(__navita::GetAccessEpochInHistory "${line}")"
 		local seconds_old && seconds_old="$(( now_time - access_time ))"
 		local days_old && days_old="$(( seconds_old/86400 ))"
 		local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
