@@ -46,10 +46,12 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 fi
 
 # Utility: Resolve to Relative path
+# Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	local _path && _path="$1"
 	printf "%s\n" "$(realpath -s --relative-to=. "${_path}")"
 }
+# }}}
 
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
