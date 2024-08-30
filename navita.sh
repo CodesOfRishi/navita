@@ -88,34 +88,91 @@ __navita::GetRelativePath() {
 }
 # }}}
 
+# Utility: Get RankScore for a path{{{
+__navita::GetRankScore() {
+	local curr_freq && curr_freq="${1?Navita: Frequency of the path is needed for this function!}"
+	local curr_access_epoch && curr_access_epoch="${2?Navita: Epoch time of the path is needed for this function!}"
+	local max_epoch && max_epoch="${3?Navita: Maximum epoch time from the history is needed for this function!}"
+
+	# decay rate
+	local k && k="0.1"
+	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
+	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
+
+	local RankScore && RankScore="$( echo "scale=10; l(${curr_freq} + 1) * e((-1 * ${k} * ${curr_age})/${max_age})" | bc -l )"
+	printf "%s\n" "${RankScore}"
+}
+# }}}
+
 # Utility: Update History{{{
 __navita::UpdatePathHistory() { 
-	__navita::UpdatePathHistory::AgeOutHistory() {
-		[[ ! -s "${NAVITA_HISTORYFILE}" ]] && return 0
-		local latest_epoch && latest_epoch="$(head -1 "${NAVITA_HISTORYFILE}")" && latest_epoch="${latest_epoch#* : }"
-		local earliest_epoch && earliest_epoch="$(tail -1 "${NAVITA_HISTORYFILE}")" && earliest_epoch="${earliest_epoch#* : }"
-		local D && D="$(( latest_epoch - earliest_epoch ))"
+	# First of all, check if PWD matches any regex entry from the ignore file, if it does, do nothing and return.
+	# Since the PWD was has been accessed at current time (now), store epoch time for now to a variable.
+	# This will also be the maximum epoch (or the latest access time) in history.
+	# 
+	# Now there's either of two possibilities - the PWD is already in the history OR PWD has been accessed for the first time
+	#
+	# If already in the history, get the specific line the PWD is present at, along with its line number and remove the specific line from the history.
+	# Update the RankScore of the remaining paths in the history, since the maximum epoch is changed to the current time (now).
+	# Increment the frequency for the PWD.
+	# Get the RankScore for PWD and add the new details for the PWD to the end of the history file.
+	# Sort the history file according to the RankScore of the paths.
+	#
+	# If not in the history, frequency for the PWD will be set to 1.
+	# Update the RankScore of the remaining paths in the history, since the maximum epoch is changed to the current time (now).
+	# Get the RankScore for PWD and add the new details for the PWD to the end of the history file.
+	# Sort the history file according to the RankScore of the paths.
 
-		while (( D > 2592000 )); do
-			sed -i '$d' "${NAVITA_HISTORYFILE}"
-			latest_epoch="$(head -1 "${NAVITA_HISTORYFILE}")"
-			earliest_epoch="$(tail -1 "${NAVITA_HISTORYFILE}")"
-			D="$(( latest_epoch - earliest_epoch ))"
-		done
+	# Update RankScore of History{{{
+	__navita::UpdatePathHistory::UpdateHistoryRankScore() {
+		# now_access_epoch should already be set to the maximum epoch (the latest access time) in history
+		local line_path
+		local line_access_epoch
+		local line_freq
+		local curr_score
+		local new_line
+		local line_no && line_no=1
+		while read -r line; do
+			line_path="$(__navita::GetPathInHistory "${line}")"
+			line_access_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
+			line_freq="$(__navita::GetFreqInHistory "${line}")"
+			curr_score="$(__navita::GetRankScore "${line_freq}" "${line_access_epoch}" "${now_access_epoch}")"
+
+			new_line="${line_path} : ${line_access_epoch} : ${line_freq} : ${curr_score}"
+			sed -i -e "${line_no} s|.*|${new_line}|" "${NAVITA_HISTORYFILE}"
+			(( line_no++ ))
+		done < "${NAVITA_HISTORYFILE}"
 	}
+	# }}}
 
+	# don't add paths that matches regex from the ignore file
 	while read -r pattern; do
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
 
-	if [[ ! -s "${NAVITA_HISTORYFILE}" ]]; then 
-		printf "%s : %d\n" "${PWD}" "$( date +%s )" > "${NAVITA_HISTORYFILE}"
-	else
-		sed -i "1i ${PWD} : $( date +%s )" "${NAVITA_HISTORYFILE}" 
-	fi
+	local now_access_epoch && now_access_epoch="$(date +%s)"
+	local hist_line && hist_line="$(grep -n -E "^${PWD} : " "${NAVITA_HISTORYFILE}")"
 
-	awk -i inplace -F " : " '!seen[$1]++' "${NAVITA_HISTORYFILE}" # remove duplicate paths
-	__navita::UpdatePathHistory::AgeOutHistory
+	if [[ -n "${hist_line}" ]]; then
+		local line_no && line_no="${hist_line%%:*}"
+		sed -i "${line_no}d" "${NAVITA_HISTORYFILE}"
+		unset line_no
+		hist_line="${hist_line#*:}"
+		local freq && freq="$(__navita::GetFreqInHistory "${hist_line}")" && \
+			(( freq++ ))
+
+		# update the rankscore of the paths history
+		__navita::UpdatePathHistory::UpdateHistoryRankScore
+	else
+		local freq && freq=1
+
+		# update the rankscore of the paths history
+		__navita::UpdatePathHistory::UpdateHistoryRankScore
+	fi
+	
+	# history format -> path : epoch : freq : score
+	printf "%s : %s : %s : %s\n" "${PWD}" "${now_access_epoch}" "${freq}" "$(__navita::GetRankScore "${freq}" "${now_access_epoch}" "${now_access_epoch}")" >> "${NAVITA_HISTORYFILE}"
+	sort -n -b -t':' -k4,4 --reverse "${NAVITA_HISTORYFILE}" --output="${NAVITA_HISTORYFILE}"
 }
 # }}}
 
