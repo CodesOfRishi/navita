@@ -45,14 +45,15 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
-# Uitility: Get a Path from an entry in history
+# Uitility: Get a Path from an entry in history{{{
 __navita::GetPathInHistory() {
 	# should be passed only a line from the history file
 	local line && line="${1}"
 	printf "%s\n" "${line%% : *}"
 }
+# }}}
 
-# Utility: Get Epoch access time of a path/entry in history
+# Utility: Get Epoch access time of a path/entry in history{{{
 __navita::GetAccessEpochInHistory() {
 	# can be passed a line from history file
 	# or only the path
@@ -65,8 +66,9 @@ __navita::GetAccessEpochInHistory() {
 	access_epoch="${access_epoch%% : *}"
 	printf "%s\n" "${access_epoch}"
 }
+# }}}
 
-# Utility: Get Frequency of a path/entry in history
+# Utility: Get Frequency of a path/entry in history{{{
 __navita::GetFreqInHistory() {
 	# can be passed a line from history file
 	# or only the path
@@ -80,6 +82,7 @@ __navita::GetFreqInHistory() {
 	freq="${freq%% : *}"
 	printf "%s\n" "${freq}"
 }
+# }}}
 
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
