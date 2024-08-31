@@ -376,7 +376,7 @@ __navita::NavigateParentDirs() {
 			else
 				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
 			fi
-		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
+		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
 	}
 
 	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
