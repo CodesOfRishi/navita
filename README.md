@@ -26,6 +26,16 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 <div align="center">
 
+### Usual Directory Change
+
+</div>
+
+**Synopsis:** `cd [string...]`
+
+Search directories in the *current working directory* and navigate to the selected one. If no match is found, Navita will search the history and directly navigate to the matching highest-ranked directory.
+
+<div align="center">
+
 ### Search & Traverse Child Directories
 
 </div>
@@ -43,7 +53,7 @@ Search subdirectories, and their subdirectories (and so on), and navigate to the
 </div>
 
 **Synopsis:** `cd (-S | --super-search) [string...]`<br>
-&nbsp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
+&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
 Search directories (1-level down) in parent directories and navigate to the selected one.
 
@@ -82,16 +92,6 @@ Switch between your current directory and the previous directory you were in.
 
 > [!NOTE]
 > `cd -` only works if you've used `cd` to change directories previously. If you haven't used `cd` before in the current shell, `cd -` won't do anything.
-
-<div align="center">
-
-### Usual Directory Change
-
-</div>
-
-**Synopsis:** `cd [string...]`
-
-Search directories in the *current working directory* and navigate to the selected one. If no match is found, Navita would search the history i.e., the same as the [*Search & Traverse History*](#search--traverse-history) feature.
 
 <div align="center">
 
@@ -170,8 +170,6 @@ By default, Navita will remember directories for a maximum of 30 days. Any direc
 - Navita will prioritize search results based on the position of the match within the directory path, giving preference to matches near the end and then considering the recency of the path.
 <!--- Navita has a few default annotations that are visible when using the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature. These include error, PWD, and LWD (last working directory) annotations.-->
 
-
-
 <div align="center">
 
 ## Dependencies
@@ -180,9 +178,9 @@ By default, Navita will remember directories for a maximum of 30 days. Any direc
 
 - [FZF](https://junegunn.github.io/fzf/)
 - [GNU Sed](https://sed.sourceforge.io/)
-- [GNU Gawk](https://www.gnu.org/software/gawk/)
 - [GNU Grep](https://www.gnu.org/software/grep/)
-- [GNU Findutils](https://www.gnu.org/software/findutils/) (basically the `find` command)
+- [GNU bc](https://www.gnu.org/software/bc/)
+- [GNU Find Utilities](https://www.gnu.org/software/findutils/) (basically the `find` command)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
 
 <div align="center">
@@ -246,6 +244,9 @@ source "path/to/the/navita.sh"
 - **NAVITA_IGNOREFILE**
     - The file containing regular expression patterns to ignore matching paths from being added to the history.
     - The path to the file is `$NAVITA_CONFIG_DIR/navita-ignore`.
+- **NAVITA_SHOW_AGE**
+    - It defaults to `n`, i.e., don't show an age annotation next to the paths while searching and traversing from history.
+    - Change it to `y` or `Y`, to show an age annotation beside the paths.
 
 - **NAVITA_VERSION**
     - Navita's version information.
