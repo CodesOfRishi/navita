@@ -353,7 +353,17 @@ __navita::CDGeneral() {
 
 	case "$?" in
 		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
-		1) __navita::NavigateHistory "${@}";;
+		1) 
+			# the implementation should be as close to the NavigateHistory feature as possible, with the only difference being that this automatically accepts the very first matching highest ranked directory
+			local path_returned && path_returned="$( __navita::ViewHistory "n" "n" | fzf +s --tiebreak=end,index --ansi --nth=1 --with-nth=1 --delimiter=" ❰ " --exact --filter="${*}" | head -1 )"
+			
+			if [[ -n "${path_returned}" ]]; then
+				path_returned="${path_returned%% ❰ *}"; builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory
+			else
+				printf "Navita(info): None matched!\n" >&2
+				return 1
+			fi
+			;;
 		*) return $?;;
 	esac
 }
