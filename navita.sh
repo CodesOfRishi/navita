@@ -195,7 +195,7 @@ __navita::CleanHistory() {
 
 		local tempfile && tempfile=$( mktemp )
 		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
-		> "${NAVITA_HISTORYFILE}"
+		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if [[ "${exitcode}" -eq 0 ]]; then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
