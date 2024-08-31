@@ -132,6 +132,8 @@ __navita::UpdatePathHistory() {
 		local curr_score
 		local new_line
 		local line_no && line_no=1
+		local temp_hist && temp_hist="$(mktemp)"
+		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${temp_hist}"
 		while read -r line; do
 			line_path="$(__navita::GetPathInHistory "${line}")"
 			line_access_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
@@ -141,7 +143,8 @@ __navita::UpdatePathHistory() {
 			new_line="${line_path} : ${line_access_epoch} : ${line_freq} : ${curr_score}"
 			sed -i -e "${line_no} s|.*|${new_line}|" "${NAVITA_HISTORYFILE}"
 			(( line_no++ ))
-		done < "${NAVITA_HISTORYFILE}"
+		done < "${temp_hist}"
+		$( type -apf rm | head -1 ) --interactive=never "${temp_hist}"
 	}
 	# }}}
 
