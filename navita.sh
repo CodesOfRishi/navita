@@ -308,7 +308,7 @@ __navita::NavigateHistory() {
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
-		1) printf "Navita(info): None matched!\n"; return 1;;
+		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
@@ -326,7 +326,7 @@ __navita::NavigateChildDirs() {
 
 	case "$?" in
 		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
-		1) printf "Navita(info): None matched!\n"; return 1;;
+		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
@@ -383,7 +383,7 @@ __navita::NavigateParentDirs() {
 
 	case "$?" in
 		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
-		1) printf "Navita(info): None matched!\n"; return 1;;
+		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
