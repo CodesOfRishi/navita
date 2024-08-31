@@ -22,6 +22,7 @@ export NAVITA_VERSION="Alpha"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
+export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-n}"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -267,30 +268,32 @@ __navita::CleanHistory() {
 
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
-	local check_pwd="${1:-n}"
+	local show_pwd && show_pwd="${1:-y}"
+	local show_age && show_age="${2:-y}"
 	local line
 	local now_time && now_time="$( date +%s )"
 	while read -r line; do
 		local _path && _path="$(__navita::GetPathInHistory "${line}")"
-		# local _path && _path="${line%% : *}"
-		if [[ "${check_pwd}" == "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
-			check_pwd="n"
+		if [[ "${show_pwd}" != "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
+			show_pwd="y"
 			continue
 		fi
 		printf "%s" "${_path}" 
 
-		local access_time && access_time="$(__navita::GetAccessEpochInHistory "${line}")"
-		local seconds_old && seconds_old="$(( now_time - access_time ))"
-		local days_old && days_old="$(( seconds_old/86400 ))"
-		local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
-		local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
+		if [[ "${show_age}" =~ ^(y|Y)$ ]]; then
+			local access_time && access_time="$(__navita::GetAccessEpochInHistory "${line}")"
+			local seconds_old && seconds_old="$(( now_time - access_time ))"
+			local days_old && days_old="$(( seconds_old/86400 ))"
+			local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
+			local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
 
-		local path_age=""
-		[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
-		[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
-		[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
+			local path_age=""
+			[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
+			[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
+			[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
 
-		[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
+			[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
+		fi
 
 		local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
 		[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
@@ -301,7 +304,7 @@ __navita::ViewHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory "y" | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned=$( __navita::ViewHistory "n" "${NAVITA_SHOW_AGE}" | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
