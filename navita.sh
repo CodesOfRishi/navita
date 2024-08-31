@@ -458,6 +458,3 @@ __navita__() {
 		*) __navita::CDGeneral "${navita_opt}" "${navita_args[@]}";;
 	esac
 }
-
-# Update the history with the current working directory when opening a new shell
-__navita::UpdatePathHistory
