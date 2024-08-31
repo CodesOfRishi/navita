@@ -200,7 +200,7 @@ __navita::CleanHistory() {
 		# if success, copy tempfile to historyfile.bak & remove the tempfile
 		# if failed, remove the tempfile
 
-		local tempfile && tempfile=$( mktemp )
+		local tempfile && tempfile="$( mktemp )"
 		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
@@ -237,7 +237,7 @@ __navita::CleanHistory() {
 		local line_no
 		for line_no in "${line_no_todel[@]}"; do
 			local path_to_be_deleted && path_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )" && path_to_be_deleted="${path_to_be_deleted%% : *}"
-			local error && error="$( __navita::ValidateDirectory "${path_to_be_deleted}" )" && error=${error#find: }
+			local error && error="$( __navita::ValidateDirectory "${path_to_be_deleted}" )" && error="${error#find: }"
 
 			sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
 				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${path_to_be_deleted}" "${error}" && \
@@ -304,7 +304,7 @@ __navita::ViewHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned=$( __navita::ViewHistory "n" "${NAVITA_SHOW_AGE}" | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )
+	local path_returned && path_returned="$( __navita::ViewHistory "n" "${NAVITA_SHOW_AGE}" | fzf --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) path_returned="${path_returned%% ❰ *}"; builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
