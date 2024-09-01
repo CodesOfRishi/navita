@@ -98,12 +98,11 @@ __navita::GetRankScore() {
 	local curr_access_epoch && curr_access_epoch="${2?Navita: Epoch time of the path is needed for this function!}"
 	local max_epoch && max_epoch="${3?Navita: Maximum epoch time from the history is needed for this function!}"
 
-	# decay rate
-	local k && k="0.1"
 	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 
-	printf "%s\n" "$( echo "scale=10; l(${curr_freq} + 1) * e((-1 * ${k} * ${curr_age})/${max_age})" | bc -l )"
+	# decay rate = 0.1
+	printf "%s\n" "$( echo "scale=10; l(${curr_freq} + 1) * e((-1 * 0.1 * ${curr_age})/${max_age})" | bc -l )"
 }
 # }}}
 
