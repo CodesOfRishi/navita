@@ -103,8 +103,7 @@ __navita::GetRankScore() {
 	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 
-	local RankScore && RankScore="$( echo "scale=10; l(${curr_freq} + 1) * e((-1 * ${k} * ${curr_age})/${max_age})" | bc -l )"
-	printf "%s\n" "${RankScore}"
+	printf "%s\n" "$( echo "scale=10; l(${curr_freq} + 1) * e((-1 * ${k} * ${curr_age})/${max_age})" | bc -l )"
 }
 # }}}
 
