@@ -331,7 +331,9 @@ __navita::CDGeneral() {
 			;;
 		1) 
 			# automatically accepts the very first matching highest ranked directory
-			local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${*}" | head -1 )"
+			local fzf_query && fzf_query="${*}"
+			[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
+			local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
 			
 			if [[ -n "${path_returned}" ]]; then
 				builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
