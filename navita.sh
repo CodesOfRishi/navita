@@ -50,7 +50,7 @@ fi
 __navita::GetPathInHistory() {
 	# should be passed only a line from the history file
 	local line && line="${1}"
-	printf "%s\n" "${line%% : *}"
+	printf "%s\n" "${line%%:*}"
 }
 # }}}
 
@@ -60,11 +60,11 @@ __navita::GetAccessEpochInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local access_epoch="${1}"
-	[[ -d "${1}" ]] && access_epoch="$(grep -m 1 -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && access_epoch="$(grep -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
 	[[ -z "${access_epoch}" ]] && return 1
 	
-	access_epoch="${access_epoch#* : }"
-	access_epoch="${access_epoch%% : *}"
+	access_epoch="${access_epoch#*:}"
+	access_epoch="${access_epoch%%:*}"
 	printf "%s\n" "${access_epoch}"
 }
 # }}}
@@ -75,12 +75,12 @@ __navita::GetFreqInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local freq="${1}"
-	[[ -d "${1}" ]] && freq="$(grep -m 1 -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && freq="$(grep -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
 	[[ -z "${freq}" ]] && return 1
 
-	freq="${freq#* : }"
-	freq="${freq#* : }"
-	freq="${freq%% : *}"
+	freq="${freq#*:}"
+	freq="${freq#*:}"
+	freq="${freq%%:*}"
 	printf "%s\n" "${freq}"
 }
 # }}}
@@ -138,11 +138,11 @@ __navita::UpdatePathHistory() {
 			(( history_size-- ))
 			continue
 		fi
-		sed -i -e "${i} s|.*|${curr_path} : ${curr_epoch} : ${curr_freq} : $(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")|" "${NAVITA_HISTORYFILE}"
+		sed -i -e "${i} s|.*|${curr_path}:${curr_epoch}:${curr_freq}:$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")|" "${NAVITA_HISTORYFILE}"
 		(( i++ ))
 	done
 
-	(( pwd_found == 1 )) && printf "%s : %s : %s : %s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${NAVITA_HISTORYFILE}"
+	(( pwd_found == 1 )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${NAVITA_HISTORYFILE}"
 	sort -n -b -t':' -k4,4 --reverse "${NAVITA_HISTORYFILE}" --output="${NAVITA_HISTORYFILE}"
 }
 # }}}
@@ -189,7 +189,7 @@ __navita::CleanHistory() {
 		local line
 		
 		while read -r line; do
-			line="${line%% : *}"
+			line="${line%%:*}"
 			local error && error="$( __navita::ValidateDirectory "${line}" )"
 			if [[ -n "${error}" ]]; then 
 				line_no_todel+=( "${line_no}" )
@@ -200,7 +200,7 @@ __navita::CleanHistory() {
 		local index_reduced=0
 		local line_no
 		for line_no in "${line_no_todel[@]}"; do
-			local path_to_be_deleted && path_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )" && path_to_be_deleted="${path_to_be_deleted%% : *}"
+			local path_to_be_deleted && path_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )" && path_to_be_deleted="${path_to_be_deleted%%:*}"
 			local error && error="$( __navita::ValidateDirectory "${path_to_be_deleted}" )" && error="${error#find: }"
 
 			sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
