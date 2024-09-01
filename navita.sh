@@ -60,7 +60,7 @@ __navita::GetAccessEpochInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local access_epoch="${1}"
-	[[ -d "${1}" ]] && access_epoch="$(grep -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && access_epoch="$(grep -m 1 -E "^${1} : " "${NAVITA_HISTORYFILE}")"
 	[[ -z "${access_epoch}" ]] && return 1
 	
 	access_epoch="${access_epoch#* : }"
@@ -75,7 +75,7 @@ __navita::GetFreqInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local freq="${1}"
-	[[ -d "${1}" ]] && freq="$(grep -E "^${1} : " "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && freq="$(grep -m 1 -E "^${1} : " "${NAVITA_HISTORYFILE}")"
 	[[ -z "${freq}" ]] && return 1
 
 	freq="${freq#* : }"
@@ -158,7 +158,7 @@ __navita::UpdatePathHistory() {
 	done < "${NAVITA_IGNOREFILE}"
 
 	local now_access_epoch && now_access_epoch="$(date +%s)"
-	local hist_line && hist_line="$(grep -n -E "^${PWD} : " "${NAVITA_HISTORYFILE}")"
+	local hist_line && hist_line="$(grep -m 1 -n -E "^${PWD} : " "${NAVITA_HISTORYFILE}")"
 
 	if [[ -n "${hist_line}" ]]; then
 		local line_no && line_no="${hist_line%%:*}"
