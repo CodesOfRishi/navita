@@ -34,6 +34,9 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 Search directories in the *current working directory* and navigate to the selected one. If no match is found, Navita will search the history and directly navigate to the matching highest-ranked directory.
 
+> [!NOTE]
+> Navita will always try to match the last word in the input string with the end of the paths in the history.
+
 <div align="center">
 
 ### Search & Traverse Child Directories
@@ -65,7 +68,7 @@ Search directories (1-level down) in parent directories and navigate to the sele
 
 **Synopsis:** `cd -- [string...]`
 
-Search recently visited directory paths and navigate to the selected one. This feature can still be used by omitting the `--` option if the provided string does not match any directory paths in your PWD. See the [*Usual Directory Change*](#usual-directory-change) feature.
+Search recently visited directory paths and navigate to the selected one.
 
 > [!NOTE]
 > Visit a few directories after a clean or initial installation to build a history.
@@ -128,10 +131,36 @@ Navita supports Tab completion for its options and directories in your PWD.
 </div>
 
 - Prevent paths that match any regular expression pattern in the `$NAVITA_IGNOREFILE` file from being added to the history.
-- Navita does not add the .git directory to the history by default.
+- Navita automatically prevents the `.git` and `$HOME` directories from being added to the history by default.
+
+
 
 > [!NOTE]
 > Even if a path was part of the history prior to its inclusion in the `$NAVITA_IGNOREFILE` using a regular expression pattern, it will still be visible, but Navita will cease to boost its ranking.
+
+<div align="center">
+
+### Frecency Directory Ranking
+
+</div>
+
+The Frecency algorithm ranks directories based on a combination of two factors: 
+- frequency (how often a directory is accessed) and, 
+- recency (how recently it was accessed). 
+
+This ensures that the most relevant directories—those accessed both frequently and recently—are ranked higher, while directories with older access are deprioritized. 
+
+#### How it Works
+
+`RankScore = ln(F+1) * e^(-k * (T1/T2))`
+
+where:
+- F is the frequency of access.
+- T1 is the time difference between the most recent access and the current directory.
+- T2 is the maximum time difference allowed (default is 30 days).
+- k is the decay factor, controls the rate at which the weight of older accesses decreases.
+- The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
+- The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
 
 <div align="center">
 
