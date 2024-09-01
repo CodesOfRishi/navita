@@ -270,7 +270,11 @@ __navita::NavigateHistory() {
 	local path_returned && path_returned="$( __navita::ViewHistory "n" "${NAVITA_SHOW_AGE}" | fzf +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )"
 
 	case "$?" in
-		0) path_returned="${path_returned%% ❰ *}"; builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory;;
+		0) 
+			path_returned="${path_returned%% ❰ *}"
+			builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
 		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
@@ -279,7 +283,8 @@ __navita::NavigateHistory() {
 
 # ── Feature: ToggleLastVisits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
-	builtin cd "${__the_builtin_cd_option[@]}" - && __navita::UpdatePathHistory 
+	builtin cd "${__the_builtin_cd_option[@]}" - || return $?
+	(&>/dev/null __navita::UpdatePathHistory &)
 }
 # }}}
 
@@ -288,7 +293,10 @@ __navita::NavigateChildDirs() {
 	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' 2> /dev/null | fzf --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
-		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
 		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
@@ -304,24 +312,30 @@ __navita::CDGeneral() {
 
 	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
-		builtin cd "${__the_builtin_cd_option[@]}" "${HOME}" && __navita::UpdatePathHistory 
-		return $?
+		builtin cd "${__the_builtin_cd_option[@]}" "${HOME}" || return $?
+		(&>/dev/null __navita::UpdatePathHistory &) 
+		return 0
 	elif [[ -d "${*}" ]]; then
 		# argument provided by the user is a valid directory path
-		builtin cd "${__the_builtin_cd_option[@]}" -- "${*}" && __navita::UpdatePathHistory 
-		return $?
+		builtin cd "${__the_builtin_cd_option[@]}" -- "${*}" || return $?
+		(&>/dev/null __navita::UpdatePathHistory &) 
+		return 0
 	fi
 
 	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d 2> /dev/null | fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
-		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
 		1) 
 			# automatically accepts the very first matching highest ranked directory
 			local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${*}" | head -1 )"
 			
 			if [[ -n "${path_returned}" ]]; then
-				builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" && __navita::UpdatePathHistory
+				builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
+				(&>/dev/null __navita::UpdatePathHistory &)
 			else
 				printf "Navita(info): None matched!\n" >&2
 				return 1
@@ -355,7 +369,10 @@ __navita::NavigateParentDirs() {
 	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
 
 	case "$?" in
-		0) builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" && __navita::UpdatePathHistory;;
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
 		1) printf "Navita(info): None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
