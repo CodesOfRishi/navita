@@ -119,35 +119,32 @@ __navita::UpdatePathHistory() {
 	done < "${NAVITA_IGNOREFILE}"
 
 	local now_epoch && now_epoch="$(date +%s)"
-	local history_size && history_size="$(wc -l "${NAVITA_HISTORYFILE}" | cut -d ' ' -f 1)"
+	local history_size && history_size="$(wc -l "${NAVITA_HISTORYFILE}")" && history_size="${history_size%% *}"
 
-	local pwd_found=1
-	local curr_line
 	local curr_path
-	local curr_epoch
 	local curr_freq
-	local i && i=1
-	while (( i <= history_size )); do
-		curr_line="$(sed -n "$i"p "${NAVITA_HISTORYFILE}")"
-		curr_path="$(__navita::GetPathInHistory "${curr_line}")"
-		curr_freq="$(__navita::GetFreqInHistory "${curr_line}")"
-		curr_epoch="$(__navita::GetAccessEpochInHistory "${curr_line}")"
+	local curr_epoch
+	local pwd_not_found=1
 
-		if (( pwd_found == 1 )) && [[ "${PWD}" == "${curr_path}" ]]; then
-			curr_epoch="${now_epoch}"
-			(( curr_freq++ ))
-			pwd_found=0
-		elif [[ ! -d "${curr_path}" ]] || [[ ! -x "${curr_path}" ]]; then
-			sed -i "${i}"d "${NAVITA_HISTORYFILE}"
-			(( history_size-- ))
+	: > "${__navita_temp_history}"
+	while read -r line; do
+		curr_path="$(__navita::GetPathInHistory "${line}")"
+		curr_freq="$(__navita::GetFreqInHistory "${line}")"
+		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
+
+		if [[ ! -d "${curr_path}" ]] || [[ ! -x "${curr_path}" ]]; then
 			continue
+		elif (( pwd_not_found )) && [[ "${PWD}" == "${curr_path}" ]]; then
+			(( curr_freq++ ))
+			curr_epoch="${now_epoch}"
+			pwd_not_found=0
 		fi
-		sed -i -e "${i} s|.*|${curr_path}:${curr_epoch}:${curr_freq}:$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")|" "${NAVITA_HISTORYFILE}"
-		(( i++ ))
-	done
 
-	(( pwd_found == 1 )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${NAVITA_HISTORYFILE}"
-	sort -n -b -t':' -k4,4 --reverse "${NAVITA_HISTORYFILE}" --output="${NAVITA_HISTORYFILE}"
+		printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
+	done < "${NAVITA_HISTORYFILE}"
+
+	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
+	sort -n -b -t':' -k4,4 --reverse "${__navita_temp_history}" --output="${NAVITA_HISTORYFILE}"
 }
 # }}}
 
