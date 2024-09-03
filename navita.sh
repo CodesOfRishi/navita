@@ -106,8 +106,9 @@ __navita::GetRankScore() {
 
 	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
+	local x && (( x = max_age - curr_age )) && (( x = x < 0 ? 0 : x ))
 
-	printf "%s\n" "$( echo "scale=10; l((${curr_freq}*$((max_age - curr_age < 0 ? 0 : (max_age - curr_age)))/${max_age}) + 1) * e((-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age})/${max_age})" | bc -l )"
+	printf "%s\n" "$(bc -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})")"
 }
 # }}}
 
