@@ -182,33 +182,24 @@ __navita::CleanHistory() {
 
 	# ── Feature: RemoveInvalidPaths ───────────────────────────────────────{{{
 	__navita::CleanHistory::RemoveInvalidPaths() {
-		# NOTE:
-		# the line numbers that needs to be deleted from the history file, will be stored in an array
-		# using sed, delete those lines in-place
+		# clear the temporary file
+		: > "${__navita_temp_history}"
 
-		local -a line_no_todel
-		local line_no=1
-		local line
-		
+		local curr_path
+		local path_error
+
 		while read -r line; do
-			line="${line%%:*}"
-			local error && error="$( __navita::ValidateDirectory "${line}" )"
-			if [[ -n "${error}" ]]; then 
-				line_no_todel+=( "${line_no}" )
+			curr_path="$(__navita::GetPathInHistory "${line}")"
+			path_error="$(__navita::ValidateDirectory "${curr_path}")"
+
+			if [[ -n "${path_error}" ]]; then
+				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${curr_path}" "${path_error#find: }"
+			else
+				printf "%s\n" "${line}" >> "${__navita_temp_history}"
 			fi
-			(( line_no++ ))
 		done < "${NAVITA_HISTORYFILE}"
 
-		local index_reduced=0
-		local line_no
-		for line_no in "${line_no_todel[@]}"; do
-			local path_to_be_deleted && path_to_be_deleted="$( sed -n "$(( line_no - index_reduced ))p" "${NAVITA_HISTORYFILE}" )" && path_to_be_deleted="${path_to_be_deleted%%:*}"
-			local error && error="$( __navita::ValidateDirectory "${path_to_be_deleted}" )" && error="${error#find: }"
-
-			sed -i -e "$(( line_no - index_reduced ))d" "${NAVITA_HISTORYFILE}" && \
-				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${path_to_be_deleted}" "${error}" && \
-				(( index_reduced++ ))
-		done
+		$( type -apf cp | head -1 ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}" 
 	}
 	# }}}
 
