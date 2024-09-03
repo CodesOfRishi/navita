@@ -218,15 +218,14 @@ __navita::CleanHistory() {
 	read -rp "Choice? (1 or 2): " user_choice
 	printf "\n"
 
-	if (( user_choice == 1 )); then
-		__navita::CleanHistory::RemoveInvalidPaths
-	elif (( user_choice == 2 )); then
-		__navita::CleanHistory::EmptyHistoryFile
-	else
-		printf "Invalid input!\n" 1>&2
-		return 1
-	fi
-	return $?
+	case "${user_choice}" in
+		1) __navita::CleanHistory::RemoveInvalidPaths;;
+		2) __navita::CleanHistory::EmptyHistoryFile;;
+		*) 
+			printf "Invalid input!\n" >&2
+			return 1
+			;;
+	esac
 }
 # }}}
 
