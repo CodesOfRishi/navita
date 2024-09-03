@@ -8,23 +8,25 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Dependencies](#dependencies) •
 [Installation](#installation) •
 [Environment Variables](#environment-variables) •
+[Known Caveats](#known-caveats) •
 [Concept/Motivation](#conceptmotivation) •
 [Contributing to Navita](#contributing-to-navita) •
 [License](#license)
 
-</div>
 
 **Tired of typing out long, complex directory paths?** Navita is here to simplify your command-line experience! The powerful Bash tool uses fuzzy search to get you to your destination in seconds.
 
 **Forget about tedious typing.** You can instantly find and jump to any directory, no matter how deeply nested. Navita is a great tool for boosting your productivity and saving you valuable time.
 
-<div align="center">
+</div>
 
-## Features
+<div align="center"> 
+
+## Features 
 
 </div>
 
-<div align="center">
+<div align="center"> 
 
 ### Usual Directory Change
 
@@ -32,12 +34,12 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Synopsis:** `cd [string...]`
 
-Search directories in the *current working directory* and navigate to the selected one. If no match is found, Navita will search the history and directly navigate to the matching highest-ranked directory.
+Search through directories in the current working directory and select the desired one. In the absence of a match, Navita will search the history and directly navigate to the highest-ranked matching directory. You can also navigate directories the same way you would with the usual built-in cd command.
 
 > [!NOTE]
-> Navita will always try to match the last word in the input string with the end of the paths in the history.
+> Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.
 
-<div align="center">
+<div align="center"> 
 
 ### Search & Traverse Child Directories
 
@@ -47,20 +49,19 @@ Search directories in the *current working directory* and navigate to the select
 
 Search subdirectories, and their subdirectories (and so on), and navigate to the selected one.
 
-
-
-<div align="center">
+<div align="center"> 
 
 ### Search & Traverse Parent Directories
 
 </div>
+
 
 **Synopsis:** `cd (-S | --super-search) [string...]`<br>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
 Search directories (1-level down) in parent directories and navigate to the selected one.
 
-<div align="center">
+<div align="center"> 
 
 ### Search & Traverse History
 
@@ -68,12 +69,12 @@ Search directories (1-level down) in parent directories and navigate to the sele
 
 **Synopsis:** `cd -- [string...]`
 
-Search recently visited directory paths and navigate to the selected one.
+Search your recently visited directories and select the desired one. The current working directory will not be considered in the search.
 
 > [!NOTE]
 > Visit a few directories after a clean or initial installation to build a history.
 
-<div align="center">
+<div align="center"> 
 
 ### View History
 
@@ -83,7 +84,7 @@ Search recently visited directory paths and navigate to the selected one.
 
 View recently visited directory paths.
 
-<div align="center">
+<div align="center"> 
 
 ### Toggle Current & Previous Directories
 
@@ -96,7 +97,7 @@ Switch between your current directory and the previous directory you were in.
 > [!NOTE]
 > `cd -` only works if you've used `cd` to change directories previously. If you haven't used `cd` before in the current shell, `cd -` won't do anything.
 
-<div align="center">
+<div align="center"> 
 
 ### Clean-up History
 
@@ -104,9 +105,9 @@ Switch between your current directory and the previous directory you were in.
 
 **Synopsis:** `cd (-c | --cleanup)`
 
-You can choose to either remove invalid paths from the history or clear the entire history.
+You can choose to either remove invalid paths from the history or clear the entire history. However, Navita will automatically remove non-existent and non-executable directories.
 
-<div align="center">
+<div align="center"> 
 
 ### Version Information
 
@@ -116,7 +117,7 @@ You can choose to either remove invalid paths from the history or clear the enti
 
 View Navita's version information.
 
-<div align="center">
+<div align="center"> 
 
 ### Tab Completion
 
@@ -124,7 +125,8 @@ View Navita's version information.
 
 Navita supports Tab completion for its options and directories in your PWD.
 
-<div align="center">
+
+<div align="center"> 
 
 ### Path Exclusion for History
 
@@ -138,7 +140,7 @@ Navita supports Tab completion for its options and directories in your PWD.
 > [!NOTE]
 > Even if a path was part of the history prior to its inclusion in the `$NAVITA_IGNOREFILE` using a regular expression pattern, it will still be visible, but Navita will cease to boost its ranking.
 
-<div align="center">
+<div align="center"> 
 
 ### Frecency Directory Ranking
 
@@ -150,29 +152,31 @@ The Frecency algorithm ranks directories based on a combination of two factors:
 
 This ensures that the most relevant directories—those accessed both frequently and recently—are ranked higher, while directories with older access are deprioritized. 
 
-#### How it Works
+<details>
+<summary>How it Works?</summary> 
 
-`RankScore = ln(F+1) * e^(-k * (T1/T2))`
+$$
+\text{Score} = \ln(\frac{F \times (T_2-T_1)}{T_2}+1) \times e^{(-k \times (T_1/T_2))}
+$$
 
 where:
 - F is the frequency of access.
 - T1 is the time difference between the most recent access and the current directory.
-- T2 is the maximum time difference allowed (default is 30 days).
-- k is the decay factor, controls the rate at which the weight of older accesses decreases.
+- T2 is the maximum time difference allowed (90 days).
+- k controls the rate at which the weight of older accesses decreases. A higher value results in a faster decay rate. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
 - The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
 - The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
 
-<div align="center">
+</details>
+
+<div align="center"> 
 
 ### Aging
 
 </div>
 
-By default, Navita will remember directories for a maximum of 30 days. Any directories that have not been accessed in over 30 days will be forgotten. This value can be changed using the `NAVITA_MAX_AGE` environment variable.
-
-> [!NOTE]
-> For Navita, age is relative to the most recently accessed directory.
-> For example, if the most recently accessed directory was accessed at time `a` and another directory was accessed at time `(a+x)`, then the age of the other directory is `x` time units.
+- By default, Navita will remember directories for a maximum of 90 days. Any directories that have not been accessed in over 90 days will be forgotten. This value can be changed using the `NAVITA_MAX_AGE` environment variable.
+- For Navita, age is relative to the most recently accessed directory. For example, if the most recently accessed directory was accessed at time `a` and another directory was accessed at time `(a+x)`, then the age of the other directory is `x` time units.
 
 <!--<div align="center">-->
 <!---->
@@ -184,22 +188,18 @@ By default, Navita will remember directories for a maximum of 30 days. Any direc
 <!---->
 <!--- Annotate a specific directory path with a note or comment that will appear in the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature.-->
 
-<div align="center">
+<div align="center"> 
 
 ### Additional Info
 
 </div>
 
-- For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk.
-    - To make Navita *always* resolve symbolic links, check the `NAVITA_FOLLOW_ACTUAL_PATH` environment variable.
+- For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk. To make Navita *always* resolve symbolic links, check the `NAVITA_FOLLOW_ACTUAL_PATH` environment variable.
 
 > [!NOTE]
 > If this option is used, it should be the very first option given to Navita.
 
-- Navita will prioritize search results based on the position of the match within the directory path, giving preference to matches near the end and then considering the recency of the path.
-<!--- Navita has a few default annotations that are visible when using the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature. These include error, PWD, and LWD (last working directory) annotations.-->
-
-<div align="center">
+<div align="center"> 
 
 ## Dependencies
 
@@ -212,7 +212,7 @@ By default, Navita will remember directories for a maximum of 30 days. Any direc
 - [GNU Find Utilities](https://www.gnu.org/software/findutils/) (basically the `find` command)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
 
-<div align="center">
+<div align="center"> 
 
 ## Installation
 
@@ -234,7 +234,7 @@ curl <raw.githubusercontent.com url to navita.sh...> --output navita.sh
 source "path/to/the/navita.sh"
 ```
 
-<div align="center">
+<div align="center"> 
 
 ## Environment Variables
 
@@ -264,7 +264,7 @@ source "path/to/the/navita.sh"
 
 - **NAVITA_MAX_AGE**
     - Specifies maximum retention period for a directory path since last access.
-    - The default value is `30` i.e., 30 days.
+    - The default value is `90` i.e., 90 days.
 
 - **NAVITA_RELATIVE_PARENT_PATH**
     - It defaults to `y` i.e., show the resolved parent paths relative to PWD in *Search & Traverse Parent Directories* feature.
@@ -276,11 +276,25 @@ source "path/to/the/navita.sh"
 - **NAVITA_SHOW_AGE**
     - It defaults to `n`, i.e., don't show an age annotation next to the paths while searching and traversing from history.
     - Change it to `y` or `Y`, to show an age annotation beside the paths.
+- **NAVITA_DECAY_FACTOR**
+    - The rate at which the score of older accesses decreases. A higher value results in a faster decay rate.
+    - It defaults to `6`.
+
+> [!WARNING]
+> The decay factor should always be positive. Only adjust the decay factor if you are confident in the algorithm's behavior with the new value.
 
 - **NAVITA_VERSION**
     - Navita's version information.
 
-<div align="center">
+<div align="center"> 
+
+## Known Caveats
+
+</div>
+
+- [FZF Issue #3983](https://github.com/junegunn/fzf/issues/3983)
+
+<div align="center"> 
 
 ## Concept/Motivation
 
@@ -290,9 +304,13 @@ source "path/to/the/navita.sh"
 - KISS&E - Keep It Simple, Straightforward & Efficient.
 - No feature bloating.
 
-<div align="center">
+<div align="center"> 
 
 ## Contributing to Navita
+
+</div>
+
+<div align="center"> 
 
 ### Reporting Issues
 
@@ -300,7 +318,7 @@ source "path/to/the/navita.sh"
 
 If you encounter any bugs or issues while using Navita, please open an issue on the Navita GitHub repository. Provide as much detail as possible, including steps to reproduce the issue and any relevant error messages.
 
-<div align="center">
+<div align="center"> 
 
 ### Contributing Code
 
@@ -314,6 +332,10 @@ I welcome contributions from the community! If you'd like to contribute, please:
 > [!WARNING]
 > Please do not submit pull requests to the main branch.
 
+<div align="center"> 
+
 ## License
+
+</div>
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) for details.
