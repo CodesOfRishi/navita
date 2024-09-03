@@ -232,6 +232,7 @@ __navita::ViewHistory() {
 	while read -r line; do
 		local _path && _path="$(__navita::GetPathInHistory "${line}")"
 		if [[ "${show_pwd}" != "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
+			# setting this to 'y', since pwd only needs to be checked once
 			show_pwd="y"
 			continue
 		fi
