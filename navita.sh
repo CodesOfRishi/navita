@@ -23,6 +23,7 @@ export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
 export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-n}"
+export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-6}"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -102,7 +103,7 @@ __navita::GetRankScore() {
 	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 
-	printf "%s\n" "$( echo "scale=10; l((${curr_freq}*$((max_age - curr_age < 0 ? 0 : (max_age - curr_age)))/${max_age}) + 1) * e((-1 * 6 * ${curr_age})/${max_age})" | bc -l )"
+	printf "%s\n" "$( echo "scale=10; l((${curr_freq}*$((max_age - curr_age < 0 ? 0 : (max_age - curr_age)))/${max_age}) + 1) * e((-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age})/${max_age})" | bc -l )"
 }
 # }}}
 
