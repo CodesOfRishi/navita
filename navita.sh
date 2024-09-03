@@ -168,7 +168,7 @@ __navita::CleanHistory() {
 		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
-		if [[ "${exitcode}" -eq 0 ]]; then 
+		if (( exitcode == 0 )); then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			$( type -apf cp | head -1 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
@@ -218,9 +218,9 @@ __navita::CleanHistory() {
 	read -rp "Choice? (1 or 2): " user_choice
 	printf "\n"
 
-	if [[ "${user_choice}" -eq 1 ]]; then
+	if (( user_choice == 1 )); then
 		__navita::CleanHistory::RemoveInvalidPaths
-	elif [[ "${user_choice}" -eq 2 ]]; then
+	elif (( user_choice == 2 )); then
 		__navita::CleanHistory::EmptyHistoryFile
 	else
 		printf "Invalid input!\n" 1>&2
@@ -252,9 +252,9 @@ __navita::ViewHistory() {
 			local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
 
 			local path_age=""
-			[[ "${days_old}" -gt 0 ]] && path_age="${days_old}d"
-			[[ "${hours_old}" -gt 0 ]] && path_age="${path_age}${hours_old}h"
-			[[ "${minutes_old}" -gt 0 ]] && path_age="${path_age}${minutes_old}m"
+			(( days_old > 0 )) && path_age="${days_old}d"
+			(( hours_old > 0 )) && path_age="${path_age}${hours_old}h"
+			(( minutes_old > 0 )) && path_age="${path_age}${minutes_old}m"
 
 			[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
 		fi
@@ -390,7 +390,7 @@ __navita::Version() {
 
 # ── Feature: TabCompletion ────────────────────────────────────────────{{{
 __navita::completions() {
-	if [[ "${COMP_CWORD}" -eq 1 ]] && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
+	if (( COMP_CWORD == 1 )) && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
 		local navita_opts && navita_opts="$( printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n" "-" "--" "-H" "--history" "-c" "--clean" "-s" "--sub-search" "-S" "--super-search" "-v" "--version" | \
 			fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up )"
 
