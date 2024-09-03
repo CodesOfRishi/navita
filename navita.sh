@@ -25,6 +25,10 @@ export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
 export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-n}"
 export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-6}"
 
+# temporary file for data manipulation for the history file
+export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
+: > "${__navita_temp_history}"
+
 alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── Create data file(s) for Navita ────────────────────────────────────
@@ -164,16 +168,17 @@ __navita::CleanHistory() {
 		# if success, copy tempfile to historyfile.bak & remove the tempfile
 		# if failed, remove the tempfile
 
-		local tempfile && tempfile="$( mktemp )"
-		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${tempfile}"
+		# clear the temporary file
+		: > "${__navita_temp_history}"
+
+		$( type -apf cp | head -1 ) "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if (( exitcode == 0 )); then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
-			$( type -apf cp | head -1 ) "${tempfile}" "${NAVITA_HISTORYFILE}.bak"
+			$( type -apf cp | head -1 ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
-		$( type -apf rm | head -1 ) --interactive=never "$tempfile"
 		return "$exitcode"
 	}
 	# }}}
