@@ -145,7 +145,7 @@ __navita::UpdatePathHistory() {
 	done < "${NAVITA_HISTORYFILE}"
 
 	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
-	sort -n -s -b -t':' -k4,4 --reverse "${__navita_temp_history}" --output="${NAVITA_HISTORYFILE}"
+	sort -n -s -b -t':' -k4,4 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
 
