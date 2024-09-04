@@ -395,7 +395,7 @@ __navita::completions() {
 					fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 				case "$?" in
-					0) COMPREPLY=( "${dir_select}" );;
+					0) COMPREPLY=( "${dir_select}/" );;
 					*) return 0;;
 				esac
 				;;
@@ -405,13 +405,13 @@ __navita::completions() {
 			fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 		
 		case "$?" in
-			0) COMPREPLY=( "${dir_select}" );;
+			0) COMPREPLY=( "${dir_select}/" );;
 			*) return 0;;
 		esac
 	fi
 }
 
-complete -F __navita::completions "${NAVITA_COMMAND}"
+complete -o nospace -F __navita::completions "${NAVITA_COMMAND}"
 # }}}
 
 __navita__() {
