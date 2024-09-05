@@ -284,7 +284,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( find -L . -mindepth 2 -type d -not -path '*/.git/*' 2> /dev/null | fzf --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( find -L . -mindepth 1 -type d -not -path '*/.git/*' 2> /dev/null | fzf --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
