@@ -27,7 +27,6 @@ export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-6}"
 
 # temporary file for data manipulation for the history file
 export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
-: > "${__navita_temp_history}"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
