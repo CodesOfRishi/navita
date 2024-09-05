@@ -316,29 +316,18 @@ __navita::CDGeneral() {
 		return 0
 	fi
 
-	local path_returned && path_returned="$( find -L . -maxdepth 1 -mindepth 1 -type d 2> /dev/null | fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
-
-	case "$?" in
-		0) 
-			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
-			;;
-		1) 
-			# automatically accepts the very first matching highest ranked directory
-			local fzf_query && fzf_query="${*}"
-			[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
-			local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
-			
-			if [[ -n "${path_returned}" ]]; then
-				builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
-				(&>/dev/null __navita::UpdatePathHistory &)
-			else
-				printf "Navita(info): None matched!\n" >&2
-				return 1
-			fi
-			;;
-		*) return $?;;
-	esac
+	# automatically accepts the very first matching highest ranked directory
+	local fzf_query && fzf_query="${*}"
+	[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
+	local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
+	
+	if [[ -n "${path_returned}" ]]; then
+		builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
+		(&>/dev/null __navita::UpdatePathHistory &)
+	else
+		printf "Navita(info): None matched!\n" >&2
+		return 1
+	fi
 }
 # }}}
 
