@@ -317,7 +317,7 @@ __navita::NavigateParentDirs() {
 
 		while read -r line; do
 			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
-				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "../${PWD##*/}" -print
 			else
 				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
 			fi
