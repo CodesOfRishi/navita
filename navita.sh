@@ -118,6 +118,8 @@ __navita::GetRankScore() {
 
 # Utility: Update History{{{
 __navita::UpdatePathHistory() {
+	[[ "${OLDPWD}" == "${PWD}" ]] && return 0
+
 	# don't add paths that matches regex from the ignore file
 	while read -r pattern; do
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
@@ -419,6 +421,8 @@ __navita::completions() {
 
 complete -o nospace -F __navita::completions "${NAVITA_COMMAND}"
 # }}}
+
+[[ -z "${OLDPWD}" ]] && export OLDPWD="${PWD}"
 
 __navita__() {
 
