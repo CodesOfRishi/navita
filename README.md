@@ -63,7 +63,7 @@ Search subdirectories, and their subdirectories (and so on), and navigate to the
 **Synopsis:** `cd (-S | --super-search) [string...]`<br>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
-Search directories one level below the parent directories and navigate to the desired one.
+Search directories one level below the parent directories and navigate to the desired one. The current working directory will not be considered in the search.
 
 <div align="center"> 
 
@@ -175,7 +175,7 @@ where:
 
 </div>
 
-- By default, Navita will remember directories for a maximum of 90 days. Any directories that have not been accessed in over 90 days will be forgotten. This value can be changed using the `NAVITA_MAX_AGE` environment variable.
+- By default, Navita will remember directories for a maximum of 90 days. Any directories that have not been accessed in over 90 days will be forgotten. This value can be changed using the [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
 - For Navita, age is relative to the most recently accessed directory. For example, if the most recently accessed directory was accessed at time `a` and another directory was accessed at time `(a+x)`, then the age of the other directory is `x` time units.
 
 <!--<div align="center">-->
@@ -205,9 +205,8 @@ where:
 
 </div>
 
-- [GNU Bash](http://tiswww.case.edu/php/chet/bash/bashtop.html) or [Zsh](https://www.zsh.org/)
+- [GNU Bash](http://tiswww.case.edu/php/chet/bash/bashtop.html) (or [Zsh](https://www.zsh.org/) likely in the future)
 - [FZF](https://junegunn.github.io/fzf/)
-- [GNU Sed](https://sed.sourceforge.io/)
 - [GNU Grep](https://www.gnu.org/software/grep/)
 - [GNU bc](https://www.gnu.org/software/bc/)
 - [GNU Find Utilities](https://www.gnu.org/software/findutils/) (basically the `find` command)
@@ -268,7 +267,7 @@ source "path/to/the/navita.sh"
     - The default value is `90` i.e., 90 days.
 
 - **NAVITA_RELATIVE_PARENT_PATH**
-    - It defaults to `y` i.e., show the resolved parent paths relative to PWD in *Search & Traverse Parent Directories* feature.
+    - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in *Search & Traverse Parent Directories* feature.
     - Change it to `n` or `N` to show the parent paths as absolute path. 
 
 - **NAVITA_IGNOREFILE**
