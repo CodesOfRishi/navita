@@ -20,6 +20,9 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
+> [!IMPORTANT]
+> Navita is currently under development.
+
 <div align="center"> 
 
 ## Features 
@@ -34,10 +37,11 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Synopsis:** `cd [string...]`
 
-Search through directories in the current working directory and select the desired one. In the absence of a match, Navita will search the history and directly navigate to the highest-ranked matching directory. You can also navigate directories the same way you would with the usual built-in cd command.
+- Navita will search the history and directly navigate to the highest-ranked matching directory. The current working directory will not be considered in the search.
+- You can also navigate directories the same way you would with the usual built-in cd command.
 
 > [!NOTE]
-> Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.
+> - Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.<br> 
 
 <div align="center"> 
 
@@ -59,7 +63,7 @@ Search subdirectories, and their subdirectories (and so on), and navigate to the
 **Synopsis:** `cd (-S | --super-search) [string...]`<br>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
-Search directories (1-level down) in parent directories and navigate to the selected one.
+Search directories one level below the parent directories and navigate to the desired one.
 
 <div align="center"> 
 
@@ -92,10 +96,7 @@ View recently visited directory paths.
 
 **Synopsis:** `cd -`
 
-Switch between your current directory and the previous directory you were in.
-
-> [!NOTE]
-> `cd -` only works if you've used `cd` to change directories previously. If you haven't used `cd` before in the current shell, `cd -` won't do anything.
+Switch between your current directory and the previous directory you were in. The previous directory is specific to the current shell.
 
 <div align="center"> 
 
@@ -123,8 +124,7 @@ View Navita's version information.
 
 </div>
 
-Navita supports Tab completion for its options and directories in your PWD.
-
+Navita supports Tab completion for its options and directories.
 
 <div align="center"> 
 
@@ -194,7 +194,7 @@ where:
 
 </div>
 
-- For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk. To make Navita *always* resolve symbolic links, check the `NAVITA_FOLLOW_ACTUAL_PATH` environment variable.
+- For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk. To make Navita *always* resolve symbolic links, check the [`NAVITA_FOLLOW_ACTUAL_PATH`](#environment-variables) environment variable.
 
 > [!NOTE]
 > If this option is used, it should be the very first option given to Navita.
@@ -205,6 +205,7 @@ where:
 
 </div>
 
+- [GNU Bash](http://tiswww.case.edu/php/chet/bash/bashtop.html) or [Zsh](https://www.zsh.org/)
 - [FZF](https://junegunn.github.io/fzf/)
 - [GNU Sed](https://sed.sourceforge.io/)
 - [GNU Grep](https://www.gnu.org/software/grep/)
