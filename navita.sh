@@ -150,7 +150,7 @@ __navita::UpdatePathHistory() {
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
-	printf "%s" "$( find "${*}" -maxdepth 0 -exec sh -c cd {} \; 2>&1 >/dev/null )"
+	printf "%s" "$( find "${*}" -maxdepth 0 -exec sh -c cd -- {} \; 2>&1 >/dev/null )"
 }
 # }}}
 
@@ -266,7 +266,7 @@ __navita::NavigateHistory() {
 	case "$?" in
 		0) 
 			path_returned="${path_returned%% ❰ *}"
-			builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(&>/dev/null __navita::UpdatePathHistory &)
 			;;
 		1) printf "Navita(info): None matched!\n" >&2; return 1;;
@@ -322,7 +322,7 @@ __navita::CDGeneral() {
 	local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
 	
 	if [[ -n "${path_returned}" ]]; then
-		builtin cd "${__the_builtin_cd_option[@]}" "${path_returned}" || return $?
+		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 		(&>/dev/null __navita::UpdatePathHistory &)
 	else
 		printf "Navita(info): None matched!\n" >&2
