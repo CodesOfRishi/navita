@@ -321,10 +321,24 @@ __navita::CDGeneral() {
 		return 0
 	fi
 
+	__navita::CDGeneral::GetPaths() {
+		local line
+		local _path
+		local pwd_not_found=1
+		while read -r line; do
+			_path="$(__navita::GetPathInHistory "${line}")"
+			if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
+				pwd_not_found=0
+				continue
+			fi
+			printf "%s\n" "${_path}"
+		done < "${NAVITA_HISTORYFILE}"
+	}
+
 	# automatically accepts the very first matching highest ranked directory
 	local fzf_query && fzf_query="${*}"
 	[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
-	local path_returned && path_returned="$( cut -d ':' -f1 "${NAVITA_HISTORYFILE}" | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
+	local path_returned && path_returned="$( __navita::CDGeneral::GetPaths | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
 	
 	if [[ -n "${path_returned}" ]]; then
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
