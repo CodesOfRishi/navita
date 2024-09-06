@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Verify if FZF is installed.
+if ! type -ap fzf &> /dev/null; then
+	printf "FZF not found! Navita requires FZF!\n" >&2 && return 1
+fi
+
 # ── Navita variables ──────────────────────────────────────────────────
 export NAVITA_DATA_DIR="${NAVITA_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/navita}"
 export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
