@@ -304,6 +304,39 @@ __navita::NavigateChildDirs() {
 }
 # }}}
 
+# ── Feature: NavigateParentDirs ───────────────────────────────────────{{{
+__navita::NavigateParentDirs() {
+	__navita::NavigateParentDirs::GetParentDirs() {
+		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
+			local _dir && _dir="${PWD}"
+			while [[ "${_dir}" != "/" ]]; do
+				_dir="$(dirname "${_dir}")"
+				printf "%s\n" "${_dir}"
+			done
+		}
+
+		while read -r line; do
+			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
+				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+			else
+				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+			fi
+		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
+	}
+
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
+
+	case "$?" in
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
+		1) printf "Navita(info): None matched!\n" >&2; return 1;;
+		*) return $?;;
+	esac
+}
+# }}}
+
 # ── Feature: CDGeneral ──────────────────────────────────────────────{{{
 __navita::CDGeneral() {
 	# NOTE: 
@@ -349,39 +382,6 @@ __navita::CDGeneral() {
 		printf "Navita(info): None matched!\n" >&2
 		return 1
 	fi
-}
-# }}}
-
-# ── Feature: NavigateParentDirs ───────────────────────────────────────{{{
-__navita::NavigateParentDirs() {
-	__navita::NavigateParentDirs::GetParentDirs() {
-		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
-			local _dir && _dir="${PWD}"
-			while [[ "${_dir}" != "/" ]]; do
-				_dir="$(dirname "${_dir}")"
-				printf "%s\n" "${_dir}"
-			done
-		}
-
-		while read -r line; do
-			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
-				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
-			else
-				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
-			fi
-		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) | fzf +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}"
-	}
-
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs "${@}" )"
-
-	case "$?" in
-		0) 
-			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
-			;;
-		1) printf "Navita(info): None matched!\n" >&2; return 1;;
-		*) return $?;;
-	esac
 }
 # }}}
 
