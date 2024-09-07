@@ -287,7 +287,36 @@ __navita::ViewHistory() {
 
 # ── Feature: NavigateHistory ────────────────────────────────────────{{{
 __navita::NavigateHistory() {
-	local path_returned && path_returned="$( __navita::ViewHistory "n" "${NAVITA_SHOW_AGE}" | fzf +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )"
+	__navita::NavigateHistory::GetHistory() {
+		local _path
+		local age
+		local path_error
+		local now_time && now_time="$(date +%s)"
+		local pwd_not_found && pwd_not_found=1
+		local line
+		while read -r line; do
+			_path="$(__navita::GetPathInHistory "${line}")"
+			if (( pwd_not_found )) && [[ "${PWD}" == "${_path}" ]]; then
+				pwd_not_found=0
+				continue
+			fi
+			printf "%s" "${_path}"
+
+			# show age
+			if [[ "${NAVITA_SHOW_AGE}" =~ ^(y|Y)$ ]]; then
+				age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
+				[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
+			fi
+
+			# show path error
+			path_error="$(__navita::ValidateDirectory "${_path}")"
+			[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
+
+			printf "\n"
+		done < "${NAVITA_HISTORYFILE}"
+	}
+
+	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | fzf +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) 
