@@ -27,7 +27,7 @@ export NAVITA_VERSION="Alpha"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
-export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-n}"
+export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-y}"
 export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-6}"
 
 # temporary file for data manipulation for the history file
