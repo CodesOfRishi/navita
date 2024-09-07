@@ -176,7 +176,7 @@ __navita::UpdatePathHistory() {
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
-	printf "%s" "$(builtin cd -- "${*}" 2>&1 > /dev/null)"
+	printf "%s\n" "$(builtin cd -- "${*}" 2>&1 > /dev/null)"
 }
 # }}}
 
