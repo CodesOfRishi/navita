@@ -95,6 +95,25 @@ __navita::GetFreqInHistory() {
 }
 # }}}
 
+# Utility: Get Age from an Unix Epoch time{{{
+__navita::GetAgeFromEpoch() {
+	local access_time && access_time="$1"
+	local now_time && now_time="${2:-$(date +%s)}"
+
+	local seconds_old && seconds_old="$(( now_time - access_time ))"
+	local days_old && days_old="$(( seconds_old/86400 ))"
+	local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
+	local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
+
+	local path_age=""
+	(( days_old > 0 )) && path_age="${days_old}d"
+	(( hours_old > 0 )) && path_age="${path_age}${hours_old}h"
+	(( minutes_old > 0 )) && path_age="${path_age}${minutes_old}m"
+
+	printf "%s\n" "${path_age}"
+}
+# }}}
+
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	local _path && _path="$1"
