@@ -250,36 +250,21 @@ __navita::CleanHistory() {
 
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
-	local show_pwd && show_pwd="${1:-y}"
-	local show_age && show_age="${2:-y}"
 	local line
-	local now_time && now_time="$( date +%s )"
+	local age
+	local _path
+	local path_error
+	local now_time && now_time="$(date +%s)"
 	while read -r line; do
-		local _path && _path="$(__navita::GetPathInHistory "${line}")"
-		if [[ "${show_pwd}" != "y" ]] && [[ "${_path}" == "${PWD}" ]]; then 
-			# setting this to 'y', since pwd only needs to be checked once
-			show_pwd="y"
-			continue
-		fi
+		_path="$(__navita::GetPathInHistory "${line}")"
 		printf "%s" "${_path}" 
 
-		if [[ "${show_age}" =~ ^(y|Y)$ ]]; then
-			local access_time && access_time="$(__navita::GetAccessEpochInHistory "${line}")"
-			local seconds_old && seconds_old="$(( now_time - access_time ))"
-			local days_old && days_old="$(( seconds_old/86400 ))"
-			local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
-			local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
+		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
+		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
 
-			local path_age=""
-			(( days_old > 0 )) && path_age="${days_old}d"
-			(( hours_old > 0 )) && path_age="${path_age}${hours_old}h"
-			(( minutes_old > 0 )) && path_age="${path_age}${minutes_old}m"
+		path_error="$(__navita::ValidateDirectory "${_path}")"
+		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
 
-			[[ -n "${path_age}" ]] && printf "${colr_grey} ❰ %s${colr_rst}" "${path_age}"
-		fi
-
-		local path_error && path_error="$( __navita::ValidateDirectory "${_path}" )"
-		[[ -n "${path_error}" ]] && printf "${colr_red}%s${colr_rst}" " ❰ ${path_error#find: }"
 		printf "\n"
 	done < "${NAVITA_HISTORYFILE}"
 }
