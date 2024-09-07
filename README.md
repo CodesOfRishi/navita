@@ -41,7 +41,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 - You can also navigate directories the same way you would with the usual built-in cd command.
 
 > [!NOTE]
-> - Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.<br> 
+> Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.<br> 
 
 <div align="center"> 
 
@@ -51,7 +51,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Synopsis:** `cd (-s | --sub-search) [string...]`
 
-Search subdirectories, and their subdirectories (and so on), and navigate to the selected one.
+Recursively search subdirectories, excluding .git and its subdirectories, and navigate to the selected one.
 
 <div align="center"> 
 
@@ -135,8 +135,6 @@ Navita supports Tab completion for its options and directories.
 - Prevent paths that match any regular expression pattern in the `$NAVITA_IGNOREFILE` file from being added to the history.
 - Navita automatically prevents the `.git` and `$HOME` directories from being added to the history by default.
 
-
-
 > [!NOTE]
 > Even if a path was part of the history prior to its inclusion in the `$NAVITA_IGNOREFILE` using a regular expression pattern, it will still be visible, but Navita will cease to boost its ranking.
 
@@ -198,6 +196,8 @@ where:
 
 > [!NOTE]
 > If this option is used, it should be the very first option given to Navita.
+
+- Search syntax is same as the [FZF search syntax](https://junegunn.github.io/fzf/search-syntax/).
 
 <div align="center"> 
 
@@ -274,8 +274,8 @@ source "path/to/the/navita.sh"
     - The file containing regular expression patterns to ignore matching paths from being added to the history.
     - The path to the file is `$NAVITA_CONFIG_DIR/navita-ignore`.
 - **NAVITA_SHOW_AGE**
-    - It defaults to `n`, i.e., don't show an age annotation next to the paths while searching and traversing from history.
-    - Change it to `y` or `Y`, to show an age annotation beside the paths.
+    - It defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
+    - Change it to `y` or `Y`, to not show an age annotation beside the paths.
 - **NAVITA_DECAY_FACTOR**
     - The rate at which the score of older accesses decreases. A higher value results in a faster decay rate.
     - It defaults to `6`.
