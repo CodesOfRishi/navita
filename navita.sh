@@ -157,7 +157,7 @@ __navita::UpdatePathHistory() {
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
-	printf "%s" "$( find "${*}" -maxdepth 0 -exec sh -c cd -- {} \; 2>&1 >/dev/null )"
+	printf "%s" "$(builtin cd -- "${*}" 2>&1 > /dev/null)"
 }
 # }}}
 
