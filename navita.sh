@@ -497,6 +497,12 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					esac
 					;;
 			esac
+		elif (( COMP_CWORD == 2 )) && [[ "${COMP_WORDS[$((COMP_CWORD-1))]}" =~ ^-(H|-history)$ ]]; then
+			local navita_opts && navita_opts="$(fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
+			case "$?" in
+				0) COMPREPLY=( "${navita_opts} " );;
+				*) return 0;;
+			esac
 		else
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
 				fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
