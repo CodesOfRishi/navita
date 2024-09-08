@@ -253,6 +253,7 @@ __navita::ViewHistory() {
 	local line
 	local age
 	local freq
+	local score
 	local _path
 	local path_error
 	local now_time && now_time="$(date +%s)"
@@ -265,6 +266,9 @@ __navita::ViewHistory() {
 
 		freq="$(__navita::GetFreqInHistory "${line}")"
 		[[ -n "${freq}" ]] && printf "${colr_orange} %s${colr_rst}" "❰ ${freq}"
+
+		score="$(printf "%.2f\n" "${line##*:}")"
+		[[ -n "${score}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${score}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
 		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
