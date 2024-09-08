@@ -264,7 +264,7 @@ __navita::ViewHistory() {
 		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
 
 		freq="$(__navita::GetFreqInHistory "${line}")"
-		[[ -n "${freq}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${freq}"
+		[[ -n "${freq}" ]] && printf "${colr_orange} %s${colr_rst}" "❰ ${freq}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
 		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
@@ -446,7 +446,7 @@ __navita__() {
 	fi
 
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
-	local colr_green && colr_green="\033[1;38;2;91;255;51m"
+	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 	local colr_rst && colr_rst='\e[0m'
