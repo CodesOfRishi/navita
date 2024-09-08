@@ -278,7 +278,7 @@ __navita::ViewHistory() {
 		"--by-time") sort -n -s -b -t':' -k2,2 --reverse "${NAVITA_HISTORYFILE}";;
 		"--by-freq") sort -n -s -b -t':' -k3,3 --reverse "${NAVITA_HISTORYFILE}";;
 		""|"--by-score") cat "${NAVITA_HISTORYFILE}";;
-	esac) | nl
+	esac) | nl | less -RF
 }
 # }}}
 
