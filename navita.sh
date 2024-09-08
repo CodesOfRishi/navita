@@ -219,7 +219,7 @@ __navita::CleanHistory() {
 			path_error="$(__navita::ValidateDirectory "${curr_path}")"
 
 			if [[ -n "${path_error}" ]]; then
-				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${curr_path}" "${path_error#find: }"
+				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${curr_path}" "${path_error}"
 			else
 				printf "%s\n" "${line}" >> "${__navita_temp_history}"
 			fi
@@ -271,7 +271,7 @@ __navita::ViewHistory() {
 		[[ -n "${score}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${score}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
-		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
+		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error}"
 
 		printf "\n"
 	done < <(case "$1" in
@@ -307,7 +307,7 @@ __navita::NavigateHistory() {
 
 			# show path error
 			path_error="$(__navita::ValidateDirectory "${_path}")"
-			[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
+			[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error}"
 
 			printf "\n"
 		done < "${NAVITA_HISTORYFILE}"
