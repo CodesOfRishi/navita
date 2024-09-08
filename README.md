@@ -84,9 +84,13 @@ Search your recently visited directories and select the desired one. The current
 
 </div>
 
-**Synopsis:** `cd (-H | --history) [string...]`
+**Synopsis:** `cd (-H | --history [--by-time | --by-frequency | --by-score])`
 
-View recently visited directory paths.
+- See Navita's history of visited directories. 
+- The history will be displayed in the `less` pager, or directly to STDOUT if it fits on a single screen. The output will be sorted based on the provided option:
+    - `--by-time`: Sorts the history by access time, with the most recently accessed directories appearing first.
+    - `--by-freq`: Sorts the history by frequency, showing the most frequently accessed directories first.
+    - `--by-score`: Sorts the history by score, with the highest scoring directories at the top. This is the default option.
 
 <div align="center"> 
 
@@ -124,7 +128,7 @@ View Navita's version information.
 
 </div>
 
-Navita supports Tab completion for its options and directories.
+Navita supports Tab completion for its options (in only Bash as of now) and directories.
 
 <div align="center"> 
 
@@ -211,6 +215,7 @@ where:
 - [GNU bc](https://www.gnu.org/software/bc/)
 - [GNU Find Utilities](https://www.gnu.org/software/findutils/) (basically the `find` command)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
+- [Less](http://www.greenwoodsoftware.com/less/) (only for viewing the history in a pager)
 
 <div align="center"> 
 
