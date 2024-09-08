@@ -252,6 +252,7 @@ __navita::CleanHistory() {
 __navita::ViewHistory() {
 	local line
 	local age
+	local freq
 	local _path
 	local path_error
 	local now_time && now_time="$(date +%s)"
@@ -261,6 +262,9 @@ __navita::ViewHistory() {
 
 		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
 		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
+
+		freq="$(__navita::GetFreqInHistory "${line}")"
+		[[ -n "${freq}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${freq}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
 		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
