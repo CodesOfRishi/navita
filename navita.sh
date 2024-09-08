@@ -274,7 +274,11 @@ __navita::ViewHistory() {
 		[[ -n "${path_error}" ]] && printf "${colr_red} %s${colr_rst}" "❰ ${path_error#find: }"
 
 		printf "\n"
-	done < "${NAVITA_HISTORYFILE}"
+	done < <(case "$1" in
+		"--by-time") sort -n -s -b -t':' -k2,2 --reverse "${NAVITA_HISTORYFILE}";;
+		"--by-freq") sort -n -s -b -t':' -k3,3 --reverse "${NAVITA_HISTORYFILE}";;
+		""|"--by-score") cat "${NAVITA_HISTORYFILE}";;
+	esac)
 }
 # }}}
 
@@ -457,7 +461,7 @@ __navita__() {
 
 	case "${navita_opt}" in
 		"--") __navita::NavigateHistory "${navita_args[@]}";;
-		"--history" | "-H") __navita::ViewHistory;;
+		"--history" | "-H") __navita::ViewHistory "${navita_args[@]}";;
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${navita_args[@]}";;
