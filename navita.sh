@@ -135,7 +135,7 @@ __navita::GetRankScore() {
 }
 # }}}
 
-# Utility: Update History{{{
+# Feature: FrecencyRank{{{
 __navita::UpdatePathHistory() {
 	[[ "${OLDPWD}" == "${PWD}" ]] && return 0
 
