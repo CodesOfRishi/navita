@@ -193,12 +193,12 @@ __navita::CleanHistory() {
 		# clear the temporary file
 		: > "${__navita_temp_history}"
 
-		$( type -ap cp | head -1 ) "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
+		$( type -P cp ) "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if (( exitcode == 0 )); then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
-			$( type -ap cp | head -1 ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
+			$( type -P cp ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		return "$exitcode"
@@ -224,7 +224,7 @@ __navita::CleanHistory() {
 			fi
 		done < "${NAVITA_HISTORYFILE}"
 
-		$( type -ap cp | head -1 ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}" 
+		$( type -P cp ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}" 
 	}
 	# }}}
 
