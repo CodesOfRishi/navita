@@ -145,7 +145,6 @@ __navita::UpdatePathHistory() {
 	done < "${NAVITA_IGNOREFILE}"
 
 	local now_epoch && now_epoch="$(date +%s)"
-	local history_size && history_size="$(wc -l "${NAVITA_HISTORYFILE}")" && history_size="${history_size%% *}"
 
 	local curr_path
 	local curr_freq
