@@ -251,6 +251,7 @@ __navita::CleanHistory() {
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
 	local line
+	local rank
 	local age
 	local freq
 	local score
@@ -258,8 +259,10 @@ __navita::ViewHistory() {
 	local path_error
 	local now_time && now_time="$(date +%s)"
 	while read -r line; do
+		rank="${line%%/*}"
+		line="/${line#*/}"
 		_path="$(__navita::GetPathInHistory "${line}")"
-		printf "%s" "${_path}" 
+		printf "%s%s" "${rank}" "${_path}" 
 
 		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
 		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
@@ -275,10 +278,10 @@ __navita::ViewHistory() {
 
 		printf "\n"
 	done < <(case "$1" in
-		"--by-time") sort -n -s -b -t':' -k2,2 --reverse "${NAVITA_HISTORYFILE}";;
-		"--by-freq") sort -n -s -b -t':' -k3,3 --reverse "${NAVITA_HISTORYFILE}";;
-		""|"--by-score") cat "${NAVITA_HISTORYFILE}";;
-	esac) | nl | less -RF
+		"--by-time") nl "${NAVITA_HISTORYFILE}" | sort -n -s -b -t':' -k2,2 --reverse;;
+		"--by-freq") nl "${NAVITA_HISTORYFILE}" | sort -n -s -b -t':' -k3,3 --reverse;;
+		""|"--by-score") nl "${NAVITA_HISTORYFILE}";;
+	esac) | less -RF
 }
 # }}}
 
