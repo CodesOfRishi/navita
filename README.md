@@ -51,7 +51,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Synopsis:** `cd (-s | --sub-search) [string...]`
 
-Recursively search subdirectories, excluding .git and its subdirectories, and navigate to the selected one.
+Recursively search subdirectories, excluding `.git` and its subdirectories, and navigate to the selected one.
 
 <div align="center"> 
 
@@ -272,7 +272,7 @@ source "path/to/the/navita.sh"
     - The default value is `90` i.e., 90 days.
 
 - **NAVITA_RELATIVE_PARENT_PATH**
-    - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in *Search & Traverse Parent Directories* feature.
+    - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in [Search & Traverse Parent Directories](search--traverse-parent-directories) feature.
     - Change it to `n` or `N` to show the parent paths as absolute path. 
 
 - **NAVITA_IGNOREFILE**
