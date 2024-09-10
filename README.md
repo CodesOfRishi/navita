@@ -86,11 +86,10 @@ Search your recently visited directories and select the desired one. The current
 
 **Synopsis:** `cd (-H | --history [--by-time | --by-frequency | --by-score])`
 
-- See Navita's history of visited directories. 
-- The history will be displayed in the `less` pager, or directly to STDOUT if it fits on a single screen. The output will be sorted based on the provided option:
-    - `--by-time`: Sorts the history by access time, with the most recently accessed directories appearing first.
-    - `--by-freq`: Sorts the history by frequency, showing the most frequently accessed directories first.
-    - `--by-score`: Sorts the history by score, with the highest scoring directories at the top. This is the default option.
+See Navita's history of visited directories. The history will be displayed in the `less` pager, or directly to STDOUT if it fits on a single screen. The output will be sorted based on the provided option:
+- `--by-time`: Sorts the history by access time, with the most recently accessed directories appearing first.
+- `--by-freq`: Sorts the history by frequency, showing the most frequently accessed directories first.
+- `--by-score`: Sorts the history by score, with the highest scoring directories at the top. This is the default option.
 
 <div align="center"> 
 
@@ -158,13 +157,13 @@ This ensures that the most relevant directories—those accessed both frequently
 <summary>How it Works?</summary> 
 
 $$
-\text{Score} = \ln(\frac{F \times (T_2-T_1)}{T_2}+1) \times e^{(-k \times (T_1/T_2))}
+\text{Score} = \ln\left(\frac{F \times (T_2-T_1)}{T_2}+1\right) \times e^{\left(\frac{-k \times T_1}{T_2}\right)}
 $$
 
 where:
 - F is the frequency of access.
 - T1 is the time difference between the most recent access and the current directory.
-- T2 is the maximum time difference allowed (90 days).
+- T2 is the maximum time difference allowed (90 days default). Check [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
 - k controls the rate at which the weight of older accesses decreases. A higher value results in a faster decay rate. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
 - The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
 - The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
