@@ -12,9 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Verify if FZF is installed.
-if ! type -ap fzf &> /dev/null; then
-	printf "FZF not found! Navita requires FZF!\n" >&2 && return 1
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" )
+declare -A navita_depends
+declare navita_all_command_found=1
+declare -a _cmd_type
+
+if [[ -n "${BASH_VERSION}" ]]; then
+	_cmd_type=( "type" "-P" )
+elif [[ -n "${ZSH_VERSION}" ]]; then
+	_cmd_type=( "whence" "-p" )
+else
+	printf "navita: WARNING: Unsupported shell. Navita is exclusive to Bash and Zsh.\n" >&2
+fi
+
+for _cmd in "${navita_dependencies[@]}"; do
+	navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")" 
+	
+	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
+		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
+		navita_all_command_found=0
+		break
+	fi
+done
+unset _cmd
+unset _cmd_type
+unset navita_dependencies
+
+if (( navita_all_command_found )); then
+	unset navita_all_command_found
+	export navita_depends
+else
+	unset navita_all_command_found
+	unset navita_depends
+	return 1
 fi
 
 # ── Navita variables ──────────────────────────────────────────────────
@@ -70,7 +100,7 @@ __navita::GetAccessEpochInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local access_epoch="${1}"
-	[[ -d "${1}" ]] && access_epoch="$(grep -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && access_epoch="$("${navita_depends["grep"]}" -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
 	[[ -z "${access_epoch}" ]] && return 1
 	
 	access_epoch="${access_epoch#*:}"
@@ -85,7 +115,7 @@ __navita::GetFreqInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	local freq="${1}"
-	[[ -d "${1}" ]] && freq="$(grep -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
+	[[ -d "${1}" ]] && freq="$("${navita_depends["grep"]}" -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
 	[[ -z "${freq}" ]] && return 1
 
 	freq="${freq#*:}"
@@ -98,7 +128,7 @@ __navita::GetFreqInHistory() {
 # Utility: Get Age from an Unix Epoch time{{{
 __navita::GetAgeFromEpoch() {
 	local access_time && access_time="$1"
-	local now_time && now_time="${2:-$(date +%s)}"
+	local now_time && now_time="${2:-$("${navita_depends["date"]}" +%s)}"
 
 	local seconds_old && seconds_old="$(( now_time - access_time ))"
 	local days_old && days_old="$(( seconds_old/86400 ))"
@@ -117,7 +147,7 @@ __navita::GetAgeFromEpoch() {
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	local _path && _path="$1"
-	printf "%s\n" "$(realpath -s --relative-to=. "${_path}")"
+	printf "%s\n" "$("${navita_depends["realpath"]}" -s --relative-to=. "${_path}")"
 }
 # }}}
 
@@ -131,7 +161,7 @@ __navita::GetRankScore() {
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 	local x && (( x = max_age - curr_age )) && (( x = x < 0 ? 0 : x ))
 
-	printf "%s\n" "$(bc -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})")"
+	printf "%s\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})")"
 }
 # }}}
 
@@ -144,7 +174,7 @@ __navita::UpdatePathHistory() {
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
 
-	local now_epoch && now_epoch="$(date +%s)"
+	local now_epoch && now_epoch="$("${navita_depends["date"]}" +%s)"
 
 	local curr_path
 	local curr_freq
@@ -169,7 +199,7 @@ __navita::UpdatePathHistory() {
 	done < "${NAVITA_HISTORYFILE}"
 
 	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
-	sort -n -s -b -t':' -k4,4 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
+	"${navita_depends["sort"]}" -n -s -b -t':' -k4,4 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
 
@@ -193,12 +223,12 @@ __navita::CleanHistory() {
 		# clear the temporary file
 		: > "${__navita_temp_history}"
 
-		$( type -P cp ) "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
+		"${navita_depends["cp"]}" "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if (( exitcode == 0 )); then 
 			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
-			$( type -P cp ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
+			"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
 			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		return "$exitcode"
@@ -224,7 +254,7 @@ __navita::CleanHistory() {
 			fi
 		done < "${NAVITA_HISTORYFILE}"
 
-		$( type -P cp ) "${__navita_temp_history}" "${NAVITA_HISTORYFILE}" 
+		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}" 
 	}
 	# }}}
 
@@ -256,7 +286,7 @@ __navita::ViewHistory() {
 	local score
 	local _path
 	local path_error
-	local now_time && now_time="$(date +%s)"
+	local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 	while read -r line; do
 		rank="${line%%/*}"
 		line="/${line#*/}"
@@ -277,10 +307,10 @@ __navita::ViewHistory() {
 
 		printf "\n"
 	done < <(case "$1" in
-		"--by-time") nl "${NAVITA_HISTORYFILE}" | sort -n -s -b -t':' -k2,2 --reverse;;
-		"--by-freq") nl "${NAVITA_HISTORYFILE}" | sort -n -s -b -t':' -k3,3 --reverse;;
-		""|"--by-score") nl "${NAVITA_HISTORYFILE}";;
-	esac) | less -RF
+		"--by-time") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k2,2 --reverse;;
+		"--by-freq") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k3,3 --reverse;;
+		""|"--by-score") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}";;
+	esac) | "${navita_depends["less"]}" -RF
 }
 # }}}
 
@@ -290,7 +320,7 @@ __navita::NavigateHistory() {
 		local _path
 		local age
 		local path_error
-		local now_time && now_time="$(date +%s)"
+		local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 		local pwd_not_found && pwd_not_found=1
 		local line
 		while read -r line; do
@@ -315,7 +345,7 @@ __navita::NavigateHistory() {
 		done < "${NAVITA_HISTORYFILE}"
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | fzf +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {1} && echo && ls -CFaA --color=always {1}" )"
+	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {1} && echo && "${navita_depends["ls"]}" -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) 
@@ -338,7 +368,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( find -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | fzf --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {} && echo && "${navita_depends["ls"]}" -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -357,21 +387,21 @@ __navita::NavigateParentDirs() {
 		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
 			local _dir && _dir="${PWD}"
 			while [[ "${_dir}" != "/" ]]; do
-				_dir="$(dirname "${_dir}")"
+				_dir="$("${navita_depends["dirname"]}" "${_dir}")"
 				printf "%s\n" "${_dir}"
 			done
 		}
 
 		while read -r line; do
 			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
-				find -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "../${PWD##*/}" -print
+				"${navita_depends["find"]}" -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "../${PWD##*/}" -print
 			else
-				find -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
+				"${navita_depends["find"]}" -L "${line}" -maxdepth 1 -mindepth 1 -type d -not -path "${PWD}" -print
 			fi
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) 
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | fzf +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="ls -lashFd --color=always {} && echo && ls -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {} && echo && "${navita_depends["ls"]}" -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -420,7 +450,7 @@ __navita::CDGeneral() {
 	# automatically accepts the very first matching highest ranked directory
 	local fzf_query && fzf_query="${*}"
 	[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
-	local path_returned && path_returned="$( __navita::CDGeneral::GetPaths | fzf +s --tiebreak=end,index --exact --filter="${fzf_query}" | head -1 )"
+	local path_returned && path_returned="$( __navita::CDGeneral::GetPaths | "${navita_depends["fzf"]}" +s --tiebreak=end,index --exact --filter="${fzf_query}" | "${navita_depends["head"]}" -1 )"
 	
 	if [[ -n "${path_returned}" ]]; then
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
@@ -485,13 +515,13 @@ __navita__() {
 if [[ -n "${BASH_VERSION}" ]]; then
 	__navita::completions() {
 		if (( COMP_CWORD == 1 )) && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
-			local navita_opts && navita_opts="$(fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
+			local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 
 			case "$?" in
 				0) COMPREPLY=( "${navita_opts} " );;
 				*) 
 					local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-						fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+						"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '"${navita_depends["ls"]}" -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && "${navita_depends["ls"]}" -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 					case "$?" in
 						0) COMPREPLY=( "${dir_select}/" );;
@@ -500,14 +530,14 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					;;
 			esac
 		elif (( COMP_CWORD == 2 )) && [[ "${COMP_WORDS[$((COMP_CWORD-1))]}" =~ ^-(H|-history)$ ]]; then
-			local navita_opts && navita_opts="$(fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
+			local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
 			case "$?" in
 				0) COMPREPLY=( "${navita_opts} " );;
 				*) return 0;;
 			esac
 		else
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-				fzf --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c 'ls -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ls -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '"${navita_depends["ls"]}" -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && "${navita_depends["ls"]}" -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 			case "$?" in
 				0) COMPREPLY=( "${dir_select}/" );;
