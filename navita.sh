@@ -26,8 +26,6 @@ else
 fi
 
 for _cmd in "${navita_dependencies[@]}"; do
-	navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")" 
-	
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
 		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
 		navita_all_command_found=0
