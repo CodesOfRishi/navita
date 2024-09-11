@@ -545,6 +545,27 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	}
 
 	complete -o nospace -F __navita::completions "${NAVITA_COMMAND}"
+elif [[ -n "${ZSH_VERSION}" ]]; then
+	__navita::completions() {
+		local -a navita_opts=( 
+			"-:Traverse to the previous working directory"
+			"--:Search and traverse from history"
+			"-P:Follow physical directory structures"
+			"-H:View Navita's history of directory visits"
+			"--history:View Navita's history of directory visits" 
+			"-c:Remove invalid paths or clear the entire history"
+			"--clean:Remove invalid paths or clear the entire history"
+			"-s:Recursively search and traverse sub-directories"
+			"--sub-search:Recursively search and traverse sub-directories" 
+			"-S:Search and traverse directories one level below the parent directories"
+			"--super-search:Search and traverse directories one level below the parent directories"
+			"-v:Navita's version information"
+			"--version:Navita's version information"
+		)
+		_describe "__navita__" "navita_opts"
+	}
+
+	compdef __navita::completions "__navita__"
 fi
 # }}}
 
