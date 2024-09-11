@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -65,7 +65,7 @@ alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
-	mkdir -p "${NAVITA_DATA_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}"
 	printf "Navita: Created %s\n" "${NAVITA_DATA_DIR}"
 fi
 if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
@@ -75,7 +75,7 @@ fi
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
-	mkdir -p "${NAVITA_CONFIG_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}"
 	printf "Navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
