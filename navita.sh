@@ -343,7 +343,7 @@ __navita::NavigateHistory() {
 		done < "${NAVITA_HISTORYFILE}"
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {1} && echo && "${navita_depends["ls"]}" -CFaA --color=always {1}" )"
+	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --ansi --nth=1 --with-nth=1,2,3 --delimiter=" ❰ " --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -lashFd --color=always {1} && echo && ${navita_depends["ls"]} -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) 
@@ -366,7 +366,7 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDirs ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {} && echo && "${navita_depends["ls"]}" -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -lashFd --color=always {} && echo && ${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -399,7 +399,7 @@ __navita::NavigateParentDirs() {
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) 
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview=""${navita_depends["ls"]}" -lashFd --color=always {} && echo && "${navita_depends["ls"]}" -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt="navita> " --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -lashFd --color=always {} && echo && ${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -519,7 +519,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 				0) COMPREPLY=( "${navita_opts} " );;
 				*) 
 					local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-						"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '"${navita_depends["ls"]}" -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && "${navita_depends["ls"]}" -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+						"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 					case "$?" in
 						0) COMPREPLY=( "${dir_select}/" );;
@@ -535,7 +535,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			esac
 		else
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '"${navita_depends["ls"]}" -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && "${navita_depends["ls"]}" -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 			case "$?" in
 				0) COMPREPLY=( "${dir_select}/" );;
