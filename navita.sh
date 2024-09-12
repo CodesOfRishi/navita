@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -69,7 +69,7 @@ if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then
 	printf "Navita: Created %s\n" "${NAVITA_DATA_DIR}"
 fi
 if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
-	touch "${NAVITA_HISTORYFILE}"
+	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
 
