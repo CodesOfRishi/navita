@@ -65,22 +65,22 @@ alias "${NAVITA_COMMAND}"="__navita__"
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
 	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}"
-	printf "Navita: Created %s\n" "${NAVITA_DATA_DIR}"
+	printf "navita: Created %s\n" "${NAVITA_DATA_DIR}"
 fi
 if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
-	printf "Navita: Created %s\n" "${NAVITA_HISTORYFILE}"
+	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
 	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}"
-	printf "Navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
+	printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "%s\n" "/\.git(/.*|)$" >> "${NAVITA_IGNOREFILE}"
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
-	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
+	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 [[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
@@ -235,7 +235,7 @@ __navita::AgeOut() {
 		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
 			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "$(printf "%.0f\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")")" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
-			printf "Deleted %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
+			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
 		fi
 	done < "${__navita_temp_history}"
 }
@@ -264,9 +264,9 @@ __navita::CleanHistory() {
 		: > "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if (( exitcode == 0 )); then 
-			printf "%s cleaned.\n" "${NAVITA_HISTORYFILE}"
+			printf "navita: %s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
-			printf "Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
+			printf "navita: Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		return "$exitcode"
 	}
@@ -285,7 +285,7 @@ __navita::CleanHistory() {
 			path_error="$(__navita::ValidateDirectory "${curr_path}")"
 
 			if [[ -n "${path_error}" ]]; then
-				printf "Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${curr_path}" "${path_error}"
+				printf "navita: Deleted %s ${colr_red}❰ %s${colr_rst}\n" "${curr_path}" "${path_error}"
 			else
 				printf "%s\n" "${line}" >> "${__navita_temp_history}"
 			fi
@@ -313,7 +313,7 @@ __navita::CleanHistory() {
 		2) __navita::CleanHistory::EmptyHistoryFile;;
 		"x") printf "navita: Aborted.\n";;
 		*) 
-			printf "Invalid input!\n" >&2
+			printf "navita: ERROR: Invalid input!\n" >&2
 			return 1
 			;;
 	esac
@@ -396,7 +396,7 @@ __navita::NavigateHistory() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(&>/dev/null __navita::UpdatePathHistory &)
 			;;
-		1) printf "Navita(info): None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
@@ -418,7 +418,7 @@ __navita::NavigateChildDirs() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(&>/dev/null __navita::UpdatePathHistory &)
 			;;
-		1) printf "Navita(info): None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
@@ -451,7 +451,7 @@ __navita::NavigateParentDirs() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(&>/dev/null __navita::UpdatePathHistory &)
 			;;
-		1) printf "Navita(info): None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
 	esac
 }
@@ -499,7 +499,7 @@ __navita::CDGeneral() {
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 		(&>/dev/null __navita::UpdatePathHistory &)
 	else
-		printf "Navita(info): None matched!\n" >&2
+		printf "navita: None matched!\n" >&2
 		return 1
 	fi
 }
