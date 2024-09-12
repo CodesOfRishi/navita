@@ -82,6 +82,7 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
 	printf "Navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
+[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # Uitility: Get a Path from an entry in history{{{
 __navita::GetPathInHistory() {
@@ -199,6 +200,44 @@ __navita::UpdatePathHistory() {
 	"${navita_depends["sort"]}" -n -s -b -t':' -k4,4 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
+
+# Feature: AgeOutHistory
+__navita::AgeOut() {
+	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
+
+	local total_score && total_score=0
+	local history_size && history_size=0
+	local curr_score
+	while read -r line; do
+		(( history_size++ ))
+		curr_score="${line##*:}"
+		total_score="$("${navita_depends["bc"]}" <<< "scale=10; ${total_score} + ${curr_score}")"
+	done < "${__navita_temp_history}"
+
+	# curr_score is the least score at the moment
+	if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > 0")" -eq 1 ]]; then
+		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+		return 0
+	fi
+
+	local threshold_score && threshold_score="$("${navita_depends["bc"]}" <<< "scale=10; (${total_score} * 0.20) / ${history_size}")"
+
+	: > "${NAVITA_HISTORYFILE}"
+	local curr_path
+	local curr_epoch
+	local curr_freq
+	while read -r line; do
+		curr_path="$(__navita::GetPathInHistory "${line}")"
+		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
+		curr_freq="$(__navita::GetFreqInHistory "${line}")"
+		curr_score="${line##*:}"
+		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
+			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "$(printf "%.0f\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")")" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
+		else
+			printf "Deleted %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
+		fi
+	done < "${__navita_temp_history}"
+}
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
@@ -464,6 +503,12 @@ __navita::Version() {
 	printf "Navita - %s\n" "${NAVITA_VERSION}"
 }
 # }}}
+
+# check directory paths' aging once every 24 hours
+if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
+	"${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
+	__navita::AgeOut
+fi
 
 [[ -z "${OLDPWD}" ]] && export OLDPWD="${PWD}"
 
