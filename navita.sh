@@ -553,9 +553,7 @@ __navita__() {
 				__navita::NavigateParentDirs "${navita_args[@]}"
 			fi
 			;;
-		"--root" | "-r") printf "Search & traverse in a root directory (to be implemented!)\n";;
 		"--version" | "-v") __navita::Version;;
-		"--help" | "-h") printf "Print help information (to be implemented!)\n";;
 		*) __navita::CDGeneral "${navita_opt}" "${navita_args[@]}";;
 	esac
 }
