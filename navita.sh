@@ -511,20 +511,22 @@ __navita__() {
 # ── Feature: TabCompletion ────────────────────────────────────────────{{{
 if [[ -n "${BASH_VERSION}" ]]; then
 	__navita::completions() {
+		__navita::completions::CompleteDirectory() {
+			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
+				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+
+			case "$?" in
+				0) COMPREPLY=( "${dir_select}/" );;
+				*) return 0;;
+			esac
+		}
+	
 		if (( COMP_CWORD == 1 )) && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
 			local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 
 			case "$?" in
 				0) COMPREPLY=( "${navita_opts} " );;
-				*) 
-					local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-						"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
-
-					case "$?" in
-						0) COMPREPLY=( "${dir_select}/" );;
-						*) return 0;;
-					esac
-					;;
+				*) __navita::completions::CompleteDirectory;;
 			esac
 		elif (( COMP_CWORD == 2 )); then
 			if [[ "${COMP_WORDS[$((COMP_CWORD-1))]}" =~ ^-(H|-history)$ ]]; then
@@ -539,34 +541,14 @@ if [[ -n "${BASH_VERSION}" ]]; then
 
 					case "$?" in
 						0) COMPREPLY=( "${navita_opts} " );;
-						*) 
-							local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-								"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
-
-							case "$?" in
-								0) COMPREPLY=( "${dir_select}/" );;
-								*) return 0;;
-							esac
-							;;
+						*) __navita::completions::CompleteDirectory;;
 					esac
 				else
-					local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-					"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
-
-					case "$?" in
-						0) COMPREPLY=( "${dir_select}/" );;
-						*) return 0;;
-					esac				
+					__navita::completions::CompleteDirectory
 				fi
 			fi
 		else
-			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
-
-			case "$?" in
-				0) COMPREPLY=( "${dir_select}/" );;
-				*) return 0;;
-			esac
+			__navita::completions::CompleteDirectory
 		fi
 	}
 
