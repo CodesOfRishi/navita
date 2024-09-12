@@ -160,7 +160,7 @@ __navita::GetRankScore() {
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 	local x && (( x = max_age - curr_age )) && (( x = x < 0 ? 0 : x ))
 
-	printf "%s\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})")"
+	"${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})"
 }
 # }}}
 
