@@ -87,8 +87,7 @@ fi
 # Uitility: Get a Path from an entry in history{{{
 __navita::GetPathInHistory() {
 	# should be passed only a line from the history file
-	local line && line="${1}"
-	printf "%s\n" "${line%%:*}"
+	printf "%s\n" "${1%%:*}"
 }
 # }}}
 
