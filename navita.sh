@@ -547,7 +547,7 @@ __navita__() {
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${navita_args[@]}";;
 		"--super-search" | "-S" | "..") 
-			if [[ "${navita_opt}" == ".." ]] && [[ -z "${navita_args[0]}" ]]; then
+			if [[ "${navita_opt}" == ".." ]] && [[ "${#navita_args[@]}" -eq 0 ]]; then
 				__navita::CDGeneral ".."
 			else
 				__navita::NavigateParentDirs "${navita_args[@]}"
