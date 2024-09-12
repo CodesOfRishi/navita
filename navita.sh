@@ -143,8 +143,10 @@ __navita::GetAgeFromEpoch() {
 
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
-	local _path && _path="$1"
-	printf "%s\n" "$("${navita_depends["realpath"]}" -s --relative-to=. "${_path}")"
+	"${navita_depends["realpath"]}" -s --relative-to=. "${1}" || {
+		printf "%s\n" "navita: ERROR: failed to get relative path for %s\n" "${1}" >&2
+		return 1
+	}
 }
 # }}}
 
