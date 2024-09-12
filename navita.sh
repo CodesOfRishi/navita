@@ -590,7 +590,12 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 						_describe -t sub_options "Navita's sub-options" sub_options
 						;;
 					"-P")
-						_path_files -/ '*(-/)'
+						if [[ "${words[CURRENT]}" == -* ]]; then
+							unset 'main_options[3]'
+							_describe -t main_options "Navita's main-options" main_options
+						else
+							_path_files -/ '*(-/)'
+						fi
 						;;
 				esac
 				;;
