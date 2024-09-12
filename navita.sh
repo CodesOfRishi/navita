@@ -547,22 +547,62 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	complete -o nospace -F __navita::completions "${NAVITA_COMMAND}"
 elif [[ -n "${ZSH_VERSION}" ]]; then
 	__navita::completions() {
-		local -a navita_opts=( 
+		local -a main_options sub_options
+		local state line
+
+		main_options=(
 			"-:Traverse to the previous working directory"
 			"--:Search and traverse from history"
-			"-P:Follow physical directory structures"
+			"-P:Resolve symbolic links and traverse to the actual directory"
 			"-H:View Navita's history of directory visits"
-			"--history:View Navita's history of directory visits" 
+			"--history:View Navita's history of directory visits"
 			"-c:Remove invalid paths or clear the entire history"
 			"--clean:Remove invalid paths or clear the entire history"
 			"-s:Recursively search and traverse sub-directories"
-			"--sub-search:Recursively search and traverse sub-directories" 
+			"--sub-search:Recursively search and traverse sub-directories"
 			"-S:Search and traverse directories one level below the parent directories"
 			"--super-search:Search and traverse directories one level below the parent directories"
 			"-v:Navita's version information"
 			"--version:Navita's version information"
 		)
-		_describe "__navita__" "navita_opts"
+
+		sub_options=(
+			'--by-freq:Sort history by frequency'
+			'--by-time:Sort history by access time'
+			'--by-score:Sort history by score'
+		)
+
+		_arguments -C \
+			'1: :->first_arg' \
+			'2: :->second_arg' \
+			'*: :->other_args'
+
+		case "${state}" in
+			"first_arg")
+				if [[ "${words[CURRENT]}" == -* ]]; then
+					_describe -t main_options "Navita's main-options" main_options
+				else
+					_path_files -/ '*(-/)'
+				fi
+				;;
+			"second_arg")
+				case "${words[2]}" in
+					"-H"|"--history")
+						_describe -t sub_options "Navita's sub-options" sub_options
+						;;
+					"-P")
+						_path_files -/ '*(-/)'
+						;;
+				esac
+				;;
+			"other_args")
+				case "${words[2]}" in
+					"-P")
+						_path_files -/ '*(-/)'
+						;;
+				esac
+				;;
+		esac
 	}
 
 	compdef __navita::completions "__navita__"
