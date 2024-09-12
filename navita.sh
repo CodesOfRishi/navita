@@ -300,7 +300,11 @@ __navita::CleanHistory() {
 	printf "x to abort.\n"
 	printf "\n"
 	local user_choice
-	read -rp "Choice? (1 or 2): " user_choice
+	if [[ -n "${BASH_VERSION}" ]]; then 
+		read -rp "Choice? (1 or 2): " user_choice
+	elif [[ -n "${ZSH_VERSION}" ]]; then
+		read -r "user_choice?Choice? (1 or 2): " 
+	fi
 	printf "\n"
 
 	case "${user_choice}" in
