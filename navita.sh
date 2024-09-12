@@ -36,13 +36,12 @@ unset _cmd
 unset _cmd_type
 unset navita_dependencies
 
-if (( navita_all_command_found )); then
-	unset navita_all_command_found
-	export navita_depends
-else
+if ! (( navita_all_command_found )); then
 	unset navita_all_command_found
 	unset navita_depends
 	return 1
+else
+	unset navita_all_command_found
 fi
 
 # ── Navita variables ──────────────────────────────────────────────────
