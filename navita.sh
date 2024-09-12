@@ -297,6 +297,7 @@ __navita::CleanHistory() {
 	printf "Choose any one:\n"
 	printf "1. Remove only invalid paths.\n"
 	printf "2. Empty the history.\n"
+	printf "x to abort.\n"
 	printf "\n"
 	local user_choice
 	read -rp "Choice? (1 or 2): " user_choice
@@ -305,6 +306,7 @@ __navita::CleanHistory() {
 	case "${user_choice}" in
 		1) __navita::CleanHistory::RemoveInvalidPaths;;
 		2) __navita::CleanHistory::EmptyHistoryFile;;
+		"x") printf "navita: Aborted.\n";;
 		*) 
 			printf "Invalid input!\n" >&2
 			return 1
