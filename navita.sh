@@ -596,8 +596,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"second_arg")
 				case "${words[2]}" in
 					"-H"|"--history")
-						_describe -t sub_options "Navita's sub-options" sub_options
-						;;
+						_describe -t sub_options "Navita's sub-options" sub_options;;
 					"-P")
 						if [[ "${words[CURRENT]}" == -* ]]; then
 							unset 'main_options[3]'
@@ -611,8 +610,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"other_args")
 				case "${words[2]}" in
 					"-P")
-						_path_files -/ '*(-/)'
-						;;
+						_path_files -/ '*(-/)';;
 				esac
 				;;
 		esac
