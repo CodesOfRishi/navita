@@ -13,7 +13,6 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Contributing to Navita](#contributing-to-navita) •
 [License](#license)
 
-
 **Tired of typing out long, complex directory paths?** Navita is here to simplify your command-line experience! The powerful Bash tool uses fuzzy search to get you to your destination in seconds.
 
 **Forget about tedious typing.** You can instantly find and jump to any directory, no matter how deeply nested. Navita is a great tool for boosting your productivity and saving you valuable time.
@@ -84,9 +83,9 @@ Search your recently visited directories and select the desired one. The current
 
 </div>
 
-**Synopsis:** `cd (-H | --history [--by-time | --by-frequency | --by-score])`
+**Synopsis:** `cd (-H | --history) [--by-time | --by-frequency | --by-score]`
 
-See Navita's history of visited directories. The history will be displayed in the `less` pager, or directly to STDOUT if it fits on a single screen. The output will be sorted based on the provided option:
+View Navita's history of visited directories. The history will be displayed in the `less` pager, or directly to STDOUT if it fits on a single screen. The output will be sorted based on the provided option:
 - `--by-time`: Sorts the history by access time, with the most recently accessed directories appearing first.
 - `--by-freq`: Sorts the history by frequency, showing the most frequently accessed directories first.
 - `--by-score`: Sorts the history by score, with the highest scoring directories at the top. This is the default option.
@@ -127,7 +126,8 @@ View Navita's version information.
 
 </div>
 
-Navita supports Tab completion for its options (in only Bash as of now) and directories.
+- Navita supports Tab completion for its options and directories.
+- For Zsh, to initialize the completion system, the function `compinit` should be autoloaded, and then run simply as ‘`compinit`’. *Ref: [Zsh Completion System - Use of Compinit](https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Use-of-compinit)*
 
 <div align="center"> 
 
@@ -156,15 +156,13 @@ This ensures that the most relevant directories—those accessed both frequently
 <details>
 <summary>How it Works?</summary> 
 
-$$
-\text{Score} = \ln\left(\frac{F \times (T_2-T_1)}{T_2}+1\right) \times e^{\left(\frac{-k \times T_1}{T_2}\right)}
-$$
+$$ \text{Score} = \ln\left(\frac{F \times (T_2-T_1)}{T_2}+1\right) \times e^{\left(\frac{-k \times T_1}{T_2}\right)} $$
 
 where:
-- F is the frequency of access.
-- T1 is the time difference between the most recent access and the current directory.
-- T2 is the maximum time difference allowed (90 days default). Check [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
-- k controls the rate at which the weight of older accesses decreases. A higher value results in a faster decay rate. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
+- `F` is the frequency of access.
+- `T1` is the time difference between the most recent access and the current directory.
+- `T2` is the maximum time difference allowed (90 days default). Check [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
+- `k` controls the rate at which the weight of older accesses decreases. A higher value results in a faster decay rate. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
 - The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
 - The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
 
@@ -176,8 +174,11 @@ where:
 
 </div>
 
-- By default, Navita will remember directories for a maximum of 90 days. Any directories that have not been accessed in over 90 days will be forgotten. This value can be changed using the [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
-- For Navita, age is relative to the most recently accessed directory. For example, if the most recently accessed directory was accessed at time `a` and another directory was accessed at time `(a+x)`, then the age of the other directory is `x` time units.
+- Directory paths are forgotten based on the following two conditions:
+    1. Limit the maximum number of entries in the `$NAVITA_HISTORYFILE` file to 5000.
+    2. If a directory path's score falls to 0, an average score will be calculated. Directory paths with scores less than 20% of the average score will be removed. 
+- These conditions will be checked once every 24 hours at shell startup.
+- If a directory path is removed due to a score of 0, the remaining directory paths will have their frequencies adjusted according to the formula $\ln(F+1)$, where $F$ is the frequency of the particular directory path prior to pruning.
 
 <!--<div align="center">-->
 <!---->
@@ -208,7 +209,7 @@ where:
 
 </div>
 
-- [GNU Bash](http://tiswww.case.edu/php/chet/bash/bashtop.html) (or [Zsh](https://www.zsh.org/) likely in the future)
+- [GNU Bash](http://tiswww.case.edu/php/chet/bash/bashtop.html) or [Zsh](https://www.zsh.org/)
 - [FZF](https://junegunn.github.io/fzf/)
 - [GNU Grep](https://www.gnu.org/software/grep/)
 - [GNU bc](https://www.gnu.org/software/bc/)
@@ -268,27 +269,41 @@ source "path/to/the/navita.sh"
 
 - **NAVITA_MAX_AGE**
     - Specifies maximum retention period for a directory path since last access.
+    - Navita determines the age of a directory based on its relative access time to the most recently accessed directory. If the most recent directory was accessed at time $a$ and another directory was accessed at time $(a+x)$, the age of the other directory is $x$ time units.
     - The default value is `90` i.e., 90 days.
 
 - **NAVITA_RELATIVE_PARENT_PATH**
     - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in [Search & Traverse Parent Directories](search--traverse-parent-directories) feature.
     - Change it to `n` or `N` to show the parent paths as absolute path. 
 
-- **NAVITA_IGNOREFILE**
-    - The file containing regular expression patterns to ignore matching paths from being added to the history.
-    - The path to the file is `$NAVITA_CONFIG_DIR/navita-ignore`.
 - **NAVITA_SHOW_AGE**
     - It defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
-    - Change it to `y` or `Y`, to not show an age annotation beside the paths.
+    - Change it to `n` or `N`, to not show an age annotation beside the paths.
+
 - **NAVITA_DECAY_FACTOR**
     - The rate at which the score of older accesses decreases. A higher value results in a faster decay rate.
-    - It defaults to `6`.
+    - It defaults to `10`.
 
 > [!WARNING]
 > The decay factor should always be positive. Only adjust the decay factor if you are confident in the algorithm's behavior with the new value.
 
+
+<div align="center"> 
+
+### Non-Configurable Environment Variables
+
+</div>
+
 - **NAVITA_VERSION**
     - Navita's version information.
+
+- **NAVITA_IGNOREFILE**
+    - The file containing regular expression patterns to ignore matching paths from being added to the history.
+    - The path to the file is `$NAVITA_CONFIG_DIR/navita-ignore`.
+
+- **NAVITA_HISTORYFILE**
+    - The file containing a history of directory paths visited using Navita, along with their associated metadata like frequency, access time, and score.
+    - The path to the file is `$NAVITA_DATA_DIR/navita-history`.
 
 <div align="center"> 
 
@@ -296,7 +311,7 @@ source "path/to/the/navita.sh"
 
 </div>
 
-- [FZF Issue #3983](https://github.com/junegunn/fzf/issues/3983)
+- Using suffix-exact-match FZF search syntax won't work in [Search & Traverse History](#search--traverse-history) if `NAVITA_SHOW_AGE` environment variable is set to `y` due to [FZF Issue #3983](https://github.com/junegunn/fzf/issues/3983).
 
 <div align="center"> 
 
@@ -320,8 +335,8 @@ source "path/to/the/navita.sh"
 
 </div>
 
-If you encounter any bugs or issues while using Navita, please open an issue on the Navita GitHub repository. Provide as much detail as possible, including steps to reproduce the issue and any relevant error messages.
 
+If you encounter any bugs or issues while using Navita, please open an issue on the Navita GitHub repository. Provide as much detail as possible, including steps to reproduce the issue and any relevant error messages.
 <div align="center"> 
 
 ### Contributing Code
