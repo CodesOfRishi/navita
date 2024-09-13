@@ -178,7 +178,7 @@ where:
     1. Limit the maximum number of entries in the `$NAVITA_HISTORYFILE` file to 5000.
     2. If a directory path's score falls to 0, an average score will be calculated. Directory paths with scores less than 20% of the average score will be removed. 
 - These conditions will be checked once every 24 hours at shell startup.
-- If a directory path is removed due to a score of 0, the remaining directory paths will have their frequencies adjusted according to the formula $\ln(F+1)$, where $F$ is the frequency of the particular directory path prior to pruning.
+- If a directory path is removed due to a score of 0, the remaining directory paths will have their frequencies adjusted according to the formula $\ln(F+1)$, where $F$ is the frequency of the particular directory path.
 
 <!--<div align="center">-->
 <!---->
