@@ -562,7 +562,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	__navita::completions() {
 		__navita::completions::CompleteDirectory() {
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
-				"${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
 			case "$?" in
 				0) COMPREPLY=( "${dir_select}/" );;
