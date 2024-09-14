@@ -571,35 +571,39 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			COMPREPLY=( "${dir_select}" )
 			printf '\e[5n'
 		}
-	
-		if (( COMP_CWORD == 1 )) && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
-			local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 
-			case "$?" in
-				0) COMPREPLY=( "${navita_opts} " );;
-				*) __navita::completions::CompleteDirectory;;
-			esac
-		elif (( COMP_CWORD == 2 )); then
-			if [[ "${COMP_WORDS[$((COMP_CWORD-1))]}" =~ ^-(H|-history)$ ]]; then
-				local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
+		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
+		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
+
+		if (( COMP_CWORD == 1 )); then
+			if [[ "${curr_word}" == -* ]]; then
+				local opts && opts="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 				case "$?" in
-					0) COMPREPLY=( "${navita_opts} " );;
-					*) return 0;;
+					0) COMPREPLY=( "${opts} " ); printf '\e[5n';;
+					*) __navita::completions::CompleteDirectory;;
 				esac
-			elif [[ "${COMP_WORDS[$((COMP_CWORD-1))]}" == "-P" ]]; then
-				if [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
-					local navita_opts && navita_opts="$("${navita_depends["fzf"]}" --prompt="navita> " --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
-
-					case "$?" in
-						0) COMPREPLY=( "${navita_opts} " );;
-						*) __navita::completions::CompleteDirectory;;
-					esac
-				else
-					__navita::completions::CompleteDirectory
-				fi
+			else
+				__navita::completions::CompleteDirectory
 			fi
 		else
-			__navita::completions::CompleteDirectory
+			case "${prev_word}" in
+				"-P")
+					if [[ "${curr_word}" == -* ]]; then
+						local opts && opts="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
+						case "$?" in
+							0) COMPREPLY=( "${opts} " ); printf '\e[5n';;
+							*) __navita::completions::CompleteDirectory;;
+						esac
+					else 
+						__navita::completions::CompleteDirectory
+					fi
+					;;
+				"--history"|"-H")
+					local opts && opts="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
+					[[ "$?" -eq 0 ]] && COMPREPLY=( "${opts} " )
+					printf '\e[5n'
+					;;
+			esac
 		fi
 	}
 
