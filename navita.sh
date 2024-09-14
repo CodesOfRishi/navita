@@ -559,11 +559,11 @@ __navita__() {
 
 # ── Feature: TabCompletion ────────────────────────────────────────────{{{
 if [[ -n "${BASH_VERSION}" ]]; then
-	__navita::completions() {
+	__navita::Completions() {
 		# To redraw line after fzf closes (printf '\e[5n') 
 		# This is useful when the terminal is altered by FZF, and the command line gets visually corrupted or misaligned
 		bind '"\e[0n": redraw-current-line' 2> /dev/null
-		__navita::completions::CompleteDirectory() {
+		__navita::Completions::CompleteDirectory() {
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
 				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
@@ -580,10 +580,10 @@ if [[ -n "${BASH_VERSION}" ]]; then
 				local opts && opts="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-P"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 				case "$?" in
 					0) COMPREPLY=( "${opts} " ); printf '\e[5n';;
-					*) __navita::completions::CompleteDirectory;;
+					*) __navita::Completions::CompleteDirectory;;
 				esac
 			else
-				__navita::completions::CompleteDirectory
+				__navita::Completions::CompleteDirectory
 			fi
 		else
 			case "${prev_word}" in
@@ -592,10 +592,10 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						local opts && opts="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up <<< "-"$'\n'"--"$'\n'"-H"$'\n'"--history"$'\n'"-c"$'\n'"--clean"$'\n'"-s"$'\n'"--sub-search"$'\n'"-S"$'\n'"--super-search"$'\n'"-v"$'\n'"--version")"
 						case "$?" in
 							0) COMPREPLY=( "${opts} " ); printf '\e[5n';;
-							*) __navita::completions::CompleteDirectory;;
+							*) __navita::Completions::CompleteDirectory;;
 						esac
 					else 
-						__navita::completions::CompleteDirectory
+						__navita::Completions::CompleteDirectory
 					fi
 					;;
 				"--history"|"-H")
@@ -607,9 +607,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		fi
 	}
 
-	complete -o nospace -F __navita::completions "${NAVITA_COMMAND}"
+	complete -o nospace -F __navita::Completions "${NAVITA_COMMAND}"
 elif [[ -n "${ZSH_VERSION}" ]]; then
-	__navita::completions() {
+	__navita::Completions() {
 		local -a main_options sub_options
 		local state line
 
@@ -671,7 +671,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 		esac
 	}
 
-	compdef __navita::completions "__navita__"
+	compdef __navita::Completions "__navita__"
 fi
 # }}}
 
