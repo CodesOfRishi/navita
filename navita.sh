@@ -559,15 +559,17 @@ __navita__() {
 
 # ── Feature: TabCompletion ────────────────────────────────────────────{{{
 if [[ -n "${BASH_VERSION}" ]]; then
+	# To redraw line after fzf closes (printf '\e[5n') 
+	# This is useful when the terminal is altered by FZF, and the command line gets visually corrupted or misaligned
+	bind '"\e[0n": redraw-current-line' 2> /dev/null
 	__navita::completions() {
 		__navita::completions::CompleteDirectory() {
 			local dir_select && dir_select="$( compgen -d -- "${COMP_WORDS[COMP_CWORD]}" | \
 				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -lashFd --color=always -- \"\${1/#~/${HOME}}\" && echo && ${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
 
-			case "$?" in
-				0) COMPREPLY=( "${dir_select}/" );;
-				*) return 0;;
-			esac
+			[[ "$?" -eq 0 ]] && dir_select="${dir_select}/"
+			COMPREPLY=( "${dir_select}" )
+			printf '\e[5n'
 		}
 	
 		if (( COMP_CWORD == 1 )) && [[ "${COMP_WORDS[COMP_CWORD]}" =~ ^- ]]; then
