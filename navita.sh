@@ -321,6 +321,9 @@ __navita::CleanHistory() {
 
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
+	local colr_green && colr_green='\033[1;38;2;170;255;0m'
+	local colr_brown && colr_brown='\033[1;38;2;229;152;102m'
+
 	local line
 	local rank
 	local age
@@ -333,7 +336,12 @@ __navita::ViewHistory() {
 		rank="${line%%/*}"
 		line="/${line#*/}"
 		_path="$(__navita::GetPathInHistory "${line}")"
-		printf "%s%s" "${rank}" "${_path}" 
+
+		case "${_path}" in
+			"${PWD}") printf "%s${colr_green}PWD ❱${colr_rst} %s" "${rank}" "${_path}";;
+			"${OLDPWD}") printf "%s${colr_brown}LWD ❱${colr_rst} %s" "${rank}" "${_path}";;
+			*) printf "%s%s" "${rank}" "${_path}";;
+		esac
 
 		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
 		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
