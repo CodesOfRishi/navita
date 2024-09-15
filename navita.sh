@@ -576,19 +576,19 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
 			
-			printf "%s ${colr_grey}❰ Traverse to the previous working directory${colr_rst}\n" "-"
-			printf "%s ${colr_grey}❰ Search and traverse from history${colr_rst}\n" "--"
-			printf "%s ${colr_grey}❰ Resolve symbolic links and traverse to the physical directory${colr_rst}\n" "-P"
-			printf "%s ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "-H"
-			printf "%s ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "--history"
-			printf "%s ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "-c"
-			printf "%s ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "--clean"
-			printf "%s ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "-s"
-			printf "%s ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "--sub-search"
-			printf "%s ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "-S"
-			printf "%s ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "--super-search"
-			printf "%s ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
-			printf "%s ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
+			printf "%s                   ${colr_grey}❰ Traverse to the previous working directory${colr_rst}\n" "-"
+			printf "%s                  ${colr_grey}❰ Search and traverse from history${colr_rst}\n" "--"
+			printf "%s                  ${colr_grey}❰ Resolve symbolic links and traverse to the physical directory${colr_rst}\n" "-P"
+			printf "%s                  ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "-H"
+			printf "%s           ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "--history"
+			printf "%s                  ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "-c"
+			printf "%s             ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "--clean"
+			printf "%s                  ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "-s"
+			printf "%s        ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "--sub-search"
+			printf "%s                  ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "-S"
+			printf "%s      ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "--super-search"
+			printf "%s                  ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
+			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
 
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
@@ -598,7 +598,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			if [[ "${curr_word}" == -* ]]; then
 				local opt_selected && opt_selected="$( __navita::Completions::GetMainOptions | ${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)"
 				case "$?" in
-					0) COMPREPLY=( "${opt_selected% ❰*} " ); printf '\e[5n';;
+					0) COMPREPLY=( "${opt_selected%% *} " ); printf '\e[5n';;
 					*) __navita::Completions::CompleteDirectory;;
 				esac
 			else
