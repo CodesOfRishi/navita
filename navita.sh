@@ -575,6 +575,10 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		# To redraw line after fzf closes (printf '\e[5n') 
 		# This is useful when the terminal is altered by FZF, and the command line gets visually corrupted or misaligned
 		bind '"\e[0n": redraw-current-line' 2> /dev/null
+
+		local ignore_case_completion_default && ignore_case_completion_default="$(bind -v | ${navita_depends["grep"]} -m 1 -F 'set completion-ignore-case')" && ignore_case_completion_default="${ignore_case_completion_default##* }"
+		bind "set completion-ignore-case on" 
+
 		__navita::Completions::CompleteDirectory() {
 			local dir_select && dir_select="$( compgen -d -- "${curr_word}" | \
 				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --cycle --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
@@ -636,6 +640,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					;;
 			esac
 		fi
+		bind "set completion-ignore-case ${ignore_case_completion_default}"
 	}
 
 	complete -o nospace -F __navita::Completions "${NAVITA_COMMAND}"
