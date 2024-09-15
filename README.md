@@ -129,6 +129,11 @@ View Navita's version information.
 - Navita supports Tab completion for its options and directories.
 - For Zsh, to initialize the completion system, the function `compinit` should be autoloaded, and then run simply as ‘`compinit`’. *Ref: [Zsh Completion System - Use of Compinit](https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Use-of-compinit)*
 
+<!--
+> [!TIP]
+> In Bash, you can make Readline perform filename matching and completion in a case-insensitive fashion by setting the `completion-ignore-case` variable to `on` in your *inputrc* file. For example, you can refer to my [inputrc file](https://github.com/CodesOfRishi/dotfiles/blob/main/Bash/.inputrc) or alternatively add `bind "set completion-ignore-case on"` in your `.bashrc` file.
+-->
+
 <div align="center"> 
 
 ### Path Exclusion for History
@@ -227,13 +232,13 @@ where:
 
 ```bash
 # using wget2
-wget2 <raw.githubusercontent.com url to navita.sh...>
+wget2 https://github.com/CodesOfRishi/navita/blob/dev/navita.sh
 
 # or using curl
-curl <raw.githubusercontent.com url to navita.sh...> --output navita.sh
+curl https://github.com/CodesOfRishi/navita/blob/dev/navita.sh --output navita.sh
 ```
 
-2. Source the `navita.sh` file in your .bashrc configuration file.
+2. Source the `navita.sh` file in your `.bashrc`/`.zshrc` configuration file.
 
 ```bash
 source "path/to/the/navita.sh"
@@ -246,7 +251,7 @@ source "path/to/the/navita.sh"
 </div>
 
 > [!NOTE]
-> If you want to keep your desired values rather than the default ones, make sure to export these environment variables *before* sourcing the `navita.sh` file in your `.bashrc`.
+> If you want to keep your desired values rather than the default ones, make sure to export these environment variables *before* sourcing the `navita.sh` file in your `.bashrc`/`.zshrc`.
 
 - **NAVITA_DATA_DIR**
     - Directory location for Navita's data files.
@@ -267,11 +272,6 @@ source "path/to/the/navita.sh"
     - Defaults to `n`, i.e., not to follow symbolic links.
     - Change it to `y` or `Y` to follow symbolic links.
 
-- **NAVITA_MAX_AGE**
-    - Specifies maximum retention period for a directory path since last access.
-    - Navita determines the age of a directory based on its relative access time to the most recently accessed directory. If the most recent directory was accessed at time $a$ and another directory was accessed at time $(a+x)$, the age of the other directory is $x$ time units.
-    - The default value is `90` i.e., 90 days.
-
 - **NAVITA_RELATIVE_PARENT_PATH**
     - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in [Search & Traverse Parent Directories](search--traverse-parent-directories) feature.
     - Change it to `n` or `N` to show the parent paths as absolute path. 
@@ -279,6 +279,11 @@ source "path/to/the/navita.sh"
 - **NAVITA_SHOW_AGE**
     - It defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
     - Change it to `n` or `N`, to not show an age annotation beside the paths.
+
+- **NAVITA_MAX_AGE**
+    - Specifies maximum retention period for a directory path since last access.
+    - Navita determines the age of a directory based on its relative access time to the most recently accessed directory. If the most recent directory was accessed at time $a$ and another directory was accessed at time $(a+x)$, the age of the other directory is $x$ time units.
+    - The default value is `90` i.e., 90 days.
 
 - **NAVITA_DECAY_FACTOR**
     - The rate at which the score of older accesses decreases. A higher value results in a faster decay rate.
@@ -335,21 +340,7 @@ source "path/to/the/navita.sh"
 
 </div>
 
-
 If you encounter any bugs or issues while using Navita, please open an issue on the Navita GitHub repository. Provide as much detail as possible, including steps to reproduce the issue and any relevant error messages.
-<div align="center"> 
-
-### Contributing Code
-
-</div>
-
-I welcome contributions from the community! If you'd like to contribute, please:
-
-- Fork the repository.
-- Make your changes and submit a pull request to the **dev** branch. 
-
-> [!WARNING]
-> Please do not submit pull requests to the main branch.
 
 <div align="center"> 
 
