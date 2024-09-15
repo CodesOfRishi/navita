@@ -203,6 +203,7 @@ __navita::UpdatePathHistory() {
 
 # Feature: AgeOutHistory
 __navita::AgeOut() {
+	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
 
 	local total_score && total_score=0
@@ -325,6 +326,7 @@ __navita::CleanHistory() {
 __navita::ViewHistory() {
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_green && colr_green='\033[1;38;2;170;255;0m'
+	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_brown && colr_brown='\033[1;38;2;229;152;102m'
 
 	local line
@@ -546,7 +548,6 @@ __navita__() {
 		navita_args=( "${@:2}" )
 	fi
 
-	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 	local colr_rst && colr_rst='\e[0m'
