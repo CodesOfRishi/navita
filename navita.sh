@@ -100,7 +100,7 @@ __navita::GetAccessEpochInHistory() {
 
 	local access_epoch
 	if [[ -d "${1}" ]]; then
-		access_epoch="$(${navita_depends["grep"]} -m 1 -G "^${1}:" ${NAVITA_HISTORYFILE})"
+		access_epoch="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
 	else
 		access_epoch="${1}"
 	fi
@@ -121,7 +121,7 @@ __navita::GetFreqInHistory() {
 	
 	local freq
 	if [[ -d "${1}" ]]; then 
-		freq="$(${navita_depends["grep"]} -m 1 -G "^${1}:" ${NAVITA_HISTORYFILE})"
+		freq="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
 	else
 		freq="${1}"
 	fi
