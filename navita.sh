@@ -591,10 +591,12 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		bind "set completion-ignore-case on" 
 
 		__navita::Completions::CompleteDirectory() {
-			local dir_select && dir_select="$( compgen -d -- "${curr_word}" | \
-				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --cycle --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"
+			local dir_select
+			if dir_select="$( compgen -d -- "${curr_word}" | \
+				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --cycle --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"; then
+				dir_select="${dir_select}/"
+			fi
 
-			[[ "$?" -eq 0 ]] && dir_select="${dir_select}/"
 			COMPREPLY=( "${dir_select}" )
 			printf '\e[5n'
 		}
@@ -645,8 +647,8 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					fi
 					;;
 				"--history"|"-H")
-					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")"
-					[[ "$?" -eq 0 ]] && COMPREPLY=( "${opt_selected} " )
+					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")" \
+						&& COMPREPLY=( "${opt_selected} " )
 					printf '\e[5n'
 					;;
 			esac
