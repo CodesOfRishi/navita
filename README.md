@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/c3e1e753-2c38-4c57-89ad-dcfca9cea85d
 </div>
 
 > [!IMPORTANT]
-> Navita is currently under development.
+> This branch is for development work. Please use the Main branch for the stable version.
 
 <div align="center"> 
 
