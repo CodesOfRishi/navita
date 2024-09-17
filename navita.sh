@@ -492,10 +492,6 @@ __navita::NavigateParentDirs() {
 
 # ── Feature: CDGeneral ──────────────────────────────────────────────{{{
 __navita::CDGeneral() {
-	# NOTE: 
-	# if string argument provided is either empty or already a legit directory path, then provide the argument to the builtin cd,
-	# otherwise search the directories in PWD with the argument,
-	# if still no match was found in PWD, call the NavigateHistory feature with the arguments
 
 	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
