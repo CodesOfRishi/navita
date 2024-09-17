@@ -625,11 +625,14 @@ if [[ -n "${BASH_VERSION}" ]]; then
 
 		if (( COMP_CWORD == 1 )); then
 			if [[ "${curr_word}" == -* ]]; then
-				local opt_selected && opt_selected="$( __navita::Completions::GetMainOptions | ${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)"
-				case "$?" in
-					0) COMPREPLY=( "${opt_selected%% *} " ); printf '\e[5n';;
-					*) __navita::Completions::CompleteDirectory;;
-				esac
+				local opt_selected
+				if opt_selected="$( __navita::Completions::GetMainOptions | \
+					${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose an option « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)"; then
+					COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+				else
+					__navita::Completions::CompleteDirectory
+				fi
 			else
 				__navita::Completions::CompleteDirectory
 			fi
