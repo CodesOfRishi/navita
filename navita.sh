@@ -540,37 +540,31 @@ fi
 [[ -z "${OLDPWD}" ]] && export OLDPWD="${PWD}"
 
 __navita__() {
-
-	local navita_opt
-	local -a navita_args
 	local __the_builtin_cd_option && __the_builtin_cd_option="-L"
 	if [[ "$1" == "-P" ]]; then
-		navita_opt="$2"
-		navita_args=( "${@:3}" )
+		shift
 		__the_builtin_cd_option="-P"
-	else
-		[[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]] && __the_builtin_cd_option="-P"
-		navita_opt="$1"
-		navita_args=( "${@:2}" )
+	elif [[ "${NAVITA_FOLLOW_ACTUAL_PATH}" =~ ^(y|Y)$ ]]; then
+		__the_builtin_cd_option="-P"
 	fi
 
 	local colr_rst && colr_rst='\e[0m'
 
-	case "${navita_opt}" in
-		"--") __navita::NavigateHistory "${navita_args[@]}";;
-		"--history" | "-H") __navita::ViewHistory "${navita_args[@]}";;
+	case "$1" in
+		"--") __navita::NavigateHistory "${@:2}";;
+		"--history" | "-H") __navita::ViewHistory "${@:2}";;
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
-		"--sub-search" | "-s") __navita::NavigateChildDirs "${navita_args[@]}";;
+		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
 		"--super-search" | "-S" | "..") 
-			if [[ "${navita_opt}" == ".." ]] && [[ "${#navita_args[@]}" -eq 0 ]]; then
+			if [[ "$1" == ".." ]] && [[ "$#" -eq 1 ]]; then
 				__navita::CDGeneral ".."
 			else
-				__navita::NavigateParentDirs "${navita_args[@]}"
+				__navita::NavigateParentDirs "${@:2}"
 			fi
 			;;
 		"--version" | "-v") __navita::Version;;
-		*) __navita::CDGeneral "${navita_opt}" "${navita_args[@]}";;
+		*) __navita::CDGeneral "${@}";;
 	esac
 }
 
