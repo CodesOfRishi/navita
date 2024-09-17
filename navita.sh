@@ -213,7 +213,7 @@ __navita::UpdatePathHistory() {
 }
 # }}}
 
-# Feature: AgeOutHistory
+# Feature: AgeOutHistory{{{
 __navita::AgeOut() {
 	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
@@ -253,6 +253,7 @@ __navita::AgeOut() {
 		fi
 	done < "${__navita_temp_history}"
 }
+# }}}
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
