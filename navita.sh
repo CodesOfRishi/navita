@@ -116,9 +116,15 @@ __navita::GetFreqInHistory() {
 	# can be passed a line from history file
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
-	local freq="${1}"
-	[[ -d "${1}" ]] && freq="$("${navita_depends["grep"]}" -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
-	[[ -z "${freq}" ]] && return 1
+	
+	[[ -z "${1}" ]] && return 1
+	
+	local freq
+	if [[ -d "${1}" ]]; then 
+		freq="$(${navita_depends["grep"]} -m 1 -E "^${1}:" ${NAVITA_HISTORYFILE})"
+	else
+		freq="${1}"
+	fi
 
 	freq="${freq#*:}"
 	freq="${freq#*:}"
