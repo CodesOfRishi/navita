@@ -269,8 +269,7 @@ __navita::CleanHistory() {
 		# NOTE:
 		# copy historyfile to tempfile
 		# empty the historyfile
-		# if success, copy tempfile to historyfile.bak & remove the tempfile
-		# if failed, remove the tempfile
+		# if success, copy tempfile to historyfile.bak
 
 		# clear the temporary file
 		: > "${__navita_temp_history}"
