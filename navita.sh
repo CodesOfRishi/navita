@@ -95,9 +95,15 @@ __navita::GetAccessEpochInHistory() {
 	# can be passed a line from history file
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
-	local access_epoch="${1}"
-	[[ -d "${1}" ]] && access_epoch="$("${navita_depends["grep"]}" -m 1 -E "^${1}:" "${NAVITA_HISTORYFILE}")"
-	[[ -z "${access_epoch}" ]] && return 1
+	
+	[[ -z "${1}" ]] && return 1
+
+	local access_epoch
+	if [[ -d "${1}" ]]; then
+		access_epoch="$(${navita_depends["grep"]} -m 1 -E "^${1}:" ${NAVITA_HISTORYFILE})"
+	else
+		access_epoch="${1}"
+	fi
 	
 	access_epoch="${access_epoch#*:}"
 	access_epoch="${access_epoch%%:*}"
