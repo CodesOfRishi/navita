@@ -121,7 +121,7 @@ __navita::GetFreqInHistory() {
 	
 	local freq
 	if [[ -d "${1}" ]]; then 
-		freq="$(${navita_depends["grep"]} -m 1 -E "^${1}:" ${NAVITA_HISTORYFILE})"
+		freq="$(${navita_depends["grep"]} -m 1 -G "^${1}:" ${NAVITA_HISTORYFILE})"
 	else
 		freq="${1}"
 	fi
