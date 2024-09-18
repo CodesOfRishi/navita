@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1"
+export NAVITA_VERSION="v1+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -70,6 +70,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
+[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -81,7 +82,6 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
 	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
-[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # Uitility: Get a Path from an entry in history{{{
 __navita::GetPathInHistory() {
