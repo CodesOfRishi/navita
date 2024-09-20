@@ -21,9 +21,6 @@ https://github.com/user-attachments/assets/c3e1e753-2c38-4c57-89ad-dcfca9cea85d
 
 </div>
 
-> [!IMPORTANT]
-> This branch is for development work. Please use the Main branch for the stable version.
-
 <div align="center"> 
 
 ## Features 
@@ -208,7 +205,18 @@ where:
 > [!NOTE]
 > If this option is used, it should be the very first option given to Navita.
 
-- Search syntax is same as the [FZF search syntax](https://junegunn.github.io/fzf/search-syntax/).
+- Search syntax is same as the [FZF search syntax](https://junegunn.github.io/fzf/search-syntax/). You can type in multiple search terms delimited by spaces. For example, FZF sees `^music .conf3$ sbtrkt !fire` as four separate search terms.
+
+    | Token      | Match Type                              | Description                                          |
+    | ---------- | --------------------------------------- | ---------------------------------------------------- |
+    | `sbtrkt`   | fuzzy-match                             | Items that include `sbtrkt` characters in that order |
+    | `'wild`    | exact-match (quoted)                    | Items that include `wild`                            |
+    | `'wild'`   | exact-boundary-match (quoted both ends) | Items that include `wild` at word boundaries         |
+    | `^music`   | prefix-exact-match                      | Items that start with `music`                        |
+    | `.conf3$`  | suffix-exact-match                      | Items that end with `.conf3`                         |
+    | `!fire`    | inverse-exact-match                     | Items that do not include `fire`                     |
+    | `!^music`  | inverse-prefix-exact-match              | Items that do not start with `music`                 |
+    | `!.conf3$` | inverrse-suffix-exact-match             | Items that do not end with `.conf3`                  | 
 
 <div align="center"> 
 
@@ -335,6 +343,8 @@ source "path/to/the/navita.sh"
 ## Contributing to Navita
 
 </div>
+
+To review the latest changes that have not yet been included in the latest release, check out the [dev](https://github.com/CodesOfRishi/navita/tree/dev) branch.
 
 <div align="center"> 
 
