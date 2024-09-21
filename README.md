@@ -17,7 +17,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Forget about tedious typing.** You can instantly find and jump to any directory, no matter how deeply nested. Navita is a great tool for boosting your productivity and saving you valuable time.
 
-https://github.com/user-attachments/assets/c3e1e753-2c38-4c57-89ad-dcfca9cea85d
+https://github.com/user-attachments/assets/809b68c0-ff8c-4c79-aa19-4fd7c5b4fc59
 
 </div>
 
