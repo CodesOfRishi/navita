@@ -242,10 +242,10 @@ where:
 
 ```bash
 # using wget2
-wget2 https://raw.githubusercontent.com/CodesOfRishi/navita/dev/navita.sh
+wget2 https://raw.githubusercontent.com/CodesOfRishi/navita/main/navita.sh
 
 # or using curl
-curl https://raw.githubusercontent.com/CodesOfRishi/navita/dev/navita.sh --output navita.sh
+curl https://raw.githubusercontent.com/CodesOfRishi/navita/main/navita.sh --output navita.sh
 ```
 
 2. Source the `navita.sh` file in your `.bashrc`/`.zshrc` configuration file.
