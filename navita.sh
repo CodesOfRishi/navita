@@ -247,7 +247,8 @@ __navita::AgeOut() {
 		curr_freq="$(__navita::GetFreqInHistory "${line}")"
 		curr_score="${line##*:}"
 		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
-			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "$(printf "%.0f\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")")" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
+			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
+			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
 			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
 		fi
@@ -371,7 +372,7 @@ __navita::ViewHistory() {
 		freq="$(__navita::GetFreqInHistory "${line}")"
 		[[ -n "${freq}" ]] && printf "${colr_orange} %s${colr_rst}" "❰ ${freq}"
 
-		score="$(printf "%.2f\n" "${line##*:}")"
+		printf -v score "%.2f" "${line##*:}"
 		[[ -n "${score}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${score}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
