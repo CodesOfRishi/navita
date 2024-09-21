@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1"
+export NAVITA_VERSION="v1.0.1"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -70,6 +70,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
+[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -81,7 +82,6 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
 	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
-[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # Uitility: Get a Path from an entry in history{{{
 __navita::GetPathInHistory() {
@@ -218,6 +218,7 @@ __navita::AgeOut() {
 	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
+	local colr_rst && colr_rst='\e[0m'
 	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
 
 	local total_score && total_score=0
@@ -247,9 +248,10 @@ __navita::AgeOut() {
 		curr_freq="$(__navita::GetFreqInHistory "${line}")"
 		curr_score="${line##*:}"
 		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
-			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "$(printf "%.0f\n" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")")" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
+			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
+			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
-			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
+			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ ${curr_epoch}" " ❰ ${curr_freq}" " ❰ ${curr_score}"
 		fi
 	done < "${__navita_temp_history}"
 }
@@ -319,9 +321,9 @@ __navita::CleanHistory() {
 	printf "\n"
 	local user_choice
 	if [[ -n "${BASH_VERSION}" ]]; then 
-		read -rp "Choice? (1 or 2): " user_choice
+		read -rp "Choice?: " user_choice
 	elif [[ -n "${ZSH_VERSION}" ]]; then
-		read -r "user_choice?Choice? (1 or 2): " 
+		read -r "user_choice?Choice?: " 
 	fi
 	printf "\n"
 
@@ -371,7 +373,7 @@ __navita::ViewHistory() {
 		freq="$(__navita::GetFreqInHistory "${line}")"
 		[[ -n "${freq}" ]] && printf "${colr_orange} %s${colr_rst}" "❰ ${freq}"
 
-		score="$(printf "%.2f\n" "${line##*:}")"
+		printf -v score "%.2f" "${line##*:}"
 		[[ -n "${score}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${score}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
