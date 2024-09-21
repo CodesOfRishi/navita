@@ -218,6 +218,7 @@ __navita::AgeOut() {
 	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
+	local colr_rst && colr_rst='\e[0m'
 	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
 
 	local total_score && total_score=0
@@ -250,7 +251,7 @@ __navita::AgeOut() {
 			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
 			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
-			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" "❰ ${curr_epoch}" "❰ ${curr_freq}" "❰ ${curr_score}"
+			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ ${curr_epoch}" " ❰ ${curr_freq}" " ❰ ${curr_score}"
 		fi
 	done < "${__navita_temp_history}"
 }
