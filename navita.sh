@@ -253,7 +253,7 @@ __navita::AgeOut() {
 		else
 			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ $(__navita::GetAgeFromEpoch "${curr_epoch}")" " ❰ ${curr_freq}" " ❰ ${curr_score}"
 		fi
-	done < "${__navita_temp_history}"
+	done < "${__navita_temp_history}" | "${navita_depends["nl"]}"
 }
 # }}}
 
