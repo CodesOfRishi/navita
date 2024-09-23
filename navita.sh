@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.0.1"
+export NAVITA_VERSION="v1.0.1+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -251,7 +251,7 @@ __navita::AgeOut() {
 			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
 			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
-			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ ${curr_epoch}" " ❰ ${curr_freq}" " ❰ ${curr_score}"
+			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ $(__navita::GetAgeFromEpoch "${curr_epoch}")" " ❰ ${curr_freq}" " ❰ ${curr_score}"
 		fi
 	done < "${__navita_temp_history}"
 }
