@@ -445,7 +445,11 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDir ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local -a fzf_conditional_options
+	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	unset fzf_conditional_options
 
 	case "$?" in
 		0) 
