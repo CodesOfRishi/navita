@@ -570,8 +570,9 @@ __navita__() {
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
-		"--super-search" | "-S" | "..") 
-			if [[ "$1" == ".." ]] && [[ "$#" -eq 1 ]]; then
+		"--super-search" | "-S") __navita::NavigateParentDirs "${@:2}";;
+		"..")
+			if [[ "$#" -eq 1 ]]; then
 				__navita::CDGeneral ".."
 			else
 				__navita::NavigateParentDirs "${@:2}"
