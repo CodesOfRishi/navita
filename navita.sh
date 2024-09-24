@@ -482,7 +482,11 @@ __navita::NavigateParentDirs() {
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) 
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local -a fzf_conditional_options
+	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index --exact "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	unset fzf_conditional_options
 
 	case "$?" in
 		0) 
