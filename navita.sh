@@ -705,10 +705,15 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"--version:Navita's version information"
 		)
 
-		sub_options=(
+		history_sub_options=(
 			'--by-freq:Sort history by frequency'
 			'--by-time:Sort history by access time'
 			'--by-score:Sort history by score'
+		)
+
+		clean_sub_options=(
+			'--invalid-paths:Remove invalid paths'
+			'--full-history:Clear the full history'
 		)
 
 		_arguments -C \
@@ -727,7 +732,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"second_arg")
 				case "${words[2]}" in
 					"-H"|"--history")
-						_describe -t sub_options "Navita's sub-options" sub_options;;
+						_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
 					"-P")
 						if [[ "${words[CURRENT]}" == -* ]]; then
 							unset 'main_options[3]'
@@ -736,6 +741,8 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 							_path_files -/ '*(-/)'
 						fi
 						;;
+					"-c"|"--clean")
+						_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
 				esac
 				;;
 			"other_args")
