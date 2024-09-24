@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.0.1"
+export NAVITA_VERSION="v1.0.2"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -251,9 +251,9 @@ __navita::AgeOut() {
 			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
 			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
 		else
-			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ ${curr_epoch}" " ❰ ${curr_freq}" " ❰ ${curr_score}"
+			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ $(__navita::GetAgeFromEpoch "${curr_epoch}")" " ❰ ${curr_freq}" " ❰ ${curr_score}"
 		fi
-	done < "${__navita_temp_history}"
+	done < "${__navita_temp_history}" | "${navita_depends["nl"]}"
 }
 # }}}
 
@@ -445,7 +445,11 @@ __navita::ToggleLastVisits() {
 
 # ── Feature: NavigateChildDir ─────────────────────────────────────{{{
 __navita::NavigateChildDirs() {
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index --select-1 --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local -a fzf_conditional_options
+	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	unset fzf_conditional_options
 
 	case "$?" in
 		0) 
@@ -478,7 +482,11 @@ __navita::NavigateParentDirs() {
 		done < <(__navita::NavigateParentDirs::GetParentDirs::GetParentNodes) 
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index --exact --select-1 --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local -a fzf_conditional_options
+	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index --exact "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	unset fzf_conditional_options
 
 	case "$?" in
 		0) 
@@ -566,8 +574,9 @@ __navita__() {
 		"-") __navita::ToggleLastVisits;;
 		"--clean" | "-c") __navita::CleanHistory;;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
-		"--super-search" | "-S" | "..") 
-			if [[ "$1" == ".." ]] && [[ "$#" -eq 1 ]]; then
+		"--super-search" | "-S") __navita::NavigateParentDirs "${@:2}";;
+		"..")
+			if [[ "$#" -eq 1 ]]; then
 				__navita::CDGeneral ".."
 			else
 				__navita::NavigateParentDirs "${@:2}"
