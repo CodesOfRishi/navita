@@ -17,7 +17,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 **Forget about tedious typing.** You can instantly find and jump to any directory, no matter how deeply nested. Navita is a great tool for boosting your productivity and saving you valuable time.
 
-https://github.com/user-attachments/assets/809b68c0-ff8c-4c79-aa19-4fd7c5b4fc59
+![navita-demo](https://github.com/user-attachments/assets/ed52b857-85cb-42f3-95f0-9de22240863b)
 
 </div>
 
@@ -105,7 +105,7 @@ Switch between your current directory and the previous directory you were in. Th
 
 </div>
 
-**Synopsis:** `cd (-c | --cleanup)`
+**Synopsis:** `cd (-c | --clean) [--invalid-paths | --full-history]`
 
 You can choose to either remove invalid paths from the history or clear the entire history. However, Navita will automatically remove non-existent and non-executable directories.
 
