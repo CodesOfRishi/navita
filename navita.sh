@@ -673,6 +673,11 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						&& COMPREPLY=( "${opt_selected} " )
 					printf '\e[5n'
 					;;
+				"--clean"|"-c")
+					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--invalid-paths"$'\n'"--full-history")" \
+						&& COMPREPLY=( "${opt_selected} " )
+					printf '\e[5n'
+					;;
 			esac
 		fi
 		bind "set completion-ignore-case ${ignore_case_completion_default}"
