@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.0.2"
+export NAVITA_VERSION="v1.0.2+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -314,25 +314,35 @@ __navita::CleanHistory() {
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 
-	printf "Choose any one:\n"
-	printf "1. Remove only invalid paths.\n"
-	printf "2. Empty the history.\n"
-	printf "x to abort.\n"
-	printf "\n"
-	local user_choice
-	if [[ -n "${BASH_VERSION}" ]]; then 
-		read -rp "Choice?: " user_choice
-	elif [[ -n "${ZSH_VERSION}" ]]; then
-		read -r "user_choice?Choice?: " 
-	fi
-	printf "\n"
+	case "${1}" in
+		"--invalid-paths") __navita::CleanHistory::RemoveInvalidPaths;;
+		"--full-history") __navita::CleanHistory::EmptyHistoryFile;;
+		"")
+			printf "Choose any one:\n"
+			printf "1. Remove only invalid paths.\n"
+			printf "2. Clear the full history.\n"
+			printf "x to abort.\n"
+			printf "\n"
+			local user_choice
+			if [[ -n "${BASH_VERSION}" ]]; then 
+				read -rp "Choice?: " user_choice
+			elif [[ -n "${ZSH_VERSION}" ]]; then
+				read -r "user_choice?Choice?: " 
+			fi
+			printf "\n"
 
-	case "${user_choice}" in
-		1) __navita::CleanHistory::RemoveInvalidPaths;;
-		2) __navita::CleanHistory::EmptyHistoryFile;;
-		"x") printf "navita: Aborted.\n";;
+			case "${user_choice}" in
+				1) __navita::CleanHistory::RemoveInvalidPaths;;
+				2) __navita::CleanHistory::EmptyHistoryFile;;
+				"x") printf "navita: Aborted.\n";;
+				*) 
+					printf "navita: ERROR: Invalid input!\n" >&2
+					return 1
+					;;
+			esac
+			;;
 		*) 
-			printf "navita: ERROR: Invalid input!\n" >&2
+			printf "navita: ERROR: Invalid options/arguments!\n" >&2
 			return 1
 			;;
 	esac
@@ -572,7 +582,7 @@ __navita__() {
 		"--") __navita::NavigateHistory "${@:2}";;
 		"--history" | "-H") __navita::ViewHistory "${@:2}";;
 		"-") __navita::ToggleLastVisits;;
-		"--clean" | "-c") __navita::CleanHistory;;
+		"--clean" | "-c") __navita::CleanHistory "${@:2}";;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
 		"--super-search" | "-S") __navita::NavigateParentDirs "${@:2}";;
 		"..")
