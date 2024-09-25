@@ -679,7 +679,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					;;
 				"--history"|"-H")
 					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
-						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
