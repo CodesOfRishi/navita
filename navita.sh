@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.0.2"
+export NAVITA_VERSION="v1.1.0"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -314,25 +314,35 @@ __navita::CleanHistory() {
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 
-	printf "Choose any one:\n"
-	printf "1. Remove only invalid paths.\n"
-	printf "2. Empty the history.\n"
-	printf "x to abort.\n"
-	printf "\n"
-	local user_choice
-	if [[ -n "${BASH_VERSION}" ]]; then 
-		read -rp "Choice?: " user_choice
-	elif [[ -n "${ZSH_VERSION}" ]]; then
-		read -r "user_choice?Choice?: " 
-	fi
-	printf "\n"
+	case "${1}" in
+		"--invalid-paths") __navita::CleanHistory::RemoveInvalidPaths;;
+		"--full-history") __navita::CleanHistory::EmptyHistoryFile;;
+		"")
+			printf "Choose any one:\n"
+			printf "1. Remove only invalid paths.\n"
+			printf "2. Clear the full history.\n"
+			printf "x to abort.\n"
+			printf "\n"
+			local user_choice
+			if [[ -n "${BASH_VERSION}" ]]; then 
+				read -rp "Choice?: " user_choice
+			elif [[ -n "${ZSH_VERSION}" ]]; then
+				read -r "user_choice?Choice?: " 
+			fi
+			printf "\n"
 
-	case "${user_choice}" in
-		1) __navita::CleanHistory::RemoveInvalidPaths;;
-		2) __navita::CleanHistory::EmptyHistoryFile;;
-		"x") printf "navita: Aborted.\n";;
+			case "${user_choice}" in
+				1) __navita::CleanHistory::RemoveInvalidPaths;;
+				2) __navita::CleanHistory::EmptyHistoryFile;;
+				"x") printf "navita: Aborted.\n";;
+				*) 
+					printf "navita: ERROR: Invalid input!\n" >&2
+					return 1
+					;;
+			esac
+			;;
 		*) 
-			printf "navita: ERROR: Invalid input!\n" >&2
+			printf "navita: ERROR: Invalid options/arguments!\n" >&2
 			return 1
 			;;
 	esac
@@ -572,7 +582,7 @@ __navita__() {
 		"--") __navita::NavigateHistory "${@:2}";;
 		"--history" | "-H") __navita::ViewHistory "${@:2}";;
 		"-") __navita::ToggleLastVisits;;
-		"--clean" | "-c") __navita::CleanHistory;;
+		"--clean" | "-c") __navita::CleanHistory "${@:2}";;
 		"--sub-search" | "-s") __navita::NavigateChildDirs "${@:2}";;
 		"--super-search" | "-S") __navita::NavigateParentDirs "${@:2}";;
 		"..")
@@ -627,6 +637,23 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
 
+		__navita::Completions::GetHistorySubOptions() {
+			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+			local colr_rst && colr_rst='\e[0m'
+
+			printf "%s       ${colr_grey}❰ Sort history by access time${colr_rst}\n" "--by-time"
+			printf "%s       ${colr_grey}❰ Sort history by frequency${colr_rst}\n" "--by-freq"
+			printf "%s      ${colr_grey}❰ Sort history by score${colr_rst}\n" "--by-score"
+		}
+
+		__navita::Completions::GetCleanSubOptions() {
+			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+			local colr_rst && colr_rst='\e[0m'
+
+			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
+			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
+		}
+
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
 		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -659,8 +686,15 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					fi
 					;;
 				"--history"|"-H")
-					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")" \
-						&& COMPREPLY=( "${opt_selected} " )
+					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+					;;
+				"--clean"|"-c")
+					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
 			esac
@@ -690,10 +724,15 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"--version:Navita's version information"
 		)
 
-		sub_options=(
+		history_sub_options=(
 			'--by-freq:Sort history by frequency'
 			'--by-time:Sort history by access time'
 			'--by-score:Sort history by score'
+		)
+
+		clean_sub_options=(
+			'--invalid-paths:Remove invalid paths'
+			'--full-history:Clear the full history'
 		)
 
 		_arguments -C \
@@ -712,7 +751,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"second_arg")
 				case "${words[2]}" in
 					"-H"|"--history")
-						_describe -t sub_options "Navita's sub-options" sub_options;;
+						_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
 					"-P")
 						if [[ "${words[CURRENT]}" == -* ]]; then
 							unset 'main_options[3]'
@@ -721,6 +760,8 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 							_path_files -/ '*(-/)'
 						fi
 						;;
+					"-c"|"--clean")
+						_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
 				esac
 				;;
 			"other_args")
