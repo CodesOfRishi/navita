@@ -646,6 +646,14 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s      ${colr_grey}❰ Sort history by score${colr_rst}\n" "--by-score"
 		}
 
+		__navita::Completions::GetCleanSubOptions() {
+			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+			local colr_rst && colr_rst='\e[0m'
+
+			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
+			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
+		}
+
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
 		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -684,8 +692,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					printf '\e[5n'
 					;;
 				"--clean"|"-c")
-					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--invalid-paths"$'\n'"--full-history")" \
-						&& COMPREPLY=( "${opt_selected} " )
+					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
 			esac
