@@ -637,6 +637,15 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
 
+		__navita::Completions::GetHistorySubOptions() {
+			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+			local colr_rst && colr_rst='\e[0m'
+
+			printf "%s       ${colr_grey}❰ Sort history by access time${colr_rst}\n" "--by-time"
+			printf "%s       ${colr_grey}❰ Sort history by frequency${colr_rst}\n" "--by-freq"
+			printf "%s      ${colr_grey}❰ Sort history by score${colr_rst}\n" "--by-score"
+		}
+
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
 		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -669,8 +678,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 					fi
 					;;
 				"--history"|"-H")
-					local opt_selected && opt_selected="$(${navita_depends["fzf"]} --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle <<< "--by-time"$'\n'"--by-freq"$'\n'"--by-score")" \
-						&& COMPREPLY=( "${opt_selected} " )
+					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort history either by time, frequency or score « Navita"' --height=~100% --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
 				"--clean"|"-c")
