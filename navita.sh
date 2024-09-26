@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.1.0"
+export NAVITA_VERSION="v1.1.0+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -538,18 +538,41 @@ __navita::CDGeneral() {
 		done < "${NAVITA_HISTORYFILE}"
 	}
 
-	# automatically accepts the very first matching highest ranked directory
-	local fzf_query && fzf_query="${*}"
-	[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
-	local path_returned && path_returned="$( __navita::CDGeneral::GetPaths | "${navita_depends["fzf"]}" +s --tiebreak=end,index --exact --filter="${fzf_query}" | "${navita_depends["head"]}" -1 )"
-	
-	if [[ -n "${path_returned}" ]]; then
-		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-		(&>/dev/null __navita::UpdatePathHistory &)
-	else
-		printf "navita: None matched!\n" >&2
-		return 1
+	local srch_inc=""
+	local srch_exc=""
+	local srch_num=1
+	local pattern
+
+	for pattern in "${@}"; do
+		pattern="${pattern//./\\.}"
+		
+		[[ "$#" -eq "${srch_num}" ]] && [[ "${pattern: -1}" != "$" ]] && pattern="${pattern}\$"
+		[[ "${pattern:0:1}" == "!" ]] && srch_exc="${srch_exc}${pattern:1}|" || srch_inc="${srch_inc}(?=.*${pattern})"
+
+		(( srch_num++ ))
+	done
+	unset pattern
+	unset srch_num
+
+	[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+
+	local path_returned
+	if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+	elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+	elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}")"
 	fi
+
+	case "$?" in
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
+		1) printf "navita: None matched!\n" >&2; return 1;;
+		*) return "$?";;
+	esac
 }
 # }}}
 
