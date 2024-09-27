@@ -36,10 +36,66 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 **Synopsis:** `cd [string...]`
 
 - Navita will search the history and directly navigate to the highest-ranked matching directory. The current working directory will not be considered in the search.
-- You can also navigate directories the same way you would with the usual built-in cd command.
+- For highest-ranked directory traversal, search strings will be matched using [Perl-compatible regular expressions (PCREs)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions) and are compared case-sensitively.
+- Navita has two exceptions when using PCREs, mainly to keep things (almost) compatible with FZF search syntax.
+    - The `.` character will be treated literally.
+    - The `!` character can be used to exclude matches for a specified search pattern or word.
+
+    ```bash
+    # For example, navigate to the highest-ranked directory path 
+    # that does not contain the substring 'smartcd' 
+    # and ends with the substring '.config'.
+    cd \!smartcd .config
+    # OR
+    cd '!smartcd' .config
+    ```
 
 > [!NOTE]
 > Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.<br> 
+
+<details>
+<summary>
+<b>Useful PCRE search syntaxes↴</b>
+</summary><br>
+
+| Pattern               | Info                                     |
+| --------------------- | ---------------------------------------- |
+| `a`                   | The character `a`                        |
+| `ab`                  | The string `ab`                          |
+| <code>a&#124;b</code> | `a` or `b`                               | 
+| `a*`                  | 0 or more `a`'s                          |
+| `\`                   | Escapes a special character              |
+| `*`                   | 0 or more                                |
+| `+`                   | 1 or more                                |
+| `?`                   | 0 or 1                                   |
+| `{2}`                 | Exactly 2                                |
+| `{2,5}`               | Between 2 and 5                          |
+| `{2,}`                | 2 or more                                |
+| `[ab-d]`              | One character of: `a`, `b`, `c`, `d`     |
+| `[^ab-d]`             | One character except: `a`, `b`, `c`, `d` |
+| `\d`                  | One digit                                |
+| `\D`                  | One non-digit                            |
+| `\s`                  | One whitespace                           |
+| `\S`                  | One non-whitespace                       |
+| `\w`                  | One word character                       |
+| `\W`                  | One non-word character                   |
+| `^`                   | Start of string                          |
+| `$`                   | End of string                            |
+| `\b`                  | Word boundary                            |
+| `\B`                  | Non-word boundary                        |
+| `[:alnum:]`           | Letters and digits                       |
+| `[:alpha:]`           | Letters                                  |
+| `[:digit:]`           | Decimal digits                           |
+| `[:ascii:]`           | Ascii codes 0 - 127                      |
+| `[:blank:]`           | Space or tab only                        |
+| `[:space:]`           | Whitespace                               |
+| `[:lower:]`           | Lowercase letters                        |
+| `[:upper:]`           | Uppercase letters                        |
+| `[:word:]`            | Word characters                          |
+
+</details>
+
+- You can also navigate directories the same way you would with the usual built-in cd command.
 
 <div align="center"> 
 
@@ -128,11 +184,6 @@ View Navita's version information.
 - Navita supports Tab completion for its options and directories.
 - For Zsh, to initialize the completion system, the function `compinit` should be autoloaded, and then run simply as ‘`compinit`’. *Ref: [Zsh Completion System - Use of Compinit](https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Use-of-compinit)*
 
-<!--
-> [!TIP]
-> In Bash, you can make Readline perform filename matching and completion in a case-insensitive fashion by setting the `completion-ignore-case` variable to `on` in your *inputrc* file. For example, you can refer to my [inputrc file](https://github.com/CodesOfRishi/dotfiles/blob/main/Bash/.inputrc) or alternatively add `bind "set completion-ignore-case on"` in your `.bashrc` file.
--->
-
 <div align="center"> 
 
 ### Path Exclusion for History
@@ -166,7 +217,7 @@ where:
 - `F` is the frequency of access.
 - `T1` is the time difference between the most recent access and the current directory.
 - `T2` is the maximum time difference allowed (90 days default). Check [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
-- `k` controls the rate at which the weight of older accesses decreases. A higher value results in a faster decay rate. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
+- `k` controls the rate at which the weight of older accesses decreases. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
 - The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
 - The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
 
@@ -184,16 +235,6 @@ where:
 - These conditions will be checked once every 24 hours at shell startup.
 - If a directory path is removed due to a score of 0, the remaining directory paths will have their frequencies adjusted according to the formula $\ln(F+1)$, where $F$ is the frequency of the particular directory path.
 
-<!--<div align="center">-->
-<!---->
-<!--### Add Annotations-->
-<!---->
-<!--*Feature Name: UserAnnotations*-->
-<!---->
-<!--</div>-->
-<!---->
-<!--- Annotate a specific directory path with a note or comment that will appear in the [ViewHistory](view-history) or [NavigateHistory](search--traverse-History) feature.-->
-
 <div align="center"> 
 
 ### Additional Info
@@ -205,7 +246,7 @@ where:
 > [!NOTE]
 > If this option is used, it should be the very first option given to Navita.
 
-- Search syntax is same as the [FZF search syntax](https://junegunn.github.io/fzf/search-syntax/). You can type in multiple search terms delimited by spaces. For example, FZF sees `^music .conf3$ sbtrkt !fire` as four separate search terms.
+- Search syntax is same as the [FZF search syntax](https://junegunn.github.io/fzf/search-syntax/) except when searching for [Highest-ranked directory](#usual-directory-change). You can type in multiple search terms delimited by spaces. For example, FZF sees `^music .conf3$ sbtrkt !fire` as four separate search terms.
 
     | Token      | Match Type                              | Description                                          |
     | ---------- | --------------------------------------- | ---------------------------------------------------- |
@@ -289,6 +330,11 @@ source "path/to/the/navita.sh"
 - **NAVITA_SHOW_AGE**
     - It defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
     - Change it to `n` or `N`, to not show an age annotation beside the paths.
+
+- **NAVITA_FZF_EXACT_MATCH**
+    - It defaults to `y`, i.e., Exact match and search in FZF when utilizing [Search & Traverse Child Directories](#search--traverse-child-directories), [Search & Traverse Parent Directories](#search--traverse-parent-directories) or [Search & Traverse History](#search--traverse-history).
+    - Change it to `n` or `N`, to Fuzzy match and search in FZF.
+    - It will not affect Tab completion in Bash or the [Highest-ranked directory search](#usual-directory-change).
 
 - **NAVITA_MAX_AGE**
     - Specifies maximum retention period for a directory path since last access.
