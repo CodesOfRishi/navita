@@ -55,6 +55,7 @@ export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
 export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-y}"
 export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-10}"
+export NAVITA_FZF_EXACT_MATCH="${NAVITA_FZF_EXACT_MATCH:-y}"
 
 # temporary file for data manipulation for the history file
 export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
@@ -457,8 +458,9 @@ __navita::ToggleLastVisits() {
 __navita::NavigateChildDirs() {
 	local -a fzf_conditional_options
 	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
 
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
 	unset fzf_conditional_options
 
 	case "$?" in
