@@ -49,12 +49,13 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.1.0"
+export NAVITA_VERSION="v1.2.0"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
 export NAVITA_SHOW_AGE="${NAVITA_SHOW_AGE:-y}"
 export NAVITA_DECAY_FACTOR="${NAVITA_DECAY_FACTOR:-10}"
+export NAVITA_FZF_EXACT_MATCH="${NAVITA_FZF_EXACT_MATCH:-y}"
 
 # temporary file for data manipulation for the history file
 export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
@@ -432,7 +433,10 @@ __navita::NavigateHistory() {
 		done < "${NAVITA_HISTORYFILE}"
 	}
 
-	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} History « Navita"' --height "50%" --tiebreak='end,index' --ansi --nth=1 --with-nth='1,2,3' --delimiter=' ❰ ' --exact --exit-0 --query="${*}" --layout='reverse' --preview-window='down' --border='bold' --preview="${navita_depends["ls"]} -CFaA --color=always {1}" )"
+	local -a fzf_conditional_options
+	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
+
+	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} History « Navita"' --height "50%" --tiebreak='end,index' --ansi --nth=1 --with-nth='1,2,3' --delimiter=' ❰ ' "${fzf_conditional_options[@]}" --exit-0 --query="${*}" --layout='reverse' --preview-window='down' --border='bold' --preview="${navita_depends["ls"]} -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) 
@@ -457,9 +461,9 @@ __navita::ToggleLastVisits() {
 __navita::NavigateChildDirs() {
 	local -a fzf_conditional_options
 	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
 
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --exact --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
-	unset fzf_conditional_options
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -494,9 +498,9 @@ __navita::NavigateParentDirs() {
 
 	local -a fzf_conditional_options
 	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
+	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index --exact "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
-	unset fzf_conditional_options
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" --tiebreak=end,index "${fzf_conditional_options[@]}" --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -538,18 +542,41 @@ __navita::CDGeneral() {
 		done < "${NAVITA_HISTORYFILE}"
 	}
 
-	# automatically accepts the very first matching highest ranked directory
-	local fzf_query && fzf_query="${*}"
-	[[ ! "${fzf_query}" =~ .*\$$ ]] && fzf_query="${fzf_query}\$"
-	local path_returned && path_returned="$( __navita::CDGeneral::GetPaths | "${navita_depends["fzf"]}" +s --tiebreak=end,index --exact --filter="${fzf_query}" | "${navita_depends["head"]}" -1 )"
-	
-	if [[ -n "${path_returned}" ]]; then
-		builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-		(&>/dev/null __navita::UpdatePathHistory &)
-	else
-		printf "navita: None matched!\n" >&2
-		return 1
+	local srch_inc=""
+	local srch_exc=""
+	local srch_num=1
+	local pattern
+
+	for pattern in "${@}"; do
+		pattern="${pattern//./\\.}"
+		
+		[[ "$#" -eq "${srch_num}" ]] && [[ "${pattern: -1}" != "$" ]] && pattern="${pattern}\$"
+		[[ "${pattern:0:1}" == "!" ]] && srch_exc="${srch_exc}${pattern:1}|" || srch_inc="${srch_inc}(?=.*${pattern})"
+
+		(( srch_num++ ))
+	done
+	unset pattern
+	unset srch_num
+
+	[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+
+	local path_returned
+	if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+	elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+	elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}")"
 	fi
+
+	case "$?" in
+		0) 
+			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
+			(&>/dev/null __navita::UpdatePathHistory &)
+			;;
+		1) printf "navita: None matched!\n" >&2; return 1;;
+		*) return "$?";;
+	esac
 }
 # }}}
 
