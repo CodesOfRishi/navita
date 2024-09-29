@@ -51,7 +51,8 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
     ```
 
 > [!NOTE]
-> Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.<br> 
+> Navita will compare the last word of the string argument to the end of the paths in the history to determine the highest-ranked matching directory.
+> You can override this behaviour by explicitly specifying `$` (End-of-String Anchor) in your search string.<br> 
 
 <details>
 <summary>
