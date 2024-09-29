@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.2.0"
+export NAVITA_VERSION="v1.2.0+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -544,21 +544,37 @@ __navita::CDGeneral() {
 
 	local srch_inc=""
 	local srch_exc=""
-	local srch_num=1
+	local end_of_str_anchor_found=0
+	local last_search_type=0
 	local pattern
 
 	for pattern in "${@}"; do
 		pattern="${pattern//./\\.}"
 		
-		[[ "$#" -eq "${srch_num}" ]] && [[ "${pattern: -1}" != "$" ]] && pattern="${pattern}\$"
-		[[ "${pattern:0:1}" == "!" ]] && srch_exc="${srch_exc}${pattern:1}|" || srch_inc="${srch_inc}(?=.*${pattern})"
-
-		(( srch_num++ ))
+		(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
+		if [[ "${pattern:0:1}" == "!" ]]; then 
+			srch_exc="${srch_exc}${pattern:1}|" 
+			last_search_type=2
+		else
+			srch_inc="${srch_inc}(?=.*${pattern})"
+			last_search_type=1
+		fi
 	done
 	unset pattern
-	unset srch_num
 
 	[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+	if (( end_of_str_anchor_found == 0 )); then
+		case "${last_search_type}" in
+			"1")
+				# inclusion search term
+				srch_inc="${srch_inc:0:-1}\$)"
+				;;
+			"2")
+				# exclusion search term
+				srch_exc="${srch_exc}\$"
+				;;
+		esac
+	fi
 
 	local path_returned
 	if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
