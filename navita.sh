@@ -578,11 +578,11 @@ __navita::CDGeneral() {
 
 	local path_returned
 	if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
-		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -i -vP "${srch_exc}" | ${navita_depends["grep"]} -i -m 1 -P "${srch_inc}")"
 	elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
-		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}")"
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -i -m 1 -P "${srch_inc}")"
 	elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
-		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}")"
+		path_returned="$(__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -i -m 1 -vP "${srch_exc}")"
 	fi
 
 	case "$?" in
