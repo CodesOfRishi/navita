@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cut" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -172,7 +172,7 @@ __navita::GetRankScore() {
 	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
 	local x && (( x = max_age - curr_age )) && (( x = x < 0 ? 0 : x ))
 
-	"${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age})"
+	"${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age}) * 10000000000" | "${navita_depends["cut"]}" -d'.' -f1
 }
 # }}}
 
@@ -185,32 +185,50 @@ __navita::UpdatePathHistory() {
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
 
-	local now_epoch && now_epoch="$("${navita_depends["date"]}" +%s)"
+	: > "${__navita_temp_history}"
 
+	local now_epoch && now_epoch="$("${navita_depends["date"]}" +%s)"
 	local curr_path
 	local curr_freq
 	local curr_epoch
+	local pwd_score
+	local pwd_freq
 	local pwd_not_found=1
 
-	: > "${__navita_temp_history}"
 	while read -r line; do
 		curr_path="$(__navita::GetPathInHistory "${line}")"
 		curr_freq="$(__navita::GetFreqInHistory "${line}")"
 		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
 
-		if [[ ! -d "${curr_path}" ]] || [[ ! -x "${curr_path}" ]]; then
-			continue
-		elif (( pwd_not_found )) && [[ "${PWD}" == "${curr_path}" ]]; then
-			(( curr_freq++ ))
-			curr_epoch="${now_epoch}"
+		if (( pwd_not_found )) && [[ "${curr_path}" == "${PWD}" ]]; then
+			(( pwd_freq = curr_freq + 1 ))
+			pwd_score="$(__navita::GetRankScore "${pwd_freq}" "${now_epoch}" "${now_epoch}")"
 			pwd_not_found=0
+		else
+			# path : epoch : freq : score
+			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
 		fi
-
-		printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
 	done < "${NAVITA_HISTORYFILE}"
 
-	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "1" "$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
-	"${navita_depends["sort"]}" -n -s -b -t':' -k4,4 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
+	if (( pwd_not_found )); then
+		pwd_freq=1
+		pwd_score="$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")"
+	fi
+
+	: > "${NAVITA_HISTORYFILE}"
+	local curr_score
+	pwd_not_found=1
+	while read -r line; do
+		curr_score="${line##*:}"
+
+		if (( pwd_not_found )) && (( curr_score <= pwd_score )); then
+			printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "${pwd_freq}" "${pwd_score}" >> "${NAVITA_HISTORYFILE}" 
+			pwd_not_found=0
+		fi
+		printf "%s\n" "${line}" >> "${NAVITA_HISTORYFILE}"
+	done < "${__navita_temp_history}"
+
+	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "${pwd_freq}" "${pwd_score}" >> "${NAVITA_HISTORYFILE}" 
 }
 # }}}
 
