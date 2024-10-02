@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.2.1"
+export NAVITA_VERSION="v1.2.1+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -766,7 +766,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	complete -o nospace -F __navita::Completions "${NAVITA_COMMAND}"
 elif [[ -n "${ZSH_VERSION}" ]]; then
 	__navita::Completions() {
-		local -a main_options sub_options
+		local -a main_options history_sub_options clean_sub_options
 		local state line
 
 		main_options=(
