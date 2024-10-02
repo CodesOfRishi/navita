@@ -402,7 +402,7 @@ __navita::ViewHistory() {
 		freq="$(__navita::GetFreqInHistory "${line}")"
 		[[ -n "${freq}" ]] && printf "${colr_orange} %s${colr_rst}" "❰ ${freq}"
 
-		printf -v score "%.2f" "${line##*:}"
+		printf -v score "%s" "${line##*:}"
 		[[ -n "${score}" ]] && printf "${colr_blue} %s${colr_rst}" "❰ ${score}"
 
 		path_error="$(__navita::ValidateDirectory "${_path}")"
