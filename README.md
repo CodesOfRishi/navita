@@ -164,7 +164,7 @@ Switch between your current directory and the previous directory you were in. Th
 
 **Synopsis:** `cd (-c | --clean) [--invalid-paths | --full-history]`
 
-You can choose to either remove invalid paths from the history or clear the entire history. However, Navita will automatically remove non-existent and non-executable directories.
+You can choose to either remove invalid paths from the history or clear the entire history. 
 
 <div align="center"> 
 
