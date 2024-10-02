@@ -452,9 +452,9 @@ __navita::NavigateHistory() {
 	}
 
 	local -a fzf_conditional_options
-	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
+	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( "--exact" )
 
-	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} History « Navita"' --height "50%" --tiebreak='end,index' --ansi --nth=1 --with-nth='1,2,3' --delimiter=' ❰ ' "${fzf_conditional_options[@]}" --exit-0 --query="${*}" --layout='reverse' --preview-window='down' --border='bold' --preview="${navita_depends["ls"]} -CFaA --color=always {1}" )"
+	local path_returned && path_returned="$( __navita::NavigateHistory::GetHistory | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} History « Navita"' --height "50%" --ansi --nth=1 --with-nth='1,2,3' --delimiter=' ❰ ' "${fzf_conditional_options[@]}" --scheme='path' --tiebreak='end,index' --exit-0 --query="${*}" --layout='reverse' --preview-window='down' --border='bold' --preview="${navita_depends["ls"]} -CFaA --color=always {1}" )"
 
 	case "$?" in
 		0) 
