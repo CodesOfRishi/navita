@@ -811,42 +811,38 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			'--full-history:Clear the full history'
 		)
 
-		_arguments -C \
-			'1: :->first_arg' \
-			'2: :->second_arg' \
-			'*: :->other_args'
-
-		case "${state}" in
-			"first_arg")
-				if [[ "${words[CURRENT]}" == -* ]]; then
-					_describe -t main_options "Navita's main-options" main_options
-				else
-					_path_files -/ '*(-/)'
-				fi
-				;;
-			"second_arg")
-				case "${words[2]}" in
-					"-H"|"--history")
-						_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
-					"-P")
-						if [[ "${words[CURRENT]}" == -* ]]; then
-							unset 'main_options[3]'
-							_describe -t main_options "Navita's main-options" main_options
-						else
-							_path_files -/ '*(-/)'
-						fi
-						;;
-					"-c"|"--clean")
-						_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
-				esac
-				;;
-			"other_args")
-				case "${words[2]}" in
-					"-P")
-						_path_files -/ '*(-/)';;
-				esac
-				;;
-		esac
+		if (( CURRENT == 2 )); then
+			# 1st argument
+			if [[ "${words[CURRENT]}" == -* ]]; then
+				_describe -t main_options "Navita's main-options" main_options
+			else
+				_path_files -/ '*(-/)'
+			fi
+		elif (( CURRENT == 3 )); then
+			# 2nd argument
+			case "${words[CURRENT-1]}" in
+				"-P")
+					if [[ "${words[CURRENT]}" == -* ]]; then
+						unset 'main_options[3]'
+						_describe -t main_options "Navita's main-options" main_options
+					else
+						_path_files -/ '*(-/)'
+					fi
+					;;
+				"-H"|"--history")
+					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
+				"-c"|"--clean")
+					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+			esac
+		elif (( CURRENT == 4 )) && [[ "${words[2]}" == "-P" ]]; then
+			# 3rd argument with `-P` as the 1st argument
+			case "${words[CURRENT-1]}" in
+				"-H"|"--history")
+					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
+				"-c"|"--clean")
+					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+			esac
+		fi
 	}
 
 	compdef __navita::Completions "__navita__"
