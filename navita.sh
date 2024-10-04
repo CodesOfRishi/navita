@@ -731,7 +731,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			else
 				__navita::Completions::CompleteDirectory
 			fi
-		else
+		elif (( COMP_CWORD == 2 )); then
 			case "${prev_word}" in
 				"-P")
 					if [[ "${curr_word}" == -* ]]; then
@@ -746,13 +746,28 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						__navita::Completions::CompleteDirectory
 					fi
 					;;
-				"--history"|"-H")
+				"-H"|"--history")
 					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
 						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
-				"--clean"|"-c")
+				"-c"|"--clean")
+					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+					;;
+			esac
+		elif (( COMP_CWORD == 3 )) && [[ "${COMP_WORDS[1]}" == "-P" ]]; then
+			case "${prev_word}" in
+				"-H"|"--history")
+					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+					;;
+				"-c"|"--clean")
 					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
 						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
 						&& COMPREPLY=( "${opt_selected%% *} " )
