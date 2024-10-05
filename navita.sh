@@ -668,6 +668,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		local ignore_case_completion_default && ignore_case_completion_default="$(bind -v | ${navita_depends["grep"]} -m 1 -F 'set completion-ignore-case')" && ignore_case_completion_default="${ignore_case_completion_default##* }"
 		bind "set completion-ignore-case on" 
 
+		# Directory completion{{{
 		__navita::Completions::CompleteDirectory() {
 			local dir_select
 			if dir_select="$( compgen -d -- "${curr_word}" | \
@@ -678,7 +679,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			COMPREPLY=( "${dir_select}" )
 			printf '\e[5n'
 		}
+		# }}}
 
+		# Navita's Main-options{{{
 		__navita::Completions::GetMainOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -697,7 +700,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s                  ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
+		# }}}
 
+		# Navita's History Sub-options{{{
 		__navita::Completions::GetHistorySubOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -706,7 +711,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s       ${colr_grey}❰ Sort history by frequency${colr_rst}\n" "--by-freq"
 			printf "%s      ${colr_grey}❰ Sort history by score${colr_rst}\n" "--by-score"
 		}
+		# }}}
 
+		# Navita's Clean Sub-options{{{
 		__navita::Completions::GetCleanSubOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -714,6 +721,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
 			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
 		}
+		# }}}
 
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
 		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
