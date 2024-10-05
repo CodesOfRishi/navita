@@ -890,6 +890,69 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 	__navita::Completions() {
 		local -a main_options history_sub_options clean_sub_options
 
+		# Get the highest-ranked directory for tab completion{{{
+		__navita::Completions::GetHighestRankDirectory() {
+			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
+			__navita::CDGeneral::GetPaths() {
+				local line
+				local _path
+				local pwd_not_found=1
+				while read -r line; do
+					_path="$(__navita::GetPathInHistory "${line}")"
+					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
+						pwd_not_found=0
+						continue
+					fi
+					printf "%s\n" "${_path}"
+				done < "${NAVITA_HISTORYFILE}"
+			}
+
+			local srch_inc=""
+			local srch_exc=""
+			local end_of_str_anchor_found=0
+			local last_search_type=0
+			local pattern
+
+			for pattern in "${@}"; do
+				pattern="${pattern//./\\.}"
+				# interpret special characters
+				eval "pattern=$pattern"
+
+				(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
+				if [[ "${pattern:0:1}" == "!" ]]; then 
+					srch_exc="${srch_exc}${pattern:1}|" 
+					last_search_type=2
+				else
+					srch_inc="${srch_inc}(?=.*${pattern})"
+					last_search_type=1
+				fi
+			done
+			unset pattern
+
+			[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+			if (( end_of_str_anchor_found == 0 )); then
+				case "${last_search_type}" in
+					"1")
+						# inclusion search term
+						srch_inc="${srch_inc:0:-1}\$)"
+						;;
+					"2")
+						# exclusion search term
+						srch_exc="${srch_exc}\$"
+						;;
+				esac
+			fi
+
+			if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}"
+			fi
+		}
+		# }}}
+
 		main_options=(
 			"-:Traverse to the previous working directory"
 			"--:Search and traverse from history"
@@ -939,6 +1002,12 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
 				"-c"|"--clean")
 					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+				*)
+					if [[ -z "${words[CURRENT]}" ]]; then
+						local -a path_returned && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[CURRENT-1]}")" )
+						[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
+					fi
+					;;
 			esac
 		elif (( CURRENT == 4 )) && [[ "${words[2]}" == "-P" ]]; then
 			# 3rd argument with `-P` as the 1st argument
@@ -947,7 +1016,17 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
 				"-c"|"--clean")
 					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+				*)
+					if [[ -z "${words[CURRENT]}" ]]; then
+						local -a path_returned && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[CURRENT-1]}")" )
+						[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
+					fi
+					;;
 			esac
+		elif [[ -z "${words[CURRENT]}" ]]; then
+			local -a path_returned 
+			[[ "${words[2]}" == "-P" ]] && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[@]:2:$((CURRENT - 2))}")" ) || path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[@]:1:$((CURRENT - 2))}")" )
+			[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
 		fi
 	}
 
