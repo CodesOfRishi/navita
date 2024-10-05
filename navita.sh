@@ -889,7 +889,6 @@ if [[ -n "${BASH_VERSION}" ]]; then
 elif [[ -n "${ZSH_VERSION}" ]]; then
 	__navita::Completions() {
 		local -a main_options history_sub_options clean_sub_options
-		local state line
 
 		main_options=(
 			"-:Traverse to the previous working directory"
