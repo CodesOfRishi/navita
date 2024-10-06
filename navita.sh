@@ -668,100 +668,68 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		local ignore_case_completion_default && ignore_case_completion_default="$(bind -v | ${navita_depends["grep"]} -m 1 -F 'set completion-ignore-case')" && ignore_case_completion_default="${ignore_case_completion_default##* }"
 		bind "set completion-ignore-case on" 
 
-		__navita::Completions::FeatureCompletions() {
-			# Get the highest-ranked directory for tab completion{{{
-			__navita::Completions::FeatureCompletions::GetHighestRankDirectory() {
-				# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
-				__navita::CDGeneral::GetPaths() {
-					local line
-					local _path
-					local pwd_not_found=1
-					while read -r line; do
-						_path="$(__navita::GetPathInHistory "${line}")"
-						if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
-							pwd_not_found=0
-							continue
-						fi
-						printf "%s\n" "${_path}"
-					done < "${NAVITA_HISTORYFILE}"
-				}
-
-				local srch_inc=""
-				local srch_exc=""
-				local end_of_str_anchor_found=0
-				local last_search_type=0
-				local pattern
-
-				for pattern in "${@}"; do
-					pattern="${pattern//./\\.}"
-					# interpret special characters
-					eval "pattern=$pattern"
-
-					(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
-					if [[ "${pattern:0:1}" == "!" ]]; then 
-						srch_exc="${srch_exc}${pattern:1}|" 
-						last_search_type=2
-					else
-						srch_inc="${srch_inc}(?=.*${pattern})"
-						last_search_type=1
+		# Get Highest-ranked directory for completion{{{
+		__navita::Completions::GetHighestRankDirectory() {
+			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
+			__navita::CDGeneral::GetPaths() {
+				local line
+				local _path
+				local pwd_not_found=1
+				while read -r line; do
+					_path="$(__navita::GetPathInHistory "${line}")"
+					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
+						pwd_not_found=0
+						continue
 					fi
-				done
-				unset pattern
-
-				[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
-				if (( end_of_str_anchor_found == 0 )); then
-					case "${last_search_type}" in
-						"1")
-							# inclusion search term
-							srch_inc="${srch_inc:0:-1}\$)"
-							;;
-						"2")
-							# exclusion search term
-							srch_exc="${srch_exc}\$"
-							;;
-					esac
-				fi
-
-				if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
-					__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
-				elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
-					__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
-				elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
-					__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}"
-				fi
+					printf "%s\n" "${_path}"
+				done < "${NAVITA_HISTORYFILE}"
 			}
-			# }}}
 
-			if (( COMP_CWORD >= 2 )) && [[ -z "${COMP_WORDS[COMP_CWORD]}" ]]; then
-				if [[ "${COMP_WORDS[1]}" == "-P" ]]; then
-					case "${COMP_WORDS[2]}" in
-						"-s"|"--sub-search")
-							# to be implemented
-							;;
-						"-S"|"--super-search")
-							# to be implemented
-							;;
-						*)
-							local path_returned && path_returned="$(__navita::Completions::FeatureCompletions::GetHighestRankDirectory "${COMP_WORDS[@]:2:$((${#COMP_WORDS[@]} - 3))}")"
-							[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n' 
-							;;
-					esac
+			local srch_inc=""
+			local srch_exc=""
+			local end_of_str_anchor_found=0
+			local last_search_type=0
+			local pattern
+
+			for pattern in "${@}"; do
+				pattern="${pattern//./\\.}"
+				# interpret special characters
+				eval "pattern=$pattern"
+
+				(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
+				if [[ "${pattern:0:1}" == "!" ]]; then 
+					srch_exc="${srch_exc}${pattern:1}|" 
+					last_search_type=2
 				else
-					case "${COMP_WORDS[1]}" in
-						"-s"|"--sub-search")
-							# to be implemented
-							;;
-						"-S"|"--super-search")
-							# to be implemented
-							;;
-						*)
-							local path_returned && path_returned="$(__navita::Completions::FeatureCompletions::GetHighestRankDirectory "${COMP_WORDS[@]:1:$((${#COMP_WORDS[@]} - 2))}")" 
-							[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n' 
-							;;
-					esac
+					srch_inc="${srch_inc}(?=.*${pattern})"
+					last_search_type=1
 				fi
+			done
+			unset pattern
+
+			[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+			if (( end_of_str_anchor_found == 0 )); then
+				case "${last_search_type}" in
+					"1")
+						# inclusion search term
+						srch_inc="${srch_inc:0:-1}\$)"
+						;;
+					"2")
+						# exclusion search term
+						srch_exc="${srch_exc}\$"
+						;;
+				esac
+			fi
+
+			if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}"
 			fi
 		}
+		# }}}
 
 		# Directory completion{{{
 		__navita::Completions::CompleteDirectory() {
@@ -861,7 +829,12 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
-				*) __navita::Completions::FeatureCompletions;;
+				*) 
+					if [[ -z "${curr_word}" ]]; then
+						local path_returned && path_returned="$(__navita::Completions::GetHighestRankDirectory "${prev_word}")"
+						[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
+					fi
+					;;
 			esac
 		elif (( COMP_CWORD == 3 )) && [[ "${COMP_WORDS[1]}" == "-P" ]]; then
 			case "${prev_word}" in
@@ -877,10 +850,17 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
-				*) __navita::Completions::FeatureCompletions;;
+				*) 
+					if [[ -z "${curr_word}" ]]; then
+						local path_returned && path_returned="$(__navita::Completions::GetHighestRankDirectory "${prev_word}")"
+						[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
+					fi
+					;;
 			esac
-		else 
-			__navita::Completions::FeatureCompletions
+		elif [[ -z "${curr_word}" ]]; then
+			local path_returned
+			[[ "${COMP_WORDS[1]}" == "-P" ]] && path_returned="$(__navita::Completions::GetHighestRankDirectory "${COMP_WORDS[@]:2:$(( ${#COMP_WORDS[@]} - 3 ))}")" || path_returned="$(__navita::Completions::GetHighestRankDirectory "${COMP_WORDS[@]:1:$(( ${#COMP_WORDS[@]} - 2 ))}")"
+			[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
 		fi
 		bind "set completion-ignore-case ${ignore_case_completion_default}"
 	}
