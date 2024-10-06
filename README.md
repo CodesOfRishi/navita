@@ -182,7 +182,12 @@ View Navita's version information.
 
 </div>
 
-- Navita supports Tab completion for its options and directories.
+- Navita supports Tab completion for its options, directories and Highest-ranked directory.
+    ```bash
+    # To trigger Highest-ranked directory completion, 
+    # press the Tab key after entering a space following the last search term. 
+    cd \!smartcd .config<Space><Tab>
+    ```
 - For Zsh, to initialize the completion system, the function `compinit` should be autoloaded, and then run simply as ‘`compinit`’. *Ref: [Zsh Completion System - Use of Compinit](https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Use-of-compinit)*
 
 <div align="center"> 
