@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.2.1"
+export NAVITA_VERSION="v1.3.0"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -518,7 +518,7 @@ __navita::NavigateParentDirs() {
 	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
 	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
 
-	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" +s --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" "${fzf_conditional_options[@]}" --scheme='path' --tiebreak='end,index' --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( __navita::NavigateParentDirs::GetParentDirs | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Parent-directories « Navita"' --height "50%" "${fzf_conditional_options[@]}" --scheme='path' --tiebreak='end,index' --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -668,6 +668,70 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		local ignore_case_completion_default && ignore_case_completion_default="$(bind -v | ${navita_depends["grep"]} -m 1 -F 'set completion-ignore-case')" && ignore_case_completion_default="${ignore_case_completion_default##* }"
 		bind "set completion-ignore-case on" 
 
+		# Get Highest-ranked directory for completion{{{
+		__navita::Completions::GetHighestRankDirectory() {
+			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
+			__navita::CDGeneral::GetPaths() {
+				local line
+				local _path
+				local pwd_not_found=1
+				while read -r line; do
+					_path="$(__navita::GetPathInHistory "${line}")"
+					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
+						pwd_not_found=0
+						continue
+					fi
+					printf "%s\n" "${_path}"
+				done < "${NAVITA_HISTORYFILE}"
+			}
+
+			local srch_inc=""
+			local srch_exc=""
+			local end_of_str_anchor_found=0
+			local last_search_type=0
+			local pattern
+
+			for pattern in "${@}"; do
+				pattern="${pattern//./\\.}"
+				# interpret special characters
+				eval "pattern=$pattern"
+
+				(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
+				if [[ "${pattern:0:1}" == "!" ]]; then 
+					srch_exc="${srch_exc}${pattern:1}|" 
+					last_search_type=2
+				else
+					srch_inc="${srch_inc}(?=.*${pattern})"
+					last_search_type=1
+				fi
+			done
+			unset pattern
+
+			[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+			if (( end_of_str_anchor_found == 0 )); then
+				case "${last_search_type}" in
+					"1")
+						# inclusion search term
+						srch_inc="${srch_inc:0:-1}\$)"
+						;;
+					"2")
+						# exclusion search term
+						srch_exc="${srch_exc}\$"
+						;;
+				esac
+			fi
+
+			if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}"
+			fi
+		}
+		# }}}
+
+		# Directory completion{{{
 		__navita::Completions::CompleteDirectory() {
 			local dir_select
 			if dir_select="$( compgen -d -- "${curr_word}" | \
@@ -678,7 +742,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			COMPREPLY=( "${dir_select}" )
 			printf '\e[5n'
 		}
+		# }}}
 
+		# Navita's Main-options{{{
 		__navita::Completions::GetMainOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -697,7 +763,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s                  ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
+		# }}}
 
+		# Navita's History Sub-options{{{
 		__navita::Completions::GetHistorySubOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -706,7 +774,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s       ${colr_grey}❰ Sort history by frequency${colr_rst}\n" "--by-freq"
 			printf "%s      ${colr_grey}❰ Sort history by score${colr_rst}\n" "--by-score"
 		}
+		# }}}
 
+		# Navita's Clean Sub-options{{{
 		__navita::Completions::GetCleanSubOptions() {
 			local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 			local colr_rst && colr_rst='\e[0m'
@@ -714,6 +784,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
 			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
 		}
+		# }}}
 
 		local curr_word && curr_word="${COMP_WORDS[COMP_CWORD]}"
 		local prev_word && prev_word="${COMP_WORDS[COMP_CWORD-1]}"
@@ -731,7 +802,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			else
 				__navita::Completions::CompleteDirectory
 			fi
-		else
+		elif (( COMP_CWORD == 2 )); then
 			case "${prev_word}" in
 				"-P")
 					if [[ "${curr_word}" == -* ]]; then
@@ -746,19 +817,50 @@ if [[ -n "${BASH_VERSION}" ]]; then
 						__navita::Completions::CompleteDirectory
 					fi
 					;;
-				"--history"|"-H")
+				"-H"|"--history")
 					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
 						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
-				"--clean"|"-c")
+				"-c"|"--clean")
 					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
 						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
 						&& COMPREPLY=( "${opt_selected%% *} " )
 					printf '\e[5n'
 					;;
+				*) 
+					if [[ -z "${curr_word}" ]]; then
+						local path_returned && path_returned="$(__navita::Completions::GetHighestRankDirectory "${prev_word}")"
+						[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
+					fi
+					;;
 			esac
+		elif (( COMP_CWORD == 3 )) && [[ "${COMP_WORDS[1]}" == "-P" ]]; then
+			case "${prev_word}" in
+				"-H"|"--history")
+					local opt_selected && opt_selected="$( __navita::Completions::GetHistorySubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sort and view history « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+					;;
+				"-c"|"--clean")
+					local opt_selected && opt_selected="$(__navita::Completions::GetCleanSubOptions | \
+						${navita_depends["fzf"]} --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose what to clean « Navita"' --height=~100% --nth=1 --with-nth=1,2 --delimiter=' ❰ ' --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${curr_word}" --bind=tab:down,btab:up --cycle)" \
+						&& COMPREPLY=( "${opt_selected%% *} " )
+					printf '\e[5n'
+					;;
+				*) 
+					if [[ -z "${curr_word}" ]]; then
+						local path_returned && path_returned="$(__navita::Completions::GetHighestRankDirectory "${prev_word}")"
+						[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
+					fi
+					;;
+			esac
+		elif [[ -z "${curr_word}" ]]; then
+			local path_returned
+			[[ "${COMP_WORDS[1]}" == "-P" ]] && path_returned="$(__navita::Completions::GetHighestRankDirectory "${COMP_WORDS[@]:2:$(( ${#COMP_WORDS[@]} - 3 ))}")" || path_returned="$(__navita::Completions::GetHighestRankDirectory "${COMP_WORDS[@]:1:$(( ${#COMP_WORDS[@]} - 2 ))}")"
+			[[ -n "${path_returned}" ]] && COMPREPLY=( "${path_returned} " ) && printf '\e[5n'
 		fi
 		bind "set completion-ignore-case ${ignore_case_completion_default}"
 	}
@@ -766,8 +868,70 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	complete -o nospace -F __navita::Completions "${NAVITA_COMMAND}"
 elif [[ -n "${ZSH_VERSION}" ]]; then
 	__navita::Completions() {
-		local -a main_options sub_options
-		local state line
+		local -a main_options history_sub_options clean_sub_options
+
+		# Get the highest-ranked directory for tab completion{{{
+		__navita::Completions::GetHighestRankDirectory() {
+			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
+			__navita::CDGeneral::GetPaths() {
+				local line
+				local _path
+				local pwd_not_found=1
+				while read -r line; do
+					_path="$(__navita::GetPathInHistory "${line}")"
+					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
+						pwd_not_found=0
+						continue
+					fi
+					printf "%s\n" "${_path}"
+				done < "${NAVITA_HISTORYFILE}"
+			}
+
+			local srch_inc=""
+			local srch_exc=""
+			local end_of_str_anchor_found=0
+			local last_search_type=0
+			local pattern
+
+			for pattern in "${@}"; do
+				pattern="${pattern//./\\.}"
+				# interpret special characters
+				eval "pattern=$pattern"
+
+				(( end_of_str_anchor_found == 0 )) && [[ "${pattern: -1}" == "$" ]] && end_of_str_anchor_found=1
+				if [[ "${pattern:0:1}" == "!" ]]; then 
+					srch_exc="${srch_exc}${pattern:1}|" 
+					last_search_type=2
+				else
+					srch_inc="${srch_inc}(?=.*${pattern})"
+					last_search_type=1
+				fi
+			done
+			unset pattern
+
+			[[ "${srch_exc: -1}" == "|" ]] && srch_exc="${srch_exc:0: -1}"
+			if (( end_of_str_anchor_found == 0 )); then
+				case "${last_search_type}" in
+					"1")
+						# inclusion search term
+						srch_inc="${srch_inc:0:-1}\$)"
+						;;
+					"2")
+						# exclusion search term
+						srch_exc="${srch_exc}\$"
+						;;
+				esac
+			fi
+
+			if [[ -n "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -vP "${srch_exc}" | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -z "${srch_exc}" ]] && [[ -n "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -P "${srch_inc}"
+			elif [[ -n "${srch_exc}" ]] && [[ -z "${srch_inc}" ]]; then
+				__navita::CDGeneral::GetPaths | ${navita_depends["grep"]} -m 1 -vP "${srch_exc}"
+			fi
+		}
+		# }}}
 
 		main_options=(
 			"-:Traverse to the previous working directory"
@@ -796,42 +960,54 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			'--full-history:Clear the full history'
 		)
 
-		_arguments -C \
-			'1: :->first_arg' \
-			'2: :->second_arg' \
-			'*: :->other_args'
-
-		case "${state}" in
-			"first_arg")
-				if [[ "${words[CURRENT]}" == -* ]]; then
-					_describe -t main_options "Navita's main-options" main_options
-				else
-					_path_files -/ '*(-/)'
-				fi
-				;;
-			"second_arg")
-				case "${words[2]}" in
-					"-H"|"--history")
-						_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
-					"-P")
-						if [[ "${words[CURRENT]}" == -* ]]; then
-							unset 'main_options[3]'
-							_describe -t main_options "Navita's main-options" main_options
-						else
-							_path_files -/ '*(-/)'
-						fi
-						;;
-					"-c"|"--clean")
-						_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
-				esac
-				;;
-			"other_args")
-				case "${words[2]}" in
-					"-P")
-						_path_files -/ '*(-/)';;
-				esac
-				;;
-		esac
+		if (( CURRENT == 2 )); then
+			# 1st argument
+			if [[ "${words[CURRENT]}" == -* ]]; then
+				_describe -t main_options "Navita's main-options" main_options
+			else
+				_path_files -/ '*(-/)'
+			fi
+		elif (( CURRENT == 3 )); then
+			# 2nd argument
+			case "${words[CURRENT-1]}" in
+				"-P")
+					if [[ "${words[CURRENT]}" == -* ]]; then
+						unset 'main_options[3]'
+						_describe -t main_options "Navita's main-options" main_options
+					else
+						_path_files -/ '*(-/)'
+					fi
+					;;
+				"-H"|"--history")
+					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
+				"-c"|"--clean")
+					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+				*)
+					if [[ -z "${words[CURRENT]}" ]]; then
+						local -a path_returned && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[CURRENT-1]}")" )
+						[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
+					fi
+					;;
+			esac
+		elif (( CURRENT == 4 )) && [[ "${words[2]}" == "-P" ]]; then
+			# 3rd argument with `-P` as the 1st argument
+			case "${words[CURRENT-1]}" in
+				"-H"|"--history")
+					_describe -t history_sub_options "Navita's history sub-options" history_sub_options;;
+				"-c"|"--clean")
+					_describe -t clean_sub_options "Navita's clean sub-options" clean_sub_options;;
+				*)
+					if [[ -z "${words[CURRENT]}" ]]; then
+						local -a path_returned && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[CURRENT-1]}")" )
+						[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
+					fi
+					;;
+			esac
+		elif [[ -z "${words[CURRENT]}" ]]; then
+			local -a path_returned 
+			[[ "${words[2]}" == "-P" ]] && path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[@]:2:$((CURRENT - 2))}")" ) || path_returned=( "$(__navita::Completions::GetHighestRankDirectory "${words[@]:1:$((CURRENT - 2))}")" )
+			[[ -n "${path_returned[1]}" ]] && _describe -t path_returned "Highest-ranked directory" path_returned
+		fi
 	}
 
 	compdef __navita::Completions "__navita__"
