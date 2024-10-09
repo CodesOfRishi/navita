@@ -84,13 +84,6 @@ if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
 	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
-# Uitility: Get a Path from an entry in history{{{
-__navita::GetPathInHistory() {
-	# should be passed only a line from the history file
-	printf "%s\n" "${1%%:*}"
-}
-# }}}
-
 # Utility: Get Epoch access time of a path/entry in history{{{
 __navita::GetAccessEpochInHistory() {
 	# can be passed a line from history file
@@ -228,7 +221,7 @@ __navita::UpdatePathHistory() {
 # 	local curr_epoch
 # 	local curr_freq
 # 	while read -r line; do
-# 		curr_path="$(__navita::GetPathInHistory "${line}")"
+# 		curr_path="${line%%:*}"
 # 		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
 # 		curr_freq="$(__navita::GetFreqInHistory "${line}")"
 # 		curr_score="${line##*:}"
@@ -282,7 +275,7 @@ __navita::CleanHistory() {
 		local path_error
 
 		while read -r line; do
-			curr_path="$(__navita::GetPathInHistory "${line}")"
+			curr_path="${line%%:*}"
 			path_error="$(__navita::ValidateDirectory "${curr_path}")"
 
 			if [[ -n "${path_error}" ]]; then
@@ -348,7 +341,7 @@ __navita::ViewHistory() {
 	while read -r line; do
 		rank="${line%%/*}"
 		line="/${line#*/}"
-		_path="$(__navita::GetPathInHistory "${line}")"
+		_path="${line%%:*}"
 
 		case "${_path}" in
 			"${PWD}") printf "%s${colr_green}PWD ❱${colr_rst} %s" "${rank}" "${_path}";;
@@ -386,7 +379,7 @@ __navita::NavigateHistory() {
 		local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 		local _path path_error age line pwd_not_found=1
 		while read -r line; do
-			_path="$(__navita::GetPathInHistory "${line}")"
+			_path="${line%%:*}"
 			if (( pwd_not_found )) && [[ "${PWD}" == "${_path}" ]]; then
 				pwd_not_found=0
 				continue
@@ -505,7 +498,7 @@ __navita::CDGeneral() {
 	__navita::CDGeneral::GetPaths() {
 		local line _path pwd_not_found=1
 		while read -r line; do
-			_path="$(__navita::GetPathInHistory "${line}")"
+			_path="${line%%:*}"
 			if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
 				pwd_not_found=0
 				continue
@@ -628,7 +621,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			__navita::CDGeneral::GetPaths() {
 				local line _path pwd_not_found=1
 				while read -r line; do
-					_path="$(__navita::GetPathInHistory "${line}")"
+					_path="${line%%:*}"
 					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
 						pwd_not_found=0
 						continue
@@ -828,7 +821,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			__navita::CDGeneral::GetPaths() {
 				local line _path pwd_not_found=1
 				while read -r line; do
-					_path="$(__navita::GetPathInHistory "${line}")"
+					_path="${line%%:*}"
 					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
 						pwd_not_found=0
 						continue
