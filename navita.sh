@@ -86,10 +86,7 @@ fi
 
 # Utility: Get Epoch access time of a path/entry in history{{{
 __navita::GetAccessEpochInHistory() {
-	# can be passed a line from history file
-	# or only the path
-	# however, it's recommended to pass the complete line for better time performance of this function
-	
+	# Should be passed only a line from history file
 	local access_epoch
 	access_epoch="${1#*:}"
 	access_epoch="${access_epoch#*:}"
@@ -99,18 +96,9 @@ __navita::GetAccessEpochInHistory() {
 
 # Utility: Get Frequency of a path/entry in history{{{
 __navita::GetFreqInHistory() {
-	# can be passed a line from history file
-	# or only the path
-	# however, it's recommended to pass the complete line for better time performance of this function
-	
+	# Should be passed only a line from history file
 	local freq
-	if [[ -d "${1}" ]]; then 
-		freq="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
-	else
-		freq="${1}"
-	fi
-
-	freq="${freq#*:}"
+	freq="${1#*:}"
 	printf "%s\n" "${freq%%:*}"
 }
 # }}}
