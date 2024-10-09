@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_MAX_AGE="${NAVITA_MAX_AGE:-90}"
-export NAVITA_VERSION="v1.3.0"
+export NAVITA_VERSION="v1.3.0+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -71,7 +71,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
-[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
+# [[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -97,8 +97,6 @@ __navita::GetAccessEpochInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	
-	[[ -z "${1}" ]] && return 1
-
 	local access_epoch
 	if [[ -d "${1}" ]]; then
 		access_epoch="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
@@ -107,8 +105,8 @@ __navita::GetAccessEpochInHistory() {
 	fi
 	
 	access_epoch="${access_epoch#*:}"
-	access_epoch="${access_epoch%%:*}"
-	printf "%s\n" "${access_epoch}"
+	access_epoch="${access_epoch#*:}"
+	printf "%s\n" "${access_epoch%%:*}"
 }
 # }}}
 
@@ -118,8 +116,6 @@ __navita::GetFreqInHistory() {
 	# or only the path
 	# however, it's recommended to pass the complete line for better time performance of this function
 	
-	[[ -z "${1}" ]] && return 1
-	
 	local freq
 	if [[ -d "${1}" ]]; then 
 		freq="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
@@ -128,9 +124,7 @@ __navita::GetFreqInHistory() {
 	fi
 
 	freq="${freq#*:}"
-	freq="${freq#*:}"
-	freq="${freq%%:*}"
-	printf "%s\n" "${freq}"
+	printf "%s\n" "${freq%%:*}"
 }
 # }}}
 
@@ -162,20 +156,6 @@ __navita::GetRelativePath() {
 }
 # }}}
 
-# Utility: Get RankScore for a path{{{
-__navita::GetRankScore() {
-	local curr_freq && curr_freq="${1?Navita: Frequency of the path is needed for this function!}"
-	local curr_access_epoch && curr_access_epoch="${2?Navita: Epoch time of the path is needed for this function!}"
-	local max_epoch && max_epoch="${3?Navita: Maximum epoch time from the history is needed for this function!}"
-
-	local max_age && max_age="$(( NAVITA_MAX_AGE * 86400 ))"
-	local curr_age && curr_age="$(( max_epoch - curr_access_epoch ))"
-	local x && (( x = max_age - curr_age )) && (( x = x < 0 ? 0 : x ))
-
-	"${navita_depends["bc"]}" -l <<< "scale=10; l((${curr_freq} * ${x} / ${max_age}) + 1) * e(-1 * ${NAVITA_DECAY_FACTOR} * ${curr_age} / ${max_age}) * 10000000000" | "${navita_depends["cut"]}" -d'.' -f1
-}
-# }}}
-
 # Feature: FrecencyRank{{{
 __navita::UpdatePathHistory() {
 	[[ "${OLDPWD}" == "${PWD}" ]] && return 0
@@ -185,96 +165,82 @@ __navita::UpdatePathHistory() {
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
 
-	: > "${__navita_temp_history}"
-
-	local now_epoch && now_epoch="$("${navita_depends["date"]}" +%s)"
-	local curr_path
-	local curr_freq
-	local curr_epoch
-	local pwd_score
-	local pwd_freq
+	# history format:-
+	# pwd : frequency : access_time : all_visit_score : final_score
+	local now_time && now_time="$( "${navita_depends["date"]}" +%s )"
 	local pwd_not_found=1
+	local curr_path curr_freq access_time all_visit_score final_score
 
+	: > "${__navita_temp_history}"
 	while read -r line; do
-		curr_path="$(__navita::GetPathInHistory "${line}")"
-		curr_freq="$(__navita::GetFreqInHistory "${line}")"
-		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
+		curr_path="${line%%:*}" && line="${line#*:}"
+		curr_freq="${line%%:*}" && line="${line#*:}"
+		access_time="${line%%:*}" && line="${line#*:}"
+		all_visit_score="${line%%:*}"
 
-		if (( pwd_not_found )) && [[ "${curr_path}" == "${PWD}" ]]; then
-			(( pwd_freq = curr_freq + 1 ))
-			pwd_score="$(__navita::GetRankScore "${pwd_freq}" "${now_epoch}" "${now_epoch}")"
-			pwd_not_found=0
-		else
-			# path : epoch : freq : score
-			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "$(__navita::GetRankScore "${curr_freq}" "${curr_epoch}" "${now_epoch}")" >> "${__navita_temp_history}"
-		fi
+		case "${curr_path}" in
+			"${PWD}")
+				pwd_not_found=0
+				(( curr_freq++ ))
+				access_time="${now_time}"
+				all_visit_score="$( "${navita_depends["bc"]}" <<< "scale=10; ${all_visit_score} + 1" )"
+				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${access_time}" "${all_visit_score}" "$( "${navita_depends["bc"]}" -l <<< "scale=10; l(10.1 + ${all_visit_score})" )" >> "${__navita_temp_history}"
+				;;
+			*)
+				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${now_time} - ${access_time}))) + (${all_visit_score} * e(-3 * 10^(-7) * (${now_time} - ${access_time})) + 1))" )"
+				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${access_time}" "${all_visit_score}" "${final_score}" >> "${__navita_temp_history}"
+				;;
+		esac
 	done < "${NAVITA_HISTORYFILE}"
 
-	if (( pwd_not_found )); then
-		pwd_freq=1
-		pwd_score="$(__navita::GetRankScore "1" "${now_epoch}" "${now_epoch}")"
-	fi
-
-	: > "${NAVITA_HISTORYFILE}"
-	local curr_score
-	pwd_not_found=1
-	while read -r line; do
-		curr_score="${line##*:}"
-
-		if (( pwd_not_found )) && (( curr_score <= pwd_score )); then
-			printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "${pwd_freq}" "${pwd_score}" >> "${NAVITA_HISTORYFILE}" 
-			pwd_not_found=0
-		fi
-		printf "%s\n" "${line}" >> "${NAVITA_HISTORYFILE}"
-	done < "${__navita_temp_history}"
-
-	(( pwd_not_found )) && printf "%s:%s:%s:%s\n" "${PWD}" "${now_epoch}" "${pwd_freq}" "${pwd_score}" >> "${NAVITA_HISTORYFILE}" 
+	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${now_time}" "3.3125354238" >> "${__navita_temp_history}"
+	"${navita_depends["sort"]}" -n -s -b -t: -k5,5 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
 
-# Feature: AgeOutHistory{{{
-__navita::AgeOut() {
-	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
-	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
-	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
-	local colr_rst && colr_rst='\e[0m'
-	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
-
-	local total_score && total_score=0
-	local history_size && history_size=0
-	local curr_score
-	while read -r line; do
-		(( history_size++ ))
-		curr_score="${line##*:}"
-		total_score="$("${navita_depends["bc"]}" <<< "scale=10; ${total_score} + ${curr_score}")"
-	done < "${__navita_temp_history}"
-
-	# curr_score is the least score at the moment
-	if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > 0")" -eq 1 ]]; then
-		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
-		return 0
-	fi
-
-	local threshold_score && threshold_score="$("${navita_depends["bc"]}" <<< "scale=10; (${total_score} * 0.20) / ${history_size}")"
-
-	: > "${NAVITA_HISTORYFILE}"
-	local curr_path
-	local curr_epoch
-	local curr_freq
-	while read -r line; do
-		curr_path="$(__navita::GetPathInHistory "${line}")"
-		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
-		curr_freq="$(__navita::GetFreqInHistory "${line}")"
-		curr_score="${line##*:}"
-		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
-			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
-			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
-		else
-			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ $(__navita::GetAgeFromEpoch "${curr_epoch}")" " ❰ ${curr_freq}" " ❰ ${curr_score}"
-		fi
-	done < "${__navita_temp_history}" | "${navita_depends["nl"]}"
-}
-# }}}
+# # Feature: AgeOutHistory{{{
+# __navita::AgeOut() {
+# 	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
+# 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
+# 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
+# 	local colr_rst && colr_rst='\e[0m'
+# 	"${navita_depends["head"]}" -5000 "${NAVITA_HISTORYFILE}" > "${__navita_temp_history}"
+#
+# 	local total_score && total_score=0
+# 	local history_size && history_size=0
+# 	local curr_score
+# 	while read -r line; do
+# 		(( history_size++ ))
+# 		curr_score="${line##*:}"
+# 		total_score="$("${navita_depends["bc"]}" <<< "scale=10; ${total_score} + ${curr_score}")"
+# 	done < "${__navita_temp_history}"
+#
+# 	# curr_score is the least score at the moment
+# 	if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > 0")" -eq 1 ]]; then
+# 		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+# 		return 0
+# 	fi
+#
+# 	local threshold_score && threshold_score="$("${navita_depends["bc"]}" <<< "scale=10; (${total_score} * 0.20) / ${history_size}")"
+#
+# 	: > "${NAVITA_HISTORYFILE}"
+# 	local curr_path
+# 	local curr_epoch
+# 	local curr_freq
+# 	while read -r line; do
+# 		curr_path="$(__navita::GetPathInHistory "${line}")"
+# 		curr_epoch="$(__navita::GetAccessEpochInHistory "${line}")"
+# 		curr_freq="$(__navita::GetFreqInHistory "${line}")"
+# 		curr_score="${line##*:}"
+# 		if [[ "$("${navita_depends["bc"]}" <<< "scale=10; ${curr_score} > ${threshold_score}")" -eq 1 ]]; then
+# 			printf -v curr_freq "%.0f" "$("${navita_depends["bc"]}" -l <<< "scale=10; l(${curr_freq}+1)")"
+# 			printf "%s:%s:%s:%s\n" "${curr_path}" "${curr_epoch}" "${curr_freq}" "${curr_score}" >> "${NAVITA_HISTORYFILE}"
+# 		else
+# 			printf "navita: Aged out %s${colr_grey}%s${colr_orange}%s${colr_blue}%s${colr_rst}\n" "${curr_path}" " ❰ $(__navita::GetAgeFromEpoch "${curr_epoch}")" " ❰ ${curr_freq}" " ❰ ${curr_score}"
+# 		fi
+# 	done < "${__navita_temp_history}" | "${navita_depends["nl"]}"
+# }
+# # }}}
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
@@ -377,13 +343,7 @@ __navita::ViewHistory() {
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 
-	local line
-	local rank
-	local age
-	local freq
-	local score
-	local _path
-	local path_error
+	local line rank age freq score _path path_error
 	local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 	while read -r line; do
 		rank="${line%%/*}"
@@ -410,8 +370,8 @@ __navita::ViewHistory() {
 
 		printf "\n"
 	done < <(case "$1" in
-		"--by-time") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k2,2 --reverse;;
-		"--by-freq") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k3,3 --reverse;;
+		"--by-time") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k3,3 --reverse;;
+		"--by-freq") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}" | "${navita_depends["sort"]}" -n -s -b -t':' -k2,2 --reverse;;
 		""|"--by-score") "${navita_depends["nl"]}" "${NAVITA_HISTORYFILE}";;
 	esac) | "${navita_depends["less"]}" -RF
 }
@@ -423,12 +383,8 @@ __navita::NavigateHistory() {
 		local colr_red && colr_red='\033[1;38;2;255;51;51m'
 		local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 
-		local _path
-		local age
-		local path_error
 		local now_time && now_time="$("${navita_depends["date"]}" +%s)"
-		local pwd_not_found && pwd_not_found=1
-		local line
+		local _path path_error age line pwd_not_found=1
 		while read -r line; do
 			_path="$(__navita::GetPathInHistory "${line}")"
 			if (( pwd_not_found )) && [[ "${PWD}" == "${_path}" ]]; then
@@ -460,7 +416,7 @@ __navita::NavigateHistory() {
 		0) 
 			path_returned="${path_returned%% ❰ *}"
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
+			__navita::UpdatePathHistory
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -471,7 +427,7 @@ __navita::NavigateHistory() {
 # ── Feature: ToggleLastVisits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
 	builtin cd "${__the_builtin_cd_option[@]}" - || return $?
-	(&>/dev/null __navita::UpdatePathHistory &)
+	__navita::UpdatePathHistory
 }
 # }}}
 
@@ -486,7 +442,7 @@ __navita::NavigateChildDirs() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
+			__navita::UpdatePathHistory
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -523,7 +479,7 @@ __navita::NavigateParentDirs() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
+			__navita::UpdatePathHistory
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -537,19 +493,17 @@ __navita::CDGeneral() {
 	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
 		builtin cd "${__the_builtin_cd_option[@]}" "${HOME}" || return $?
-		(&>/dev/null __navita::UpdatePathHistory &) 
+		__navita::UpdatePathHistory
 		return 0
 	elif [[ -d "${*}" ]]; then
 		# argument provided by the user is a valid directory path
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${*}" || return $?
-		(&>/dev/null __navita::UpdatePathHistory &) 
+		__navita::UpdatePathHistory
 		return 0
 	fi
 
 	__navita::CDGeneral::GetPaths() {
-		local line
-		local _path
-		local pwd_not_found=1
+		local line _path pwd_not_found=1
 		while read -r line; do
 			_path="$(__navita::GetPathInHistory "${line}")"
 			if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
@@ -606,7 +560,7 @@ __navita::CDGeneral() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			(&>/dev/null __navita::UpdatePathHistory &)
+			__navita::UpdatePathHistory
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return "$?";;
@@ -620,11 +574,11 @@ __navita::Version() {
 }
 # }}}
 
-# check directory paths' aging once every 24 hours
-if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
-	"${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
-	__navita::AgeOut
-fi
+# # check directory paths' aging once every 24 hours
+# if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
+# 	"${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
+# 	__navita::AgeOut
+# fi
 
 [[ -z "${OLDPWD}" ]] && export OLDPWD="${PWD}"
 
@@ -672,9 +626,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		__navita::Completions::GetHighestRankDirectory() {
 			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
 			__navita::CDGeneral::GetPaths() {
-				local line
-				local _path
-				local pwd_not_found=1
+				local line _path pwd_not_found=1
 				while read -r line; do
 					_path="$(__navita::GetPathInHistory "${line}")"
 					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
@@ -874,9 +826,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 		__navita::Completions::GetHighestRankDirectory() {
 			# The function should be identical to the highest-ranked directory traversal part of the __navita::CDGeneral() function
 			__navita::CDGeneral::GetPaths() {
-				local line
-				local _path
-				local pwd_not_found=1
+				local line _path pwd_not_found=1
 				while read -r line; do
 					_path="$(__navita::GetPathInHistory "${line}")"
 					if (( pwd_not_found )) && [[ "${_path}" == "${PWD}" ]]; then
