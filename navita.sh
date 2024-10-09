@@ -91,13 +91,7 @@ __navita::GetAccessEpochInHistory() {
 	# however, it's recommended to pass the complete line for better time performance of this function
 	
 	local access_epoch
-	if [[ -d "${1}" ]]; then
-		access_epoch="$(${navita_depends["grep"]} -m 1 -G "^${1}:" "${NAVITA_HISTORYFILE}")"
-	else
-		access_epoch="${1}"
-	fi
-	
-	access_epoch="${access_epoch#*:}"
+	access_epoch="${1#*:}"
 	access_epoch="${access_epoch#*:}"
 	printf "%s\n" "${access_epoch%%:*}"
 }
