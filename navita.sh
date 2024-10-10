@@ -133,6 +133,16 @@ __navita::GetRelativePath() {
 # }}}
 
 # Feature: FrecencyRank{{{
+#
+#                       ⎛                       n                 ⎞
+#                       ⎜                      ___                ⎟
+#                       ⎜          10          ╲     (-α2(t - Ti))⎟
+# FrecencyScore(t) = ln ⎜k + ────────────── +  ╱    e             ⎟
+#                       ⎜    1 + α1(t - T0)    ‾‾‾                ⎟
+#                       ⎝                     i = 0               ⎠
+#
+# The above Frecency algorithm was created by @homerours and is used in their [Jumper](https://github.com/homerours/jumper) project, another excellent fast file jumper. 
+# @homerours should be credited for the Frecency algorithm.
 __navita::UpdatePathHistory() {
 	[[ "${OLDPWD}" == "${PWD}" ]] && return 0
 
