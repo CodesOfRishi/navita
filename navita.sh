@@ -157,9 +157,9 @@ __navita::UpdatePathHistory() {
 			"${PWD}")
 				pwd_not_found=0
 				(( curr_freq++ ))
-				access_time="${now_time}"
-				all_visit_score="$( "${navita_depends["bc"]}" <<< "scale=10; ${all_visit_score} + 1" )"
-				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${access_time}" "${all_visit_score}" "$( "${navita_depends["bc"]}" -l <<< "scale=10; l(10.1 + ${all_visit_score})" )" >> "${__navita_temp_history}"
+				all_visit_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; ${all_visit_score} * e(-3 * 10^(-7) * (${now_time} - ${access_time})) + 1" )"
+				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${now_time} - ${access_time}))) + ${all_visit_score})" )"
+				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${now_time}" "${all_visit_score}" "${final_score}" >> "${__navita_temp_history}"
 				;;
 			*)
 				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${now_time} - ${access_time}))) + (${all_visit_score} * e(-3 * 10^(-7) * (${now_time} - ${access_time})) + 1))" )"
