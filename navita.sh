@@ -168,7 +168,7 @@ __navita::UpdatePathHistory() {
 		esac
 	done < "${NAVITA_HISTORYFILE}"
 
-	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${now_time}" "3.3125354238" >> "${__navita_temp_history}"
+	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${now_time}" "2.4069451083" >> "${__navita_temp_history}"
 	"${navita_depends["sort"]}" -n -s -b -t: -k5,5 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
