@@ -217,15 +217,20 @@ This ensures that the most relevant directories—those accessed both frequently
 <details>
 <summary>How it Works?</summary> 
 
-$$ \text{Score} = \ln\left(\frac{F \times (T_2-T_1)}{T_2}+1\right) \times e^{\left(\frac{-k \times T_1}{T_2}\right)} $$
+$$ \text{FrecencyScore(t)} =  \ln\Bigg(k + \frac{10}{1+\alpha_1(t-T_0)} + \sum_{i=0}^{n} e^{-\alpha_2(t-T_i)} \Bigg) $$
 
-where:
-- `F` is the frequency of access.
-- `T1` is the time difference between the most recent access and the current directory.
-- `T2` is the maximum time difference allowed (90 days default). Check [`NAVITA_MAX_AGE`](#environment-variables) environment variable.
-- `k` controls the rate at which the weight of older accesses decreases. Check [`NAVITA_DECAY_FACTOR`](#environment-variables) environment variable.
-- The logarithmic scaling reduces the impact of extremely high frequencies, ensuring a more balanced ranking.
-- The exponential decay gradually reduces the importance of older accesses, prioritizing recent activity.
+where,
+- `t` is the current time.
+- `T0` is the time of the most recent visit.
+- `Ti` represent the time of previous visits (with `i = 0` for the most recent visit and `i = n` for the oldest).
+- `k` is a constant (0.1) which provides a lower bound on the frecency score.
+- `α1` and `α2` are decay parameters:
+    - `α1 = 2 * 10^(-5)`, which controls the decay for the most recent visit.
+    - `α2 = 3 * 10^(-7)`, which controls the decay for all prior visits.
+<br>
+
+- All times are expressed in seconds and the idea is to make recency more important than frequency.
+- **NOTE:** The Frecency algorithm was created by @homerours and is used in their [Jumper](https://github.com/homerours/jumper) project, another excellent fast file jumper. @homerours should be credited for the Frecency algorithm.
 
 </details>
 
@@ -235,11 +240,11 @@ where:
 
 </div>
 
-- Directory paths are forgotten based on the following two conditions:
-    1. Limit the maximum number of entries in the `$NAVITA_HISTORYFILE` file to 5000.
-    2. If a directory path's score falls to 0, an average score will be calculated. Directory paths with scores less than 20% of the average score will be removed. 
-- These conditions will be checked once every 24 hours at shell startup.
-- If a directory path is removed due to a score of 0, the remaining directory paths will have their frequencies adjusted according to the formula $\ln(F+1)$, where $F$ is the frequency of the particular directory path.
+- Navita will check aging once every 24 hours at shell startup.
+- During the aging process, Navita will,
+    - limit the entries in the history to 100 (default) most frecent directory paths,
+    - remove directory paths that match any pattern in the `$NAVITA_IGNOREFILE`, and
+    - remove invalid directory paths.
 
 <div align="center"> 
 
@@ -247,6 +252,7 @@ where:
 
 </div>
 
+- Frecency rankings are updated asynchronously at runtime.
 - For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk. To make Navita *always* resolve symbolic links, check the [`NAVITA_FOLLOW_ACTUAL_PATH`](#environment-variables) environment variable.
 
 > [!NOTE]
@@ -330,30 +336,21 @@ source "path/to/the/navita.sh"
     - Change it to `y` or `Y` to follow symbolic links.
 
 - **NAVITA_RELATIVE_PARENT_PATH**
-    - It defaults to `y` i.e., show the resolved parent paths relative to the present working directory in [Search & Traverse Parent Directories](search--traverse-parent-directories) feature.
+    - Defaults to `y` i.e., show the resolved parent paths relative to the present working directory in [Search & Traverse Parent Directories](search--traverse-parent-directories) feature.
     - Change it to `n` or `N` to show the parent paths as absolute path. 
 
 - **NAVITA_SHOW_AGE**
-    - It defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
+    - Defaults to `y`, i.e., show an age annotation next to the paths while searching and traversing from history.
     - Change it to `n` or `N`, to not show an age annotation beside the paths.
 
 - **NAVITA_FZF_EXACT_MATCH**
-    - It defaults to `y`, i.e., Exact match and search in FZF when utilizing [Search & Traverse Child Directories](#search--traverse-child-directories), [Search & Traverse Parent Directories](#search--traverse-parent-directories) or [Search & Traverse History](#search--traverse-history).
+    - Defaults to `y`, i.e., Exact match and search in FZF when utilizing [Search & Traverse Child Directories](#search--traverse-child-directories), [Search & Traverse Parent Directories](#search--traverse-parent-directories) or [Search & Traverse History](#search--traverse-history).
     - Change it to `n` or `N`, to Fuzzy match and search in FZF.
     - It will not affect Tab completion in Bash or the [Highest-ranked directory search](#usual-directory-change).
 
-- **NAVITA_MAX_AGE**
-    - Specifies maximum retention period for a directory path since last access.
-    - Navita determines the age of a directory based on its relative access time to the most recently accessed directory. If the most recent directory was accessed at time $a$ and another directory was accessed at time $(a+x)$, the age of the other directory is $x$ time units.
-    - The default value is `90` i.e., 90 days.
-
-- **NAVITA_DECAY_FACTOR**
-    - The rate at which the score of older accesses decreases. A higher value results in a faster decay rate.
-    - It defaults to `10`.
-
-> [!WARNING]
-> The decay factor should always be positive. Only adjust the decay factor if you are confident in the algorithm's behavior with the new value.
-
+- **NAVITA_HISTORY_LIMIT**
+    - Maximum number of directory paths Navita should remember.
+    - Defaults to `100`.
 
 <div align="center"> 
 
