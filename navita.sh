@@ -382,7 +382,7 @@ __navita::NavigateHistory() {
 		0) 
 			path_returned="${path_returned%% ❰ *}"
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			__navita::UpdatePathHistory
+			(__navita::UpdatePathHistory &)
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -393,7 +393,7 @@ __navita::NavigateHistory() {
 # ── Feature: ToggleLastVisits ──────────────────────────────────────{{{
 __navita::ToggleLastVisits() {
 	builtin cd "${__the_builtin_cd_option[@]}" - || return $?
-	__navita::UpdatePathHistory
+	(__navita::UpdatePathHistory &)
 }
 # }}}
 
@@ -408,7 +408,7 @@ __navita::NavigateChildDirs() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			__navita::UpdatePathHistory
+			(__navita::UpdatePathHistory &)
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -445,7 +445,7 @@ __navita::NavigateParentDirs() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			__navita::UpdatePathHistory
+			(__navita::UpdatePathHistory &)
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return $?;;
@@ -459,12 +459,12 @@ __navita::CDGeneral() {
 	if [[ -z "${*}" ]]; then 
 		# argument provided by the user is empty
 		builtin cd "${__the_builtin_cd_option[@]}" "${HOME}" || return $?
-		__navita::UpdatePathHistory
+		(__navita::UpdatePathHistory &)
 		return 0
 	elif [[ -d "${*}" ]]; then
 		# argument provided by the user is a valid directory path
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${*}" || return $?
-		__navita::UpdatePathHistory
+		(__navita::UpdatePathHistory &)
 		return 0
 	fi
 
@@ -526,7 +526,7 @@ __navita::CDGeneral() {
 	case "$?" in
 		0) 
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
-			__navita::UpdatePathHistory
+			(__navita::UpdatePathHistory &)
 			;;
 		1) printf "navita: None matched!\n" >&2; return 1;;
 		*) return "$?";;
