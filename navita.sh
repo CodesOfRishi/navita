@@ -158,12 +158,7 @@ __navita::UpdatePathHistory() {
 	local curr_path curr_freq access_time all_visit_score final_score
 
 	: > "${__navita_temp_history}"
-	while read -r line; do
-		curr_path="${line%%:*}" && line="${line#*:}"
-		curr_freq="${line%%:*}" && line="${line#*:}"
-		access_time="${line%%:*}" && line="${line#*:}"
-		all_visit_score="${line%%:*}"
-
+	while IFS=":" read -r curr_path curr_freq access_time all_visit_score final_score; do
 		case "${curr_path}" in
 			"${PWD}")
 				pwd_not_found=0
