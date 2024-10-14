@@ -49,7 +49,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.0.0"
+export NAVITA_VERSION="v2.0.0+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -260,16 +260,40 @@ __navita::CleanHistory() {
 	}
 	# }}}
 	
+	# ── Feature: RemoveIgnoredPaths ───────────────────────────────────────{{{
+	__navita::CleanHistory::IgnoredPaths() {
+		: > "${__navita_temp_history}"
+		local line _path pattern none_matched
+		while read -r line; do
+			none_matched=1
+			_path="${line%%:*}"
+			while read -r pattern; do
+				if [[ "${_path}" =~ ${pattern} ]]; then
+					printf "navita: Deleted ${colr_red}%s${colr_rst} (matched ${colr_brown}%s${colr_rst})\n" "${_path}" "${pattern}"
+					none_matched=0
+					break
+				fi
+			done < "${NAVITA_IGNOREFILE}"
+			(( none_matched )) && printf "%s\n" "${line}" >> "${__navita_temp_history}"
+		done < "${NAVITA_HISTORYFILE}"
+		
+		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+	}
+	# }}}
+
+	local colr_brown && colr_brown='\033[1;38;2;229;152;102m'
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 
 	case "${1}" in
 		"--invalid-paths") __navita::CleanHistory::RemoveInvalidPaths;;
+		"--ignored-paths") __navita::CleanHistory::IgnoredPaths;;
 		"--full-history") __navita::CleanHistory::EmptyHistoryFile;;
 		"")
 			printf "Choose any one:\n"
 			printf "1. Remove only invalid paths.\n"
-			printf "2. Clear the full history.\n"
+			printf "2. Remove ignored paths.\n"
+			printf "3. Clear the full history.\n"
 			printf "x to abort.\n"
 			printf "\n"
 			local user_choice
@@ -282,7 +306,8 @@ __navita::CleanHistory() {
 
 			case "${user_choice}" in
 				1) __navita::CleanHistory::RemoveInvalidPaths;;
-				2) __navita::CleanHistory::EmptyHistoryFile;;
+				2) __navita::CleanHistory::IgnoredPaths;;
+				3) __navita::CleanHistory::EmptyHistoryFile;;
 				"x") printf "navita: Aborted.\n";;
 				*) 
 					printf "navita: ERROR: Invalid input!\n" >&2
