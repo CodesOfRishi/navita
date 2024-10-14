@@ -724,6 +724,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 
 			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
 			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
+			printf "%s     ${colr_grey}❰ Remove ignored paths${colr_rst}\n" "--ignored-paths"
 		}
 		# }}}
 
