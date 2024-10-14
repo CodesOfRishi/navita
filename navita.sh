@@ -897,6 +897,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 
 		clean_sub_options=(
 			'--invalid-paths:Remove invalid paths'
+			'--ignored-paths:Remove ignored paths'
 			'--full-history:Clear the full history'
 		)
 
