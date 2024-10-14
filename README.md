@@ -162,9 +162,9 @@ Switch between your current directory and the previous directory you were in. Th
 
 </div>
 
-**Synopsis:** `cd (-c | --clean) [--invalid-paths | --full-history]`
+**Synopsis:** `cd (-c | --clean) [--invalid-paths | --ignored-paths | --full-history]`
 
-You can choose to either remove invalid paths from the history or clear the entire history. 
+You can choose to either remove invalid paths or paths matching regex in the `$NAVITA_IGNOREFILE` file from the history, or clear the entire history.
 
 <div align="center"> 
 
