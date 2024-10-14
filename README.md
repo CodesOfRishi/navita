@@ -230,7 +230,8 @@ where,
 <br>
 
 - All times are expressed in seconds and the idea is to make recency more important than frequency.
-- **NOTE:** The Frecency algorithm was created by @homerours and is used in their [Jumper](https://github.com/homerours/jumper) project, another excellent fast file jumper. @homerours should be credited for the Frecency algorithm.
+- **NOTE:** The Frecency algorithm was created by @homerours and is used in their [Jumper](https://github.com/homerours/jumper) project, another excellent fast file jumper. @homerours should be credited for the Frecency algorithm. 
+- Detailed information about the algorithm can be found [here](https://github.com/homerours/jumper/blob/master/algorithm.md#frecency).
 
 </details>
 
