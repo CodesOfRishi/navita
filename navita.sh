@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cut" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cut" "cat" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -564,6 +564,64 @@ __navita::Version() {
 }
 # }}}
 
+# ── Feature: ViewHelp ────────────────────────────────────────────────
+__navita::ViewHelp() {
+"${navita_depends["cat"]}" << EOF
+Navita is a Bash/Zsh utility for rapid directory traversal, employing fuzzy matching, history tracking, and path validation for efficient file system navigation.
+
+Usage:
+	cd [-P] [PCRE_EXPRESSION... | DIR]
+	   [-P] -
+	   [-P] -- [STRING...]
+	   [-P] (-s | --sub-search) [STRING...]
+	   [-P] (-S | --super-search) [STRING...]
+	   (-c | --clean) [--full-history | --ignored-paths | --invalid-paths]
+	   (-H | --history) [--by-freq | --by-score | --by-time]
+	   (-v | --version)
+	   (-h | --help)
+
+Main Options:
+	-                       Traverse to the previous working directory
+	--                      Search and traverse from history                                                                                                                                                
+	-P                      Resolve symbolic links and traverse to the actual directory
+	--clean,         -c     Remove invalid paths or clear the entire history
+	--history,       -H     View Navita's history of directory visits
+	--sub-search,    -s     Recursively search and traverse sub-directories
+	--super-search,  -S     Search and traverse directories one level below the parent directories
+	--version,       -v     Navita's version information
+	--help,          -h     Show help (this) message
+
+Sub-options for -H/--history:
+	--by-freq      Sort history by frequency
+	--by-score     Sort history by score
+	--by-time      Sort history by access time
+
+Sub-options for -c/--clean:
+	--full-history      Clear the full history
+	--ignored-paths     Remove ignored paths
+	--invalid-paths     Remove invalid paths
+
+Configurable Environment Variables:
+	NAVITA_DATA_DIR                 Directory location for Navita's data files
+	NAVITA_CONFIG_DIR               Directory location for Navita's configuration files
+	NAVITA_COMMAND                  Name of the command to use Navita
+	NAVITA_FOLLOW_ACTUAL_PATH       Instruct Navita to follow symbolic links or not before changing the directory
+	NAVITA_RELATIVE_PARENT_PATH     Instruct Navita to show resolved parent paths relative to the current directory or not
+	NAVITA_SHOW_AGE                 Instruct Navita to show age annotation next to paths during history search or not
+	NAVITA_FZF_EXACT_MATCH          Instruct Navita to use exact or fuzzy match in FZF search or not
+	NAVITA_HISTORY_LIMITS           Maximum number of directory paths Navita should remember
+
+Informational Environment Variables:
+	NAVITA_VERSION         Navita's version information
+	NAVITA_IGNOREFILE      The file with regex patterns to ignore paths from history
+	NAVITA_HISTORYFILE     The file with Navita's directory history and metadata like frequency, access time, and score
+
+Project Author: Rishi Kumar <contact.rishikmr@gmail.com>
+Project URL: https://github.com/CodesOfRishi/navita 
+
+EOF
+}
+
 # check directory paths' aging once every 24 hours
 if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
 	"${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
@@ -597,6 +655,7 @@ __navita__() {
 				__navita::NavigateParentDirs "${@:2}"
 			fi
 			;;
+		"--help" |  "-h") __navita::ViewHelp;;
 		"--version" | "-v") __navita::Version;;
 		*) __navita::CDGeneral "${@}";;
 	esac
