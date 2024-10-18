@@ -761,6 +761,8 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s        ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "--sub-search"
 			printf "%s                  ${colr_grey}❰ Search and traverse 1-level below the parent directories${colr_rst}\n" "-S"
 			printf "%s      ${colr_grey}❰ Search and traverse 1-level below the parent directories${colr_rst}\n" "--super-search"
+			printf "%s                  ${colr_grey}❰ View help message${colr_rst}\n" "-h"
+			printf "%s              ${colr_grey}❰ View help message${colr_rst}\n" "--help"
 			printf "%s                  ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
@@ -945,6 +947,8 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"--sub-search:Recursively search and traverse sub-directories"
 			"-S:Search and traverse 1-level below the parent directories"
 			"--super-search:Search and traverse 1-level below the parent directories"
+			"-h:View help message"
+			"--help:View help message"
 			"-v:Navita's version information"
 			"--version:Navita's version information"
 		)
