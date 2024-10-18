@@ -584,7 +584,7 @@ Main Options:
 	-                       Traverse to the previous working directory
 	--                      Search and traverse from history                                                                                                                                                
 	-P                      Resolve symbolic links and traverse to the actual directory
-	--clean,         -c     Remove invalid paths or clear the entire history
+	--clean,         -c     Choose what to clear from history or clear all
 	--history,       -H     View Navita's history of directory visits
 	--sub-search,    -s     Recursively search and traverse sub-directories
 	--super-search,  -S     Search and traverse directories one level below the parent directories
@@ -755,8 +755,8 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s                  ${colr_grey}❰ Resolve symbolic links and traverse to the physical directory${colr_rst}\n" "-P"
 			printf "%s                  ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "-H"
 			printf "%s           ${colr_grey}❰ View Navita's history of directory visits${colr_rst}\n" "--history"
-			printf "%s                  ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "-c"
-			printf "%s             ${colr_grey}❰ Remove invalid paths or clear the entire history${colr_rst}\n" "--clean"
+			printf "%s                  ${colr_grey}❰ Choose what to clear from history or clear all${colr_rst}\n" "-c"
+			printf "%s             ${colr_grey}❰ Choose what to clear from history or clear all${colr_rst}\n" "--clean"
 			printf "%s                  ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "-s"
 			printf "%s        ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "--sub-search"
 			printf "%s                  ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "-S"
@@ -939,8 +939,8 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"-P:Resolve symbolic links and traverse to the actual directory"
 			"-H:View Navita's history of directory visits"
 			"--history:View Navita's history of directory visits"
-			"-c:Remove invalid paths or clear the entire history"
-			"--clean:Remove invalid paths or clear the entire history"
+			"-c:Choose what to clear from history or clear all"
+			"--clean:Choose what to clear from history or clear all"
 			"-s:Recursively search and traverse sub-directories"
 			"--sub-search:Recursively search and traverse sub-directories"
 			"-S:Search and traverse directories one level below the parent directories"
