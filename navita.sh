@@ -587,7 +587,7 @@ Main Options:
 	--clean,         -c     Choose what to clear from history or clear all
 	--history,       -H     View Navita's history of directory visits
 	--sub-search,    -s     Recursively search and traverse sub-directories
-	--super-search,  -S     Search and traverse directories one level below the parent directories
+	--super-search,  -S     Search and traverse 1-level below the parent directories
 	--version,       -v     Navita's version information
 	--help,          -h     Show help (this) message
 
@@ -759,8 +759,8 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			printf "%s             ${colr_grey}❰ Choose what to clear from history or clear all${colr_rst}\n" "--clean"
 			printf "%s                  ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "-s"
 			printf "%s        ${colr_grey}❰ Recursively search and traverse sub-directories${colr_rst}\n" "--sub-search"
-			printf "%s                  ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "-S"
-			printf "%s      ${colr_grey}❰ Search and traverse directories one level below the parent directories${colr_rst}\n" "--super-search"
+			printf "%s                  ${colr_grey}❰ Search and traverse 1-level below the parent directories${colr_rst}\n" "-S"
+			printf "%s      ${colr_grey}❰ Search and traverse 1-level below the parent directories${colr_rst}\n" "--super-search"
 			printf "%s                  ${colr_grey}❰ Navita's version information${colr_rst}\n" "-v"
 			printf "%s           ${colr_grey}❰ Navita's version information${colr_rst}\n" "--version"
 		}
@@ -943,8 +943,8 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 			"--clean:Choose what to clear from history or clear all"
 			"-s:Recursively search and traverse sub-directories"
 			"--sub-search:Recursively search and traverse sub-directories"
-			"-S:Search and traverse directories one level below the parent directories"
-			"--super-search:Search and traverse directories one level below the parent directories"
+			"-S:Search and traverse 1-level below the parent directories"
+			"--super-search:Search and traverse 1-level below the parent directories"
 			"-v:Navita's version information"
 			"--version:Navita's version information"
 		)
