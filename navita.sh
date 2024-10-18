@@ -23,6 +23,10 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 	_cmd_type=( "whence" "-p" )
 else
 	printf "navita: ERROR: Unknown shell. Navita is exclusive to Bash and Zsh.\n" >&2
+	unset navita_dependencies
+	unset navita_depends
+	unset navita_all_command_found
+	unset _cmd_type
 	return 1
 fi
 
