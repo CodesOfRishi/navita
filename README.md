@@ -33,7 +33,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
-**Synopsis:** `cd [string...]`
+**Synopsis:** `cd [PCRE_EXPRESSION... | DIR]`
 
 - Navita will search the history and directly navigate to the highest-ranked matching directory. The current working directory will not be considered in the search.
 - For highest-ranked directory traversal, search strings will be matched using [Perl-compatible regular expressions (PCREs)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions) and are compared case-sensitively.
@@ -104,7 +104,7 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 
 </div>
 
-**Synopsis:** `cd (-s | --sub-search) [string...]`
+**Synopsis:** `cd (-s | --sub-search) [STRING...]`
 
 Recursively search subdirectories, excluding `.git` and its subdirectories, and navigate to the selected one.
 
@@ -115,7 +115,7 @@ Recursively search subdirectories, excluding `.git` and its subdirectories, and 
 </div>
 
 
-**Synopsis:** `cd (-S | --super-search) [string...]`<br>
+**Synopsis:** `cd (-S | --super-search) [STRING...]`<br>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
 
 Search directories one level below the parent directories and navigate to the desired one. The current working directory will not be considered in the search.
@@ -126,7 +126,7 @@ Search directories one level below the parent directories and navigate to the de
 
 </div>
 
-**Synopsis:** `cd -- [string...]`
+**Synopsis:** `cd -- [STRING...]`
 
 Search your recently visited directories and select the desired one. The current working directory will not be considered in the search.
 
@@ -175,6 +175,16 @@ You can choose to either remove invalid paths or paths matching regex in the `$N
 **Synopsis:** `cd (-v | --version)`
 
 View Navita's version information.
+
+<div align="center">
+
+### View Help
+
+</div>
+
+**Synopsis:** `cd (-h | --help)`
+
+View help message.
 
 <div align="center"> 
 
