@@ -611,7 +611,7 @@ Configurable Environment Variables:
 	NAVITA_FZF_EXACT_MATCH          Instruct Navita to use exact or fuzzy match in FZF search or not
 	NAVITA_HISTORY_LIMITS           Maximum number of directory paths Navita should remember
 
-Informational Environment Variables:
+Non-configurable Environment Variables:
 	NAVITA_VERSION         Navita's version information
 	NAVITA_IGNOREFILE      The file with regex patterns to ignore paths from history
 	NAVITA_HISTORYFILE     The file with Navita's directory history and metadata like frequency, access time, and score
