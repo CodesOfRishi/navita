@@ -54,7 +54,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.2.0"
+export NAVITA_VERSION="v2.2.0+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -586,7 +586,7 @@ Usage:
 
 Main Options:
 	-                       Traverse to the previous working directory
-	--                      Search and traverse from history                                                                                                                                                
+	--                      Search and traverse from history
 	-P                      Resolve symbolic links and traverse to the actual directory
 	--clean,         -c     Choose what to clear from history or clear all
 	--history,       -H     View Navita's history of directory visits
