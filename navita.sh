@@ -568,7 +568,7 @@ __navita::Version() {
 }
 # }}}
 
-# ── Feature: ViewHelp ────────────────────────────────────────────────
+# ── Feature: ViewHelp ────────────────────────────────────────────────{{{
 __navita::ViewHelp() {
 "${navita_depends["cat"]}" << EOF
 Navita is a Bash/Zsh utility for rapid directory traversal, employing fuzzy matching, history tracking, and path validation for efficient file system navigation.
@@ -625,6 +625,7 @@ Project URL: https://github.com/CodesOfRishi/navita
 
 EOF
 }
+# }}}
 
 # check directory paths' aging once every 24 hours
 if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
