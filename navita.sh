@@ -662,7 +662,7 @@ Usage:
 	   [-P] -- [STRING...]
 	   [-P] (-s | --sub-search) [STRING...]
 	   [-P] (-S | --super-search | ..) [STRING...]
-	   (-c | --clean) [--full-history | --ignored-paths | --invalid-paths]
+	   (-c | --clean) [--full-history | --ignored-paths | --custom-paths | --invalid-paths]
 	   (-H | --history) [--by-freq | --by-score | --by-time]
 	   (-v | --version)
 	   (-h | --help)
@@ -687,6 +687,7 @@ Sub-options for -c/--clean:
 	--full-history      Clear the full history
 	--ignored-paths     Remove ignored paths
 	--invalid-paths     Remove invalid paths
+	--custom-paths      Remove custom paths
 
 Configurable Environment Variables:
 	NAVITA_DATA_DIR                 Directory location for Navita's data files
