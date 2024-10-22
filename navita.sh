@@ -874,8 +874,9 @@ if [[ -n "${BASH_VERSION}" ]]; then
 			local colr_rst && colr_rst='\e[0m'
 
 			printf "%s     ${colr_grey}❰ Remove invalid paths${colr_rst}\n" "--invalid-paths"
-			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
 			printf "%s     ${colr_grey}❰ Remove ignored paths${colr_rst}\n" "--ignored-paths"
+			printf "%s      ${colr_grey}❰ Remove custom paths${colr_rst}\n" "--custom-paths"
+			printf "%s      ${colr_grey}❰ Clear the full history${colr_rst}\n" "--full-history"
 		}
 		# }}}
 
@@ -1051,6 +1052,7 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 		clean_sub_options=(
 			'--invalid-paths:Remove invalid paths'
 			'--ignored-paths:Remove ignored paths'
+			'--custom-paths:Remove custom paths'
 			'--full-history:Clear the full history'
 		)
 
