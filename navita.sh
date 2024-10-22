@@ -286,6 +286,86 @@ __navita::CleanHistory() {
 	}
 	# }}}
 
+	# Feature: RemoveCustomPaths{{{
+	__navita::CleanHistory::Custom() {
+		__navita::CleanHistory::Custom::GetPaths() {
+			local now_time && now_time="$("${navita_depends["date"]}" +%s)"
+			local rank _path freq epoch visit_score final_score
+			while IFS=":" read -r rank _path freq epoch visit_score final_score; do
+				printf "%s ${colr_grey}:${colr_rst} ${colr_white}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_brown}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_grey}%s${colr_rst}\n" "$rank" "$_path" "$freq" "$(__navita::GetAgeFromEpoch "$epoch" "$now_time")"
+			done < <("${navita_depends["nl"]}" -s ":" "${NAVITA_HISTORYFILE}") | "${navita_depends["fzf"]}" --header='Use Tab or Shift-Tab to (de)select paths' --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose paths to remove « Navita"' --layout='reverse' --delimiter=" : " --nth=2 --with-nth=1,2,3,4 --multi | "${navita_depends["sort"]}" -b -n -t ':' --key=1,1
+		}
+
+		local -a paths_to_remove
+		IFS=$'\n' paths_to_remove=( $(__navita::CleanHistory::Custom::GetPaths) ) || {
+			printf "%s\n" "navita: ERROR: Something went wrong during assignment of the selected paths to an array!" >&2
+			return 1
+		}
+		[[ "${#paths_to_remove[@]}" -eq 0 ]] && printf "%s\n" "navita: No paths were removed from history." >&2 && return 1
+
+		local line rank _path freq duration i=0
+		[[ -n "${ZSH_VERSION}" ]] && i=1
+		while (( 1 )); do
+			if [[ -n "${BASH_VERSION}" ]]; then 
+				(( i >= ${#paths_to_remove[@]} )) && break
+			elif [[ -n "${ZSH_VERSION}" ]]; then
+				(( i > ${#paths_to_remove[@]} )) && break
+			fi
+
+			line="${paths_to_remove[i]}"
+			rank="${line%% : *}" && line="${line#* : }"
+			_path="${line%% : *}" && line="${line#* : }"
+			freq="${line%% : *}" && line="${line#* : }"
+			duration="${line%%: *}"
+			printf "%s ${colr_grey}:${colr_rst} ${colr_white}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_brown}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_grey}%s${colr_rst}\n" "$rank" "$_path" "$freq" "$duration"
+			(( i++ ))
+		done
+		unset i rank _path freq duration line
+
+		local user_choice
+		printf "\n"
+		if [[ -n "${BASH_VERSION}" ]]; then 
+			read -rp "Proceed to remove the above path(s) from history? [Y/n]: " user_choice
+		elif [[ -n "${ZSH_VERSION}" ]]; then
+			read -r "user_choice?Proceed to remove the above path(s) from history? [Y/n]: " 
+		fi
+
+		case "${user_choice}" in
+			Y|y) 
+				local curr_line curr_rank=1 rank_to_remove i=0
+				[[ -n "${ZSH_VERSION}" ]] && i=1
+				entry_to_remove="${paths_to_remove[i]}"
+				rank_to_remove="${entry_to_remove%% : *}"
+				rank_to_remove="${rank_to_remove##* }"
+				rank_to_remove="${rank_to_remove%% *}"
+
+				: > "${__navita_temp_history}"
+				while read -r curr_line; do
+					if [[ -n "${ZSH_VERSION}" ]] && (( i <= ${#paths_to_remove[@]} )) && [[ "${curr_rank}" == "${rank_to_remove}" ]]; then
+						(( i++ ))
+						entry_to_remove="${paths_to_remove[i]}"
+						rank_to_remove="${entry_to_remove%% : *}"
+						rank_to_remove="${rank_to_remove##* }"
+						rank_to_remove="${rank_to_remove%% *}"
+					elif [[ -n "${BASH_VERSION}" ]] && (( i < ${#paths_to_remove[@]} )) && [[ "${curr_rank}" == "${rank_to_remove}" ]]; then
+						(( i++ ))
+						entry_to_remove="${paths_to_remove[i]}"
+						rank_to_remove="${entry_to_remove%% : *}"
+						rank_to_remove="${rank_to_remove##* }"
+						rank_to_remove="${rank_to_remove%% *}"
+					else
+						printf "%s\n" "${curr_line}" >> "${__navita_temp_history}"
+					fi
+					(( curr_rank++ ))
+				done < "${NAVITA_HISTORYFILE}"
+				"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+				;;
+			*) printf "%s\n" "navita: No paths were removed from history.";;
+		esac
+	}
+	# }}}
+
+	local colr_white && colr_white='\033[1;38;2;255;255;255m'
 	local colr_brown && colr_brown='\033[1;38;2;229;152;102m'
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
@@ -293,12 +373,14 @@ __navita::CleanHistory() {
 	case "${1}" in
 		"--invalid-paths") __navita::CleanHistory::RemoveInvalidPaths;;
 		"--ignored-paths") __navita::CleanHistory::IgnoredPaths;;
+		"--custom-paths") __navita::CleanHistory::Custom;;
 		"--full-history") __navita::CleanHistory::EmptyHistoryFile;;
 		"")
 			printf "Choose any one:\n"
 			printf "1. Remove only invalid paths.\n"
 			printf "2. Remove ignored paths.\n"
-			printf "3. Clear the full history.\n"
+			printf "3. Remove custom paths.\n"
+			printf "4. Clear the full history.\n"
 			printf "x to abort.\n"
 			printf "\n"
 			local user_choice
@@ -312,7 +394,8 @@ __navita::CleanHistory() {
 			case "${user_choice}" in
 				1) __navita::CleanHistory::RemoveInvalidPaths;;
 				2) __navita::CleanHistory::IgnoredPaths;;
-				3) __navita::CleanHistory::EmptyHistoryFile;;
+				3) __navita::CleanHistory::Custom;;
+				4) __navita::CleanHistory::EmptyHistoryFile;;
 				"x") printf "navita: Aborted.\n";;
 				*) 
 					printf "navita: ERROR: Invalid input!\n" >&2
