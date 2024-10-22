@@ -115,8 +115,7 @@ Recursively search subdirectories, excluding `.git` and its subdirectories, and 
 </div>
 
 
-**Synopsis:** `cd (-S | --super-search) [STRING...]`<br>
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`cd .. string...`
+**Synopsis:** `cd (-S | --super-search | ..) [STRING...]`
 
 Search directories one level below the parent directories and navigate to the desired one. The current working directory will not be considered in the search.
 
@@ -162,9 +161,9 @@ Switch between your current directory and the previous directory you were in. Th
 
 </div>
 
-**Synopsis:** `cd (-c | --clean) [--invalid-paths | --ignored-paths | --full-history]`
+**Synopsis:** `cd (-c | --clean) [--invalid-paths | --ignored-paths | --custom-paths | --full-history]`
 
-You can choose to either remove invalid paths or paths matching regex in the `$NAVITA_IGNOREFILE` file from the history, or clear the entire history.
+You can choose to either remove invalid paths or paths matching regex in the `$NAVITA_IGNOREFILE` file or custom paths from the history, or clear the entire history.
 
 <div align="center"> 
 
