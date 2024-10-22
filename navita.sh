@@ -293,7 +293,7 @@ __navita::CleanHistory() {
 			local rank _path freq epoch visit_score final_score
 			while IFS=":" read -r rank _path freq epoch visit_score final_score; do
 				printf "%s ${colr_grey}:${colr_rst} ${colr_white}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_brown}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_grey}%s${colr_rst}\n" "$rank" "$_path" "$freq" "$(__navita::GetAgeFromEpoch "$epoch" "$now_time")"
-			done < <("${navita_depends["nl"]}" -s ":" "${NAVITA_HISTORYFILE}") | "${navita_depends["fzf"]}" --header='Use Tab or Shift-Tab to (de)select paths' --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose paths to remove « Navita"' --layout='reverse' --delimiter=" : " --nth=2 --with-nth=1,2,3,4 --multi | "${navita_depends["sort"]}" -b -n -t ':' --key=1,1
+			done < <("${navita_depends["nl"]}" -s ":" "${NAVITA_HISTORYFILE}") | "${navita_depends["fzf"]}" --header='Use Tab or Shift-Tab to (de)select paths' --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose paths to remove « Navita"' --layout='reverse' --scheme='path' --tiebreak='end,index' --delimiter=" : " --nth=2 --with-nth=1,2,3,4 --multi | "${navita_depends["sort"]}" -b -n -t ':' --key=1,1
 		}
 
 		local -a paths_to_remove
