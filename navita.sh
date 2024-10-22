@@ -286,7 +286,7 @@ __navita::CleanHistory() {
 	}
 	# }}}
 
-	# Feature: RemoveCustomPaths{{{
+	# ── Feature: RemoveCustomPaths ────────────────────────────────────────{{{
 	__navita::CleanHistory::Custom() {
 		__navita::CleanHistory::Custom::GetPaths() {
 			local now_time && now_time="$("${navita_depends["date"]}" +%s)"
