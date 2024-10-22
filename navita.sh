@@ -325,9 +325,9 @@ __navita::CleanHistory() {
 		local user_choice
 		printf "\n"
 		if [[ -n "${BASH_VERSION}" ]]; then 
-			read -rp "Proceed to remove the above path(s) from history? [Y/n]: " user_choice
+			read -rp "Remove the above path(s) from history? [Y/n]: " user_choice
 		elif [[ -n "${ZSH_VERSION}" ]]; then
-			read -r "user_choice?Proceed to remove the above path(s) from history? [Y/n]: " 
+			read -r "user_choice?Remove the above path(s) from history? [Y/n]: " 
 		fi
 
 		case "${user_choice}" in
