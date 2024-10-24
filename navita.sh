@@ -83,8 +83,8 @@ if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
 	printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
-	printf "%s\n" "/\.git(/.*|)$" >> "${NAVITA_IGNOREFILE}"
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
+	printf "%s\n" "/\.git(/.*|)$" >> "${NAVITA_IGNOREFILE}"
 	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
