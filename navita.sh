@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "date" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -54,7 +54,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.3.1"
+export NAVITA_VERSION="v2.3.1+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -66,6 +66,9 @@ export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
+# link zsh/datetime module
+[[ -n "$ZSH_VERSION" ]] && [[ -z "${EPOCHSECONDS}" ]] && zmodload zsh/datetime
+
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
 	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}"
@@ -75,7 +78,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
-[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && "${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
+[[ ! -f "${NAVITA_DATA_DIR}/navita_age_last_check" ]] && printf "%s\n" "${EPOCHSECONDS}" > "${NAVITA_DATA_DIR}/navita_age_last_check"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -110,9 +113,8 @@ __navita::GetFreqInHistory() {
 # Utility: Get Age from an Unix Epoch time{{{
 __navita::GetAgeFromEpoch() {
 	local access_time && access_time="$1"
-	local now_time && now_time="${2:-$("${navita_depends["date"]}" +%s)}"
 
-	local seconds_old && seconds_old="$(( now_time - access_time ))"
+	local seconds_old && seconds_old="$(( EPOCHSECONDS - access_time ))"
 	local days_old && days_old="$(( seconds_old/86400 ))"
 	local hours_old && hours_old="$(( (seconds_old - (days_old * 86400))/3600 ))"
 	local minutes_old && minutes_old="$(( (seconds_old - (days_old * 86400) - (hours_old * 3600))/60 ))"
@@ -156,7 +158,6 @@ __navita::UpdatePathHistory() {
 
 	# history format:-
 	# pwd : frequency : access_time : all_visit_score : final_score
-	local now_time && now_time="$( "${navita_depends["date"]}" +%s )"
 	local pwd_not_found=1
 	local curr_path curr_freq access_time all_visit_score final_score
 
@@ -166,18 +167,18 @@ __navita::UpdatePathHistory() {
 			"${PWD}")
 				pwd_not_found=0
 				(( curr_freq++ ))
-				all_visit_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; ${all_visit_score} * e(-3 * 10^(-7) * (${now_time} - ${access_time})) + 1" )"
-				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${now_time} - ${access_time}))) + ${all_visit_score})" )"
-				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${now_time}" "${all_visit_score}" "${final_score}" >> "${__navita_temp_history}"
+				all_visit_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; ${all_visit_score} * e(-3 * 10^(-7) * (${EPOCHSECONDS} - ${access_time})) + 1" )"
+				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${EPOCHSECONDS} - ${access_time}))) + ${all_visit_score})" )"
+				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${EPOCHSECONDS}" "${all_visit_score}" "${final_score}" >> "${__navita_temp_history}"
 				;;
 			*)
-				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${now_time} - ${access_time}))) + (${all_visit_score} * e(-3 * 10^(-7) * (${now_time} - ${access_time})) + 1))" )"
+				final_score="$( "${navita_depends["bc"]}" -l <<< "scale=10; l(0.1 + (10/(1 + 2 * 10^(-5) * (${EPOCHSECONDS} - ${access_time}))) + (${all_visit_score} * e(-3 * 10^(-7) * (${EPOCHSECONDS} - ${access_time})) + 1))" )"
 				printf "%s:%s:%s:%s:%s\n" "${curr_path}" "${curr_freq}" "${access_time}" "${all_visit_score}" "${final_score}" >> "${__navita_temp_history}"
 				;;
 		esac
 	done < "${NAVITA_HISTORYFILE}"
 
-	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${now_time}" "2.4069451083" >> "${__navita_temp_history}"
+	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${EPOCHSECONDS}" "2.4069451083" >> "${__navita_temp_history}"
 	"${navita_depends["sort"]}" -n -s -b -t: -k5,5 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 }
 # }}}
@@ -289,10 +290,9 @@ __navita::CleanHistory() {
 	# ── Feature: RemoveCustomPaths ────────────────────────────────────────{{{
 	__navita::CleanHistory::Custom() {
 		__navita::CleanHistory::Custom::GetPaths() {
-			local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 			local rank _path freq epoch visit_score final_score
 			while IFS=":" read -r rank _path freq epoch visit_score final_score; do
-				printf "%s ${colr_grey}:${colr_rst} ${colr_white}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_brown}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_grey}%s${colr_rst}\n" "$rank" "$_path" "$freq" "$(__navita::GetAgeFromEpoch "$epoch" "$now_time")"
+				printf "%s ${colr_grey}:${colr_rst} ${colr_white}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_brown}%s${colr_rst} ${colr_grey}:${colr_rst} ${colr_grey}%s${colr_rst}\n" "$rank" "$_path" "$freq" "$(__navita::GetAgeFromEpoch "$epoch")"
 			done < <("${navita_depends["nl"]}" -s ":" "${NAVITA_HISTORYFILE}") | "${navita_depends["fzf"]}" --header='Use Tab or Shift-Tab to (de)select paths' --ansi --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Choose paths to remove « Navita"' --layout='reverse' --scheme='path' --tiebreak='end,index' --delimiter=" : " --nth=2 --with-nth=1,2,3,4 --multi | "${navita_depends["sort"]}" -b -n -t ':' --key=1,1
 		}
 
@@ -421,7 +421,6 @@ __navita::ViewHistory() {
 	local colr_blue && colr_blue="\033[1;38;2;0;150;255m"
 
 	local line rank age freq score _path path_error
-	local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 	while read -r line; do
 		rank="${line%%/*}"
 		line="/${line#*/}"
@@ -433,7 +432,7 @@ __navita::ViewHistory() {
 			*) printf "%s%s" "${rank}" "${_path}";;
 		esac
 
-		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
+		age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")")"
 		[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
 
 		freq="$(__navita::GetFreqInHistory "${line}")"
@@ -460,7 +459,6 @@ __navita::NavigateHistory() {
 		local colr_red && colr_red='\033[1;38;2;255;51;51m'
 		local colr_grey && colr_grey="\033[1;38;2;122;122;122m"
 
-		local now_time && now_time="$("${navita_depends["date"]}" +%s)"
 		local _path path_error age line pwd_not_found=1
 		while read -r line; do
 			_path="${line%%:*}"
@@ -472,7 +470,7 @@ __navita::NavigateHistory() {
 
 			# show age
 			if [[ "${NAVITA_SHOW_AGE}" =~ ^(y|Y)$ ]]; then
-				age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")" "${now_time}")"
+				age="$(__navita::GetAgeFromEpoch "$(__navita::GetAccessEpochInHistory "${line}")")"
 				[[ -n "${age}" ]] && printf "${colr_grey} %s${colr_rst}" "❰ ${age}"
 			fi
 
@@ -712,8 +710,8 @@ EOF
 # }}}
 
 # check directory paths' aging once every 24 hours
-if [[ "$(( "$(${navita_depends["date"]} +%s)" - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
-	"${navita_depends["date"]}" +%s > "${NAVITA_DATA_DIR}/navita_age_last_check"
+if [[ "$(( EPOCHSECONDS - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/navita_age_last_check")" ))" -gt 86400 ]]; then
+	printf "%s\n" "${EPOCHSECONDS}" > "${NAVITA_DATA_DIR}/navita_age_last_check"
 	__navita::AgeOut
 fi
 
