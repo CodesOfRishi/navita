@@ -156,6 +156,7 @@ __navita::UpdatePathHistory() {
 	[[ "${OLDPWD}" == "${PWD}" ]] && return 0
 
 	# don't add paths that matches regex from the ignore file
+	local pattern
 	while read -r pattern; do
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
@@ -190,7 +191,7 @@ __navita::UpdatePathHistory() {
 # Feature: AgeOutHistory{{{
 __navita::AgeOut() {
 	: > "${__navita_temp_history}"
-	local _path path_error pattern in_ignorefile=0 line_num=1
+	local line _path path_error pattern in_ignorefile=0 line_num=1
 	while read -r line; do
 		# limit number of paths in the history file to 100
 		(( line_num > NAVITA_HISTORY_LIMIT )) && break
@@ -252,8 +253,7 @@ __navita::CleanHistory() {
 		# clear the temporary file
 		: > "${__navita_temp_history}"
 
-		local curr_path
-		local path_error
+		local curr_path path_error line
 
 		while read -r line; do
 			curr_path="${line%%:*}"
@@ -540,6 +540,7 @@ __navita::NavigateParentDirs() {
 			done
 		}
 
+		local line
 		while read -r line; do
 			if [[ "${NAVITA_RELATIVE_PARENT_PATH}" =~ ^(y|Y)$ ]]; then 
 				"${navita_depends["find"]}" -L "$(__navita::GetRelativePath "${line}")" -maxdepth 1 -mindepth 1 -type d -not -path "../${PWD##*/}" -print
