@@ -46,6 +46,13 @@ if ! (( navita_all_command_found )); then
 	return 1
 else
 	unset navita_all_command_found
+	if [[ -n "${ZSH_VERSION}" ]] && [[ -z "${EPOCHSECONDS}" ]]; then
+		zmodload zsh/datetime || {
+			unset navita_depends
+			printf "navita: ERROR: The 'zsh/datetime' module failed to link correctly." >&2
+			return 1
+		}
+	fi
 fi
 
 # ── Navita variables ──────────────────────────────────────────────────
@@ -65,9 +72,6 @@ export NAVITA_FZF_EXACT_MATCH="${NAVITA_FZF_EXACT_MATCH:-y}"
 export __navita_temp_history="${NAVITA_DATA_DIR}/temp-history"
 
 alias "${NAVITA_COMMAND}"="__navita__"
-
-# link zsh/datetime module
-[[ -n "$ZSH_VERSION" ]] && [[ -z "${EPOCHSECONDS}" ]] && zmodload zsh/datetime
 
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
