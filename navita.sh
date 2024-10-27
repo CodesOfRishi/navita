@@ -340,6 +340,14 @@ __navita::CleanHistory() {
 
 	# ── Feature: RemoveCustomPaths ────────────────────────────────────────{{{
 	__navita::CleanHistory::Custom() {
+		# lock history updation preventing race condition
+		local FD
+		exec {FD}>"${__navita_lockfile}"
+		"${navita_depends["flock"]}" -x -n "${FD}" || {
+			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+			return 0
+		}
+
 		__navita::CleanHistory::Custom::GetPaths() {
 			local rank _path freq epoch visit_score final_score
 			while IFS=":" read -r rank _path freq epoch visit_score final_score; do
@@ -350,9 +358,13 @@ __navita::CleanHistory() {
 		local -a paths_to_remove
 		IFS=$'\n' paths_to_remove=( $(__navita::CleanHistory::Custom::GetPaths) ) || {
 			printf "%s\n" "navita: ERROR: Something went wrong during assignment of the selected paths to an array!" >&2
+			exec {FD}>&-
 			return 1
 		}
-		[[ "${#paths_to_remove[@]}" -eq 0 ]] && printf "%s\n" "navita: No paths were removed from history." >&2 && return 1
+		[[ "${#paths_to_remove[@]}" -eq 0 ]] && printf "%s\n" "navita: No paths were removed from history." >&2 && {
+			exec {FD}>&-
+			return 1
+		}
 
 		local line rank _path freq duration i=0
 		[[ -n "${ZSH_VERSION}" ]] && i=1
@@ -413,6 +425,7 @@ __navita::CleanHistory() {
 				;;
 			*) printf "%s\n" "navita: No paths were removed from history.";;
 		esac
+		exec {FD}>&-
 	}
 	# }}}
 
