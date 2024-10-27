@@ -292,6 +292,7 @@ where,
 - [GNU Grep](https://www.gnu.org/software/grep/)
 - [GNU bc](https://www.gnu.org/software/bc/)
 - [GNU Find Utilities](https://www.gnu.org/software/findutils/) (basically the `find` command)
+- [Util-Linux](https://github.com/util-linux/util-linux) (basically the `flock` command)
 - [GNU Core Utilities](https://www.gnu.org/software/coreutils/)
 - [Less](http://www.greenwoodsoftware.com/less/) (only for viewing the history in a pager)
 
