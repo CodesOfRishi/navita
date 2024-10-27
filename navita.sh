@@ -176,7 +176,7 @@ __navita::UpdatePathHistory() {
 	local pwd_not_found=1
 	local curr_path curr_freq access_time all_visit_score final_score
 
-	: > "${__navita_temp_history}"
+	: >| "${__navita_temp_history}"
 	while IFS=":" read -r curr_path curr_freq access_time all_visit_score final_score; do
 		case "${curr_path}" in
 			"${PWD}")
@@ -209,7 +209,7 @@ __navita::AgeOut() {
 		return 0
 	}
 
-	: > "${__navita_temp_history}"
+	: >| "${__navita_temp_history}"
 	local line _path path_error pattern in_ignorefile=0 line_num=1
 	while read -r line; do
 		# limit number of paths in the history file to 100
@@ -262,10 +262,10 @@ __navita::CleanHistory() {
 		}
 
 		# clear the temporary file
-		: > "${__navita_temp_history}"
+		: >| "${__navita_temp_history}"
 
 		"${navita_depends["cp"]}" "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
-		: > "${NAVITA_HISTORYFILE}"
+		: >| "${NAVITA_HISTORYFILE}"
 		local exitcode="$?"
 		if (( exitcode == 0 )); then 
 			printf "navita: %s cleaned.\n" "${NAVITA_HISTORYFILE}"
@@ -288,7 +288,7 @@ __navita::CleanHistory() {
 		}
 
 		# clear the temporary file
-		: > "${__navita_temp_history}"
+		: >| "${__navita_temp_history}"
 
 		local curr_path path_error line
 
@@ -318,7 +318,7 @@ __navita::CleanHistory() {
 			return 0
 		}
 
-		: > "${__navita_temp_history}"
+		: >| "${__navita_temp_history}"
 		local line _path pattern none_matched
 		while read -r line; do
 			none_matched=1
@@ -402,7 +402,7 @@ __navita::CleanHistory() {
 				rank_to_remove="${rank_to_remove##* }"
 				rank_to_remove="${rank_to_remove%% *}"
 
-				: > "${__navita_temp_history}"
+				: >| "${__navita_temp_history}"
 				while read -r curr_line; do
 					if [[ -n "${ZSH_VERSION}" ]] && (( i <= ${#paths_to_remove[@]} )) && [[ "${curr_rank}" == "${rank_to_remove}" ]]; then
 						(( i++ ))
@@ -776,7 +776,7 @@ EOF
 
 # check directory paths' aging once every 24 hours
 if [[ "$(( EPOCHSECONDS - "$(${navita_depends["head"]} -1 "${__navita_last_age_check}")" ))" -gt 86400 ]]; then
-	printf "%s\n" "${EPOCHSECONDS}" > "${__navita_last_age_check}"
+	printf "%s\n" "${EPOCHSECONDS}" >| "${__navita_last_age_check}"
 	__navita::AgeOut
 fi
 
