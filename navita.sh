@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" )
+declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -71,6 +71,7 @@ export NAVITA_FZF_EXACT_MATCH="${NAVITA_FZF_EXACT_MATCH:-y}"
 # temporary file for data manipulation for the history file
 export __navita_temp_history="${NAVITA_DATA_DIR}/.temp-history"
 export __navita_last_age_check="${NAVITA_DATA_DIR}/.temp-lastagecheck"
+export __navita_lockfile="${NAVITA_DATA_DIR}/.LOCK"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -162,6 +163,14 @@ __navita::UpdatePathHistory() {
 		[[ "${PWD}" =~ ${pattern} ]] && return 0
 	done < "${NAVITA_IGNOREFILE}"
 
+	# lock history updation preventing race condition
+	local FD
+	exec {FD}>"${__navita_lockfile}"
+	"${navita_depends["flock"]}" -x -n "${FD}" || {
+		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+		return 0
+	}
+
 	# history format:-
 	# pwd : frequency : access_time : all_visit_score : final_score
 	local pwd_not_found=1
@@ -186,6 +195,7 @@ __navita::UpdatePathHistory() {
 
 	(( pwd_not_found )) && printf "%s:1:%s:0:%s\n" "${PWD}" "${EPOCHSECONDS}" "2.4069451083" >> "${__navita_temp_history}"
 	"${navita_depends["sort"]}" -n -s -b -t: -k5,5 --reverse --output="${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
+	exec {FD}>&-
 }
 # }}}
 
