@@ -250,6 +250,14 @@ __navita::CleanHistory() {
 		# empty the historyfile
 		# if success, copy tempfile to historyfile.bak
 
+		# lock history updation preventing race condition
+		local FD
+		exec {FD}>"${__navita_lockfile}"
+		"${navita_depends["flock"]}" -x -n "${FD}" || {
+			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+			return 0
+		}
+
 		# clear the temporary file
 		: > "${__navita_temp_history}"
 
@@ -261,6 +269,7 @@ __navita::CleanHistory() {
 			"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
 			printf "navita: Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
+		exec {FD}>&-
 		return "$exitcode"
 	}
 	# }}}
