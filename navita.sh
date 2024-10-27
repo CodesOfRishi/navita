@@ -310,6 +310,14 @@ __navita::CleanHistory() {
 	
 	# ── Feature: RemoveIgnoredPaths ───────────────────────────────────────{{{
 	__navita::CleanHistory::IgnoredPaths() {
+		# lock history updation preventing race condition
+		local FD
+		exec {FD}>"${__navita_lockfile}"
+		"${navita_depends["flock"]}" -x -n "${FD}" || {
+			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+			return 0
+		}
+
 		: > "${__navita_temp_history}"
 		local line _path pattern none_matched
 		while read -r line; do
@@ -326,6 +334,7 @@ __navita::CleanHistory() {
 		done < "${NAVITA_HISTORYFILE}"
 		
 		"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+		exec {FD}>&-
 	}
 	# }}}
 
