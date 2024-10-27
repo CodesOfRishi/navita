@@ -165,7 +165,7 @@ __navita::UpdatePathHistory() {
 
 	# lock history updation preventing race condition
 	local FD
-	exec {FD}>"${__navita_lockfile}"
+	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
 		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 		return 0
@@ -203,7 +203,7 @@ __navita::UpdatePathHistory() {
 __navita::AgeOut() {
 	# lock history updation preventing race condition
 	local FD
-	exec {FD}>"${__navita_lockfile}"
+	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
 		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 		return 0
@@ -255,7 +255,7 @@ __navita::CleanHistory() {
 
 		# lock history updation preventing race condition
 		local FD
-		exec {FD}>"${__navita_lockfile}"
+		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 0
@@ -281,7 +281,7 @@ __navita::CleanHistory() {
 	__navita::CleanHistory::RemoveInvalidPaths() {
 		# lock history updation preventing race condition
 		local FD
-		exec {FD}>"${__navita_lockfile}"
+		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 0
@@ -312,7 +312,7 @@ __navita::CleanHistory() {
 	__navita::CleanHistory::IgnoredPaths() {
 		# lock history updation preventing race condition
 		local FD
-		exec {FD}>"${__navita_lockfile}"
+		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 0
@@ -342,7 +342,7 @@ __navita::CleanHistory() {
 	__navita::CleanHistory::Custom() {
 		# lock history updation preventing race condition
 		local FD
-		exec {FD}>"${__navita_lockfile}"
+		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 0
