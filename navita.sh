@@ -70,6 +70,7 @@ export NAVITA_FZF_EXACT_MATCH="${NAVITA_FZF_EXACT_MATCH:-y}"
 
 # temporary file for data manipulation for the history file
 export __navita_temp_history="${NAVITA_DATA_DIR}/.temp-history"
+export __navita_last_age_check="${NAVITA_DATA_DIR}/.temp-lastagecheck"
 
 alias "${NAVITA_COMMAND}"="__navita__"
 
@@ -82,7 +83,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
-[[ ! -f "${NAVITA_DATA_DIR}/.navita_age_last_check" ]] && printf "%s\n" "${EPOCHSECONDS}" > "${NAVITA_DATA_DIR}/.navita_age_last_check"
+[[ ! -f "${__navita_last_age_check}" ]] && printf "%s\n" "${EPOCHSECONDS}" > "${__navita_last_age_check}"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -715,8 +716,8 @@ EOF
 # }}}
 
 # check directory paths' aging once every 24 hours
-if [[ "$(( EPOCHSECONDS - "$(${navita_depends["head"]} -1 "${NAVITA_DATA_DIR}/.navita_age_last_check")" ))" -gt 86400 ]]; then
-	printf "%s\n" "${EPOCHSECONDS}" > "${NAVITA_DATA_DIR}/.navita_age_last_check"
+if [[ "$(( EPOCHSECONDS - "$(${navita_depends["head"]} -1 "${__navita_last_age_check}")" ))" -gt 86400 ]]; then
+	printf "%s\n" "${EPOCHSECONDS}" > "${__navita_last_age_check}"
 	__navita::AgeOut
 fi
 
