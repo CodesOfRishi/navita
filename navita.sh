@@ -204,7 +204,10 @@ __navita::AgeOut() {
 	# lock history updation preventing race condition
 	local FD
 	exec {FD}>"${__navita_lockfile}"
-	"${navita_depends["flock"]}" -x -n "${FD}" || return 0
+	"${navita_depends["flock"]}" -x -n "${FD}" || {
+		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+		return 0
+	}
 
 	: > "${__navita_temp_history}"
 	local line _path path_error pattern in_ignorefile=0 line_num=1
