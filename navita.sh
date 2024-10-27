@@ -201,6 +201,11 @@ __navita::UpdatePathHistory() {
 
 # Feature: AgeOutHistory{{{
 __navita::AgeOut() {
+	# lock history updation preventing race condition
+	local FD
+	exec {FD}>"${__navita_lockfile}"
+	"${navita_depends["flock"]}" -x -n "${FD}" || return 0
+
 	: > "${__navita_temp_history}"
 	local line _path path_error pattern in_ignorefile=0 line_num=1
 	while read -r line; do
@@ -225,6 +230,7 @@ __navita::AgeOut() {
 	done < "${NAVITA_HISTORYFILE}"
 
 	"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}"
+	exec {FD}>&-
 }
 # }}}
 
