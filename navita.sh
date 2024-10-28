@@ -16,6 +16,7 @@ declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "realpat
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
+declare NAVITA_EXITCODE=0
 
 if [[ -n "${BASH_VERSION}" ]]; then
 	_cmd_type=( "type" "-P" )
@@ -27,7 +28,7 @@ else
 	unset navita_depends
 	unset navita_all_command_found
 	unset _cmd_type
-	return 1
+	return 64
 fi
 
 for _cmd in "${navita_dependencies[@]}"; do
@@ -43,14 +44,15 @@ unset navita_dependencies
 if ! (( navita_all_command_found )); then
 	unset navita_all_command_found
 	unset navita_depends
-	return 1
+	return 69
 else
 	unset navita_all_command_found
 	if [[ -n "${ZSH_VERSION}" ]] && [[ -z "${EPOCHSECONDS}" ]]; then
 		zmodload zsh/datetime || {
+			NAVITA_EXITCODE="$?"
 			unset navita_depends
 			printf "navita: ERROR: The 'zsh/datetime' module failed to link correctly." >&2
-			return 1
+			return "${NAVITA_EXITCODE}"
 		}
 	fi
 fi
@@ -137,8 +139,9 @@ __navita::GetAgeFromEpoch() {
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	"${navita_depends["realpath"]}" -s --relative-to=. "${1}" || {
+		NAVITA_EXITCODE="$?"
 		printf "%s\n" "navita: ERROR: failed to get relative path for %s\n" "${1}" >&2
-		return 1
+		return "${NAVITA_EXITCODE}"
 	}
 }
 # }}}
@@ -167,8 +170,12 @@ __navita::UpdatePathHistory() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-		return 0
+		if [[ "$?" -eq 1 ]]; then
+			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+			return 75
+		else
+			return "$?"
+		fi
 	}
 
 	# history format:-
@@ -205,8 +212,12 @@ __navita::AgeOut() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-		return 0
+		if [[ "$?" -eq 1 ]]; then
+			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+			return 75
+		else
+			return "$?"
+		fi
 	}
 
 	: >| "${__navita_temp_history}"
@@ -257,8 +268,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-			return 0
+			if [[ "$?" -eq 1 ]]; then
+				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+				return 75
+			else
+				return "$?"
+			fi
 		}
 
 		# clear the temporary file
@@ -266,14 +281,14 @@ __navita::CleanHistory() {
 
 		"${navita_depends["cp"]}" "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
 		: >| "${NAVITA_HISTORYFILE}"
-		local exitcode="$?"
-		if (( exitcode == 0 )); then 
+		NAVITA_EXITCODE="$?"
+		if (( NAVITA_EXITCODE == 0 )); then 
 			printf "navita: %s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
 			printf "navita: Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
 		fi
 		exec {FD}>&-
-		return "$exitcode"
+		return "${NAVITA_EXITCODE}"
 	}
 	# }}}
 
@@ -283,8 +298,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-			return 0
+			if [[ "$?" -eq 1 ]]; then
+				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+				return 75
+			else
+				return "$?"
+			fi
 		}
 
 		# clear the temporary file
@@ -314,8 +333,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-			return 0
+			if [[ "$?" -eq 1 ]]; then
+				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+				return 75
+			else
+				return "$?"
+			fi
 		}
 
 		: >| "${__navita_temp_history}"
@@ -344,8 +367,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
-			return 0
+			if [[ "$?" -eq 1 ]]; then
+				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
+				return 75
+			else
+				return "$?"
+			fi
 		}
 
 		__navita::CleanHistory::Custom::GetPaths() {
@@ -357,13 +384,14 @@ __navita::CleanHistory() {
 
 		local -a paths_to_remove
 		IFS=$'\n' paths_to_remove=( $(__navita::CleanHistory::Custom::GetPaths) ) || {
+			NAVITA_EXITCODE="$?"
 			printf "%s\n" "navita: ERROR: Something went wrong during assignment of the selected paths to an array!" >&2
 			exec {FD}>&-
-			return 1
+			return "${NAVITA_EXITCODE}"
 		}
 		[[ "${#paths_to_remove[@]}" -eq 0 ]] && printf "%s\n" "navita: No paths were removed from history." >&2 && {
 			exec {FD}>&-
-			return 1
+			return 65
 		}
 
 		local line rank _path freq duration i=0
@@ -463,13 +491,13 @@ __navita::CleanHistory() {
 				"x") printf "navita: Aborted.\n";;
 				*) 
 					printf "navita: ERROR: Invalid input!\n" >&2
-					return 1
+					return 65
 					;;
 			esac
 			;;
 		*) 
 			printf "navita: ERROR: Invalid options/arguments!\n" >&2
-			return 1
+			return 64
 			;;
 	esac
 }
@@ -557,7 +585,7 @@ __navita::NavigateHistory() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(__navita::UpdatePathHistory &)
 			;;
-		1) printf "navita: None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return $?;;
 		*) return $?;;
 	esac
 }
@@ -583,7 +611,7 @@ __navita::NavigateChildDirs() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(__navita::UpdatePathHistory &)
 			;;
-		1) printf "navita: None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return $?;;
 		*) return $?;;
 	esac
 }
@@ -621,7 +649,7 @@ __navita::NavigateParentDirs() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(__navita::UpdatePathHistory &)
 			;;
-		1) printf "navita: None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return $?;;
 		*) return $?;;
 	esac
 }
@@ -634,12 +662,12 @@ __navita::CDGeneral() {
 		# argument provided by the user is empty
 		builtin cd "${__the_builtin_cd_option[@]}" "${HOME}" || return $?
 		(__navita::UpdatePathHistory &)
-		return 0
+		return $?
 	elif [[ -d "${*}" ]]; then
 		# argument provided by the user is a valid directory path
 		builtin cd "${__the_builtin_cd_option[@]}" -- "${*}" || return $?
 		(__navita::UpdatePathHistory &)
-		return 0
+		return $?
 	fi
 
 	__navita::CDGeneral::GetPaths() {
@@ -702,7 +730,7 @@ __navita::CDGeneral() {
 			builtin cd "${__the_builtin_cd_option[@]}" -- "${path_returned}" || return $?
 			(__navita::UpdatePathHistory &)
 			;;
-		1) printf "navita: None matched!\n" >&2; return 1;;
+		1) printf "navita: None matched!\n" >&2; return $?;;
 		*) return "$?";;
 	esac
 }
