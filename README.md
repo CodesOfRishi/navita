@@ -263,6 +263,7 @@ where,
 </div>
 
 - Frecency rankings are updated asynchronously at runtime.
+- Navita employs a locking mechanism to ensure atomic history updates, preventing race conditions that may arise from concurrent modifications.
 - For Navita to follow physical directory structures, use the `-P` option along with the other options. This will resolve symbolic links and navigate you to the actual physical location on disk. To make Navita *always* resolve symbolic links, check the [`NAVITA_FOLLOW_ACTUAL_PATH`](#environment-variables) environment variable.
 
 > [!NOTE]
