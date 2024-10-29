@@ -40,6 +40,7 @@ unset _cmd_type
 if ! (( navita_all_command_found )); then
 	unset navita_all_command_found
 	unset navita_depends
+	unset NAVITA_EXITCODE
 	return 69
 else
 	unset navita_all_command_found
