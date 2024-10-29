@@ -28,7 +28,7 @@ declare -A navita_depends
 declare navita_all_command_found=1
 declare NAVITA_EXITCODE=0
 
-for _cmd in "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock"; do
+for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
 		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
 		navita_all_command_found=0
@@ -806,7 +806,7 @@ EOF
 # }}}
 
 # check directory paths' aging once every 24 hours
-if [[ "$(( EPOCHSECONDS - "$(${navita_depends["head"]} -1 "${__navita_last_age_check}")" ))" -gt 86400 ]]; then
+if [[ "$(( EPOCHSECONDS - "$(${navita_depends["cat"]} "${__navita_last_age_check}")" ))" -gt 86400 ]]; then
 	printf "%s\n" "${EPOCHSECONDS}" >| "${__navita_last_age_check}"
 	__navita::AgeOut
 fi
