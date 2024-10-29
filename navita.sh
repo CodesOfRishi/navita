@@ -28,7 +28,7 @@ declare -A navita_depends
 declare navita_all_command_found=1
 declare NAVITA_EXITCODE=0
 
-for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock"; do
+for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "mkdir" "touch" "cat" "flock"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
 		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
 		navita_all_command_found=0
@@ -625,10 +625,18 @@ __navita::NavigateParentDirs() {
 	__navita::NavigateParentDirs::GetParentDirs() {
 		__navita::NavigateParentDirs::GetParentDirs::GetParentNodes() {
 			local _dir && _dir="${PWD}"
-			while [[ "${_dir}" != "/" ]]; do
-				_dir="$("${navita_depends["dirname"]}" "${_dir}")"
-				printf "%s\n" "${_dir}"
+			while [[ "${#_dir}" -gt 1 ]] && [[ "${_dir: -1}" == "/" ]]; do
+				_dir="${_dir:0: -1}"
 			done
+
+			until [[ -z "${_dir}" ]] || [[ "${_dir}" == "/" ]]; do
+				_dir="${_dir%/*}"
+				while [[ "${#_dir}" -gt 1 ]] && [[ "${_dir: -1}" == "/" ]]; do
+					_dir="${_dir:0: -1}"
+				done
+				[[ -n "${_dir}" ]] && printf "%s\n" "${_dir}"
+			done
+			[[ -z "${_dir}" ]] && printf "/\n"
 		}
 
 		local line
