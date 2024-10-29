@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -a navita_dependencies=( "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock" )
 declare -A navita_depends
 declare navita_all_command_found=1
 declare -a _cmd_type
@@ -24,14 +23,13 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 	_cmd_type=( "whence" "-p" )
 else
 	printf "navita: ERROR: Unknown shell. Navita is exclusive to Bash and Zsh.\n" >&2
-	unset navita_dependencies
 	unset navita_depends
 	unset navita_all_command_found
 	unset _cmd_type
 	return 64
 fi
 
-for _cmd in "${navita_dependencies[@]}"; do
+for _cmd in "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
 		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
 		navita_all_command_found=0
@@ -39,7 +37,6 @@ for _cmd in "${navita_dependencies[@]}"; do
 done
 unset _cmd
 unset _cmd_type
-unset navita_dependencies
 
 if ! (( navita_all_command_found )); then
 	unset navita_all_command_found
@@ -63,7 +60,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.3.3"
+export NAVITA_VERSION="v2.3.3+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
