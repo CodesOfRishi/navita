@@ -166,11 +166,12 @@ __navita::UpdatePathHistory() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		if [[ "$?" -eq 1 ]]; then
+		NAVITA_EXITCODE="$?"
+		if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 75
 		else
-			return "$?"
+			return "${NAVITA_EXITCODE}"
 		fi
 	}
 
@@ -208,11 +209,12 @@ __navita::AgeOut() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		if [[ "$?" -eq 1 ]]; then
+		NAVITA_EXITCODE="$?"
+		if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 75
 		else
-			return "$?"
+			return "${NAVITA_EXITCODE}"
 		fi
 	}
 
@@ -264,11 +266,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			if [[ "$?" -eq 1 ]]; then
+			NAVITA_EXITCODE="$?"
+			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "$?"
+				return "${NAVITA_EXITCODE}"
 			fi
 		}
 
@@ -294,11 +297,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			if [[ "$?" -eq 1 ]]; then
+			NAVITA_EXITCODE="$?"
+			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "$?"
+				return "${NAVITA_EXITCODE}"
 			fi
 		}
 
@@ -329,11 +333,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			if [[ "$?" -eq 1 ]]; then
+			NAVITA_EXITCODE="$?"
+			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "$?"
+				return "${NAVITA_EXITCODE}"
 			fi
 		}
 
@@ -363,11 +368,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			if [[ "$?" -eq 1 ]]; then
+			NAVITA_EXITCODE="$?"
+			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "$?"
+				return "${NAVITA_EXITCODE}"
 			fi
 		}
 
