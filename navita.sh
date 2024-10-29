@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declare -A navita_depends
-declare navita_all_command_found=1
 declare -a _cmd_type
-declare NAVITA_EXITCODE=0
 
 if [[ -n "${BASH_VERSION}" ]]; then
 	_cmd_type=( "type" "-P" )
@@ -23,11 +20,13 @@ elif [[ -n "${ZSH_VERSION}" ]]; then
 	_cmd_type=( "whence" "-p" )
 else
 	printf "navita: ERROR: Unknown shell. Navita is exclusive to Bash and Zsh.\n" >&2
-	unset navita_depends
-	unset navita_all_command_found
 	unset _cmd_type
 	return 64
 fi
+
+declare -A navita_depends
+declare navita_all_command_found=1
+declare NAVITA_EXITCODE=0
 
 for _cmd in "fzf" "find" "grep" "sort" "ls" "head" "realpath" "bc" "cp" "less" "nl" "dirname" "mkdir" "touch" "cat" "flock"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
