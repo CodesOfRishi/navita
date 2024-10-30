@@ -55,7 +55,7 @@ else
 fi
 
 # ── Navita variables ──────────────────────────────────────────────────
-export NAVITA_DATA_DIR="${NAVITA_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/navita}"
+export NAVITA_DATA_DIR="${NAVITA_DATA_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/navita}"
 export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
