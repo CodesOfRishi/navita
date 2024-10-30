@@ -330,8 +330,8 @@ source "path/to/the/navita.sh"
 
 - **NAVITA_DATA_DIR**
     - Directory location for Navita's data files.
-    - Defaults to `$XDG_DATA_HOME/navita`
-    - If `XDG_DATA_HOME` is not set, it defaults to `~/.local/share/navita`.
+    - Defaults to `$XDG_STATE_HOME/navita`
+    - If `XDG_STATE_HOME` is not set, it defaults to `~/.local/state/navita`.
 
 - **NAVITA_CONFIG_DIR**
     - Directory location for Navita's configuration files.
