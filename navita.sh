@@ -83,7 +83,7 @@ if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then
 	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
 	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
-[[ ! -f "${__navita_last_age_check}" ]] && printf "%s\n" "${EPOCHSECONDS}" > "${__navita_last_age_check}"
+[[ ! -f "${__navita_last_age_check}" ]] && printf "%s\n" "${EPOCHSECONDS}" >| "${__navita_last_age_check}"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
@@ -249,7 +249,7 @@ __navita::AgeOut() {
 
 # Utility: Validate Directory{{{
 __navita::ValidateDirectory() {
-	printf "%s\n" "$(builtin cd -- "${*}" 2>&1 > /dev/null)"
+	printf "%s\n" "$(builtin cd -- "${*}" 2>&1 >| /dev/null)"
 }
 # }}}
 
@@ -607,7 +607,7 @@ __navita::NavigateChildDirs() {
 	[[ -n "${*}" ]] && fzf_conditional_options+=( --select-1 )
 	[[ "${NAVITA_FZF_EXACT_MATCH}" =~ ^(y|Y)$ ]] && fzf_conditional_options+=( --exact )
 
-	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2> /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" "${fzf_conditional_options[@]}" --scheme='path' --tiebreak='end,index' --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
+	local path_returned && path_returned="$( "${navita_depends["find"]}" -L . -mindepth 1 -type d -path '*/.git' -prune -o -type d -print 2>| /dev/null | "${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Sub-directories « Navita"' --height "50%" "${fzf_conditional_options[@]}" --scheme='path' --tiebreak='end,index' --exit-0 --layout=reverse --preview-window=down --border=bold --query="${*}" --preview="${navita_depends["ls"]} -CFaA --color=always {}" )"
 
 	case "$?" in
 		0) 
@@ -857,7 +857,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 	__navita::Completions() {
 		# To redraw line after fzf closes (printf '\e[5n') 
 		# This is useful when the terminal is altered by FZF, and the command line gets visually corrupted or misaligned
-		bind '"\e[0n": redraw-current-line' 2> /dev/null
+		bind '"\e[0n": redraw-current-line' 2>| /dev/null
 
 		local ignore_case_completion_default && ignore_case_completion_default="$(bind -v | ${navita_depends["grep"]} -m 1 -F 'set completion-ignore-case')" && ignore_case_completion_default="${ignore_case_completion_default##* }"
 		bind "set completion-ignore-case on" 
