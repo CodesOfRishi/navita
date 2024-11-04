@@ -28,7 +28,7 @@ declare -A navita_depends
 declare navita_all_command_found=1
 declare NAVITA_EXITCODE=0
 
-for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "mkdir" "touch" "cat" "flock"; do
+for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "mkdir" "touch" "cat" "flock" "date"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
 		printf "navita: ERROR: %s not found!\n" "${_cmd}" >&2
 		navita_all_command_found=0
@@ -60,7 +60,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.3.5"
+export NAVITA_VERSION="v2.3.5+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -277,19 +277,16 @@ __navita::CleanHistory() {
 			fi
 		}
 
-		# clear the temporary file
-		: >| "${__navita_temp_history}"
-
-		"${navita_depends["cp"]}" "${NAVITA_HISTORYFILE}" "${__navita_temp_history}"
-		: >| "${NAVITA_HISTORYFILE}"
-		NAVITA_EXITCODE="$?"
-		if (( NAVITA_EXITCODE == 0 )); then 
+		local backup_history 
+		if backup_history="${NAVITA_HISTORYFILE}-$("${navita_depends["date"]}" +"%Y-%m-%dT%H:%M:%S").bak" && "${navita_depends["cp"]}" "${NAVITA_HISTORYFILE}" "${backup_history}" && : >| "${NAVITA_HISTORYFILE}"; then
 			printf "navita: %s cleaned.\n" "${NAVITA_HISTORYFILE}"
-			"${navita_depends["cp"]}" "${__navita_temp_history}" "${NAVITA_HISTORYFILE}.bak"
-			printf "navita: Backup created at ${colr_grey}%s.bak${colr_rst}\n" "${NAVITA_HISTORYFILE}"
+			printf "navita: Backup created at ${colr_grey}%s${colr_rst}\n" "${backup_history}"
+		else
+			NAVITA_EXITCODE="$?"
+			exec {FD}>&-
+			return "${NAVITA_EXITCODE}"
 		fi
 		exec {FD}>&-
-		return "${NAVITA_EXITCODE}"
 	}
 	# }}}
 
