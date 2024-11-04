@@ -924,7 +924,7 @@ if [[ -n "${BASH_VERSION}" ]]; then
 		# Directory completion{{{
 		__navita::Completions::CompleteDirectory() {
 			local dir_select
-			if dir_select="$( compgen -d -- "${curr_word}" | \
+			if dir_select="$( compgen -o bashdefault -d -- "${curr_word}" | \
 				"${navita_depends["fzf"]}" --prompt='❯ ' --info='inline: ❮ ' --info-command='echo -e "\x1b[33;1m${FZF_INFO%%/*}\x1b[m/${FZF_INFO##*/} Directory completion « Navita"' --height "40%" --tiebreak=begin,index --select-1 --exit-0 --exact --layout=reverse --query="${COMP_WORDS[COMP_CWORD]}" --bind=tab:down,btab:up --cycle --preview-window=down --border=bold --preview="bash -c '${navita_depends["ls"]} -CFaA --color=always -- \"\${1/#~/${HOME}}\"' -- {}" )"; then
 				dir_select="${dir_select}/"
 			fi
