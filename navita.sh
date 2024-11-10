@@ -506,6 +506,11 @@ __navita::CleanHistory() {
 
 # ── Feature: ViewHistory ────────────────────────────────────────────{{{
 __navita::ViewHistory() {
+	case "$1" in
+		""|"--by-time"|"--by-freq"|"--by-score") :;;
+		*) printf "navita: ERROR: Invalid options/arguments!\n" >&2; return 64;;
+	esac
+
 	local colr_red && colr_red='\033[1;38;2;255;51;51m'
 	local colr_green && colr_green='\033[1;38;2;170;255;0m'
 	local colr_orange && colr_orange="\033[1;38;2;255;165;0m"
