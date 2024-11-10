@@ -804,6 +804,14 @@ Non-configurable Environment Variables:
 	NAVITA_IGNOREFILE      The file with regex patterns to ignore paths from history
 	NAVITA_HISTORYFILE     The file with Navita's directory history and metadata like frequency, access time, and score
 
+Exit Status:
+	0      Success.
+	64     The command was used incorrectly, e.g., with an invalid number of arguments, an unrecognized flag, or a malformed parameter.
+	65     The input data was malformed or invalid.
+	69     A service is currently unavailable. This could be caused by missing dependencies or other unforeseen issues.
+	75     A temporary failure has occurred. The request can be retried at a later time.
+	Exit codes other than those explicitly handled may be attributed to external programs.
+
 Project Author: Rishi Kumar <contact.rishikmr@gmail.com>
 Project URL: https://github.com/CodesOfRishi/navita 
 
