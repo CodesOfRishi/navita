@@ -60,7 +60,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.3.8"
+export NAVITA_VERSION="v2.3.8+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -76,25 +76,21 @@ alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
-	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}"
-	printf "navita: Created %s\n" "${NAVITA_DATA_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}" && printf "navita: Created %s\n" "${NAVITA_DATA_DIR}"
 fi
 if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
-	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}"
-	printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
+	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}" && printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
 fi
 [[ ! -f "${__navita_last_age_check}" ]] && printf "%s\n" "${EPOCHSECONDS}" >| "${__navita_last_age_check}"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
-	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}"
-	printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}" && printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
-	"${navita_depends["touch"]}" "${NAVITA_IGNOREFILE}"
+	"${navita_depends["touch"]}" "${NAVITA_IGNOREFILE}" && printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
 	printf "%s\n" "/\.git(/.*|)$" >> "${NAVITA_IGNOREFILE}"
-	printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
 fi
 
 # Utility: Get Epoch access time of a path/entry in history{{{
