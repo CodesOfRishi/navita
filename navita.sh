@@ -76,19 +76,19 @@ alias "${NAVITA_COMMAND}"="__navita__"
 
 # ── Create data file(s) for Navita ────────────────────────────────────
 if [[ ! -d "${NAVITA_DATA_DIR}" ]]; then 
-	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}" && printf "navita: Created %s\n" "${NAVITA_DATA_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_DATA_DIR}" && printf "navita: Created %s\n" "${NAVITA_DATA_DIR}" || return $?
 fi
 if [[ ! -f "${NAVITA_HISTORYFILE}" ]]; then 
-	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}" && printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}"
+	"${navita_depends["touch"]}" "${NAVITA_HISTORYFILE}" && printf "navita: Created %s\n" "${NAVITA_HISTORYFILE}" || return $?
 fi
 [[ ! -f "${__navita_last_age_check}" ]] && printf "%s\n" "${EPOCHSECONDS}" >| "${__navita_last_age_check}"
 
 # ── Create configuration file(s) for Navita ───────────────────────────
 if [[ ! -d "${NAVITA_CONFIG_DIR}" ]]; then
-	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}" && printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}"
+	"${navita_depends["mkdir"]}" -p "${NAVITA_CONFIG_DIR}" && printf "navita: Created %s\n" "${NAVITA_CONFIG_DIR}" || return $?
 fi
 if [[ ! -f "${NAVITA_IGNOREFILE}" ]]; then
-	"${navita_depends["touch"]}" "${NAVITA_IGNOREFILE}" && printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}"
+	"${navita_depends["touch"]}" "${NAVITA_IGNOREFILE}" && printf "navita: Created %s\n" "${NAVITA_IGNOREFILE}" || return $?
 	printf "%s\n" "^${HOME}$" >> "${NAVITA_IGNOREFILE}"
 	printf "%s\n" "/\.git(/.*|)$" >> "${NAVITA_IGNOREFILE}"
 fi
