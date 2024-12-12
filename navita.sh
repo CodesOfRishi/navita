@@ -826,7 +826,7 @@ if [[ "$(( EPOCHSECONDS - "$(${navita_depends["cat"]} "${__navita_last_age_check
 	__navita::AgeOut
 fi
 
-[[ -z "${OLDPWD}" ]] && export OLDPWD="${PWD}"
+[[ -z "${OLDPWD}" ]] && OLDPWD="${PWD}"
 
 __navita__() {
 	local __the_builtin_cd_option && __the_builtin_cd_option="-L"
