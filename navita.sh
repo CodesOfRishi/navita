@@ -26,7 +26,7 @@ fi
 
 declare -A navita_depends
 declare navita_all_command_found=1
-declare NAVITA_EXITCODE=0
+declare navita_exitcode=0
 
 for _cmd in "fzf" "find" "grep" "sort" "ls" "realpath" "bc" "cp" "less" "nl" "mkdir" "touch" "cat" "flock" "date"; do
 	if ! navita_depends["${_cmd}"]="$("${_cmd_type[@]}" "${_cmd}")"; then
@@ -40,16 +40,16 @@ unset _cmd_type
 if ! (( navita_all_command_found )); then
 	unset navita_all_command_found
 	unset navita_depends
-	unset NAVITA_EXITCODE
+	unset navita_exitcode
 	return 69
 else
 	unset navita_all_command_found
 	if [[ -n "${ZSH_VERSION}" ]] && [[ -z "${EPOCHSECONDS}" ]]; then
 		zmodload zsh/datetime || {
-			NAVITA_EXITCODE="$?"
+			navita_exitcode="$?"
 			unset navita_depends
 			printf "%s\n" "navita: ERROR: The 'zsh/datetime' module failed to link correctly." >&2
-			return "${NAVITA_EXITCODE}"
+			return "${navita_exitcode}"
 		}
 	fi
 fi
@@ -60,7 +60,7 @@ export NAVITA_HISTORYFILE="${NAVITA_DATA_DIR}/navita-history"
 export NAVITA_FOLLOW_ACTUAL_PATH="${NAVITA_FOLLOW_ACTUAL_PATH:-n}"
 export NAVITA_COMMAND="${NAVITA_COMMAND:-cd}"
 export NAVITA_HISTORY_LIMIT="${NAVITA_HISTORY_LIMIT:-100}"
-export NAVITA_VERSION="v2.3.9"
+export NAVITA_VERSION="v2.3.9+dev"
 export NAVITA_CONFIG_DIR="${NAVITA_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/navita}"
 export NAVITA_IGNOREFILE="${NAVITA_CONFIG_DIR}/navita-ignore"
 export NAVITA_RELATIVE_PARENT_PATH="${NAVITA_RELATIVE_PARENT_PATH:-y}"
@@ -133,9 +133,9 @@ __navita::GetAgeFromEpoch() {
 # Utility: Resolve to Relative path{{{
 __navita::GetRelativePath() {
 	"${navita_depends["realpath"]}" -s --relative-to=. "${1}" || {
-		NAVITA_EXITCODE="$?"
+		navita_exitcode="$?"
 		printf "%s\n" "navita: ERROR: failed to get relative path for %s\n" "${1}" >&2
-		return "${NAVITA_EXITCODE}"
+		return "${navita_exitcode}"
 	}
 }
 # }}}
@@ -164,12 +164,12 @@ __navita::UpdatePathHistory() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		NAVITA_EXITCODE="$?"
-		if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+		navita_exitcode="$?"
+		if [[ "${navita_exitcode}" -eq 1 ]]; then
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 75
 		else
-			return "${NAVITA_EXITCODE}"
+			return "${navita_exitcode}"
 		fi
 	}
 
@@ -207,12 +207,12 @@ __navita::AgeOut() {
 	local FD
 	exec {FD}>|"${__navita_lockfile}"
 	"${navita_depends["flock"]}" -x -n "${FD}" || {
-		NAVITA_EXITCODE="$?"
-		if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+		navita_exitcode="$?"
+		if [[ "${navita_exitcode}" -eq 1 ]]; then
 			printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 			return 75
 		else
-			return "${NAVITA_EXITCODE}"
+			return "${navita_exitcode}"
 		fi
 	}
 
@@ -264,12 +264,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			NAVITA_EXITCODE="$?"
-			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+			navita_exitcode="$?"
+			if [[ "${navita_exitcode}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "${NAVITA_EXITCODE}"
+				return "${navita_exitcode}"
 			fi
 		}
 
@@ -278,9 +278,9 @@ __navita::CleanHistory() {
 			printf "navita: %s cleaned.\n" "${NAVITA_HISTORYFILE}"
 			printf "navita: Backup created at ${colr_grey}%s${colr_rst}\n" "${backup_history}"
 		else
-			NAVITA_EXITCODE="$?"
+			navita_exitcode="$?"
 			exec {FD}>&-
-			return "${NAVITA_EXITCODE}"
+			return "${navita_exitcode}"
 		fi
 		exec {FD}>&-
 	}
@@ -292,12 +292,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			NAVITA_EXITCODE="$?"
-			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+			navita_exitcode="$?"
+			if [[ "${navita_exitcode}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "${NAVITA_EXITCODE}"
+				return "${navita_exitcode}"
 			fi
 		}
 
@@ -328,12 +328,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			NAVITA_EXITCODE="$?"
-			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+			navita_exitcode="$?"
+			if [[ "${navita_exitcode}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "${NAVITA_EXITCODE}"
+				return "${navita_exitcode}"
 			fi
 		}
 
@@ -363,12 +363,12 @@ __navita::CleanHistory() {
 		local FD
 		exec {FD}>|"${__navita_lockfile}"
 		"${navita_depends["flock"]}" -x -n "${FD}" || {
-			NAVITA_EXITCODE="$?"
-			if [[ "${NAVITA_EXITCODE}" -eq 1 ]]; then
+			navita_exitcode="$?"
+			if [[ "${navita_exitcode}" -eq 1 ]]; then
 				printf "%s\n" "navita: WARN: History update failed due to a lock contention. Another process may have been modifying the history concurrently." >&2
 				return 75
 			else
-				return "${NAVITA_EXITCODE}"
+				return "${navita_exitcode}"
 			fi
 		}
 
@@ -381,10 +381,10 @@ __navita::CleanHistory() {
 
 		local -a paths_to_remove
 		IFS=$'\n' paths_to_remove=( $(__navita::CleanHistory::Custom::GetPaths) ) || {
-			NAVITA_EXITCODE="$?"
+			navita_exitcode="$?"
 			printf "%s\n" "navita: ERROR: Something went wrong during assignment of the selected paths to an array!" >&2
 			exec {FD}>&-
-			return "${NAVITA_EXITCODE}"
+			return "${navita_exitcode}"
 		}
 		[[ "${#paths_to_remove[@]}" -eq 0 ]] && printf "%s\n" "navita: No paths were removed from history." >&2 && {
 			exec {FD}>&-
