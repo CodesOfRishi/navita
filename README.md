@@ -8,7 +8,6 @@ _Derived from "navigate" and "ita" (short for "iteration"), suggesting a tool th
 [Dependencies](#dependencies) •
 [Installation](#installation) •
 [Environment Variables](#environment-variables) •
-<!--[Known Caveats](#known-caveats) •-->
 [Concept/Motivation](#conceptmotivation) •
 [Contributing to Navita](#contributing-to-navita) •
 [License](#license)
@@ -381,14 +380,6 @@ source "path/to/the/navita.sh"
     - The file containing a history of directory paths visited using Navita, along with their associated metadata like frequency, access time, and score.
     - The path to the file is `$NAVITA_DATA_DIR/navita-history`.
 
-<!--<div align="center"> -->
-<!---->
-<!--## Known Caveats-->
-<!---->
-<!--</div>-->
-<!---->
-<!--- Using suffix-exact-match FZF search syntax won't work in [Search & Traverse History](#search--traverse-history) if `NAVITA_SHOW_AGE` environment variable is set to `y` due to [FZF Issue #3983](https://github.com/junegunn/fzf/issues/3983).-->
-<!---->
 <div align="center"> 
 
 ## Concept/Motivation
